@@ -39,12 +39,47 @@ end)
 
 function BisTooltipAddon:GetItemState(itemID)
     if not itemID then return 0 end
+    itemID = tonumber(itemID)
+    if not itemID then return 0 end
     if BisTooltip_EquippedCache[itemID] then return 2 end
     local altID = (BisTooltip_FactionMap and BisTooltip_FactionMap[itemID]) or (BisTooltip_AliToHorde and BisTooltip_AliToHorde[itemID])
     if altID and BisTooltip_EquippedCache[altID] then return 2 end
     if GetItemCount(itemID, false) > 0 or (altID and GetItemCount(altID, false) > 0) then return 1 end
     if GetItemCount(itemID, true) > 0 or (altID and GetItemCount(altID, true) > 0) then return 3 end
     return 0
+end
+
+function BisTooltipAddon:IsFavorite(itemID)
+    if not itemID or not self.db or not self.db.char or not self.db.char.favorites then return false end
+    itemID = tonumber(itemID)
+    if not itemID then return false end
+    if self.db.char.favorites[itemID] then return true end
+    local altID = (BisTooltip_FactionMap and BisTooltip_FactionMap[itemID]) or (BisTooltip_AliToHorde and BisTooltip_AliToHorde[itemID])
+    if altID and self.db.char.favorites[altID] then return true end
+    return false
+end
+
+function BisTooltipAddon:ToggleFavorite(itemID)
+    if not itemID or not self.db or not self.db.char then return end
+    itemID = tonumber(itemID)
+    if not itemID then return end
+    self.db.char.favorites = self.db.char.favorites or {}
+    local altID = (BisTooltip_FactionMap and BisTooltip_FactionMap[itemID]) or (BisTooltip_AliToHorde and BisTooltip_AliToHorde[itemID])
+
+    if self:IsFavorite(itemID) then
+        self.db.char.favorites[itemID] = nil
+        if altID then self.db.char.favorites[altID] = nil end
+    else
+        self.db.char.fav_counter = (self.db.char.fav_counter or 0) + 1
+        self.db.char.favorites[itemID] = self.db.char.fav_counter
+    end
+
+    if self.RefreshItemStateVisuals then
+        self.RefreshItemStateVisuals()
+    end
+    if self.RefreshFavoritesWindow then
+        self:RefreshFavoritesWindow()
+    end
 end
 
 function BisTooltipAddon:BuildFactionMaps()
@@ -159,6 +194,17 @@ function BisTooltipAddon:BuildReverseLookup()
     end
 end
 
+function BisTooltipAddon:HandleChatCommand(input)
+    local cmd = strtrim(input or ""):lower()
+    if cmd == "fav" or cmd == "favorites" or cmd == "wishlist" then
+        if self.ToggleFavoritesFrame then
+            self:ToggleFavoritesFrame()
+        end
+    else
+        self:createMainFrame()
+    end
+end
+
 function BisTooltipAddon:OnInitialize()
     self:BuildFactionMaps()
     self:BuildReverseLookup()
@@ -169,7 +215,7 @@ function BisTooltipAddon:OnInitialize()
     self:addMapIcon()
     self:initBisTooltip()
 
-    self:RegisterChatCommand("bt", "createMainFrame")
-    self:RegisterChatCommand("bis", "createMainFrame")
-    self:RegisterChatCommand("bistooltip", "createMainFrame")
+    self:RegisterChatCommand("bt", "HandleChatCommand")
+    self:RegisterChatCommand("bis", "HandleChatCommand")
+    self:RegisterChatCommand("bistooltip", "HandleChatCommand")
 end

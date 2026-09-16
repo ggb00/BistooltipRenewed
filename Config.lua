@@ -29,7 +29,9 @@ local db_defaults = {
         minimap = { hide = false }, tooltip_with_ctrl = false,
         show_sources = true, source_color = "green",
         show_item_states = true, dark_tooltips = false,
-        show_item_borders = true, frame_pos = nil, scroll_status = {}
+        show_item_borders = true, frame_pos = nil, scroll_status = {},
+        favorites = {}, favorites_pos = nil, fav_counter = 0, favorite_icon = 1,
+        favorite_color = "yellow", fav_scroll_status = {}
     }
 }
 
@@ -241,6 +243,73 @@ local configTable = {
             get = function(info) return BisTooltipAddon.db.char.source_color or "green" end
         },
 
+        header_favorites = {
+            name = "Favorites",
+            type = "header",
+            order = 20,
+        },
+
+        favorite_icon = {
+            name = "Favorite Icon",
+            order = 21,
+            desc = "Choose which raid target mark to use for favorited items",
+            type = "select",
+            width = "full",
+            values = {
+                [1] = "|TInterface\\TargetingFrame\\UI-RaidTargetingIcons:14:14:0:0:256:256:0:64:0:64|t Star",
+                [2] = "|TInterface\\TargetingFrame\\UI-RaidTargetingIcons:14:14:0:0:256:256:64:128:0:64|t Circle",
+                [3] = "|TInterface\\TargetingFrame\\UI-RaidTargetingIcons:14:14:0:0:256:256:128:192:0:64|t Diamond",
+                [4] = "|TInterface\\TargetingFrame\\UI-RaidTargetingIcons:14:14:0:0:256:256:192:256:0:64|t Triangle",
+                [5] = "|TInterface\\TargetingFrame\\UI-RaidTargetingIcons:14:14:0:0:256:256:0:64:64:128|t Moon",
+                [6] = "|TInterface\\TargetingFrame\\UI-RaidTargetingIcons:14:14:0:0:256:256:64:128:64:128|t Square",
+                [7] = "|TInterface\\TargetingFrame\\UI-RaidTargetingIcons:14:14:0:0:256:256:128:192:64:128|t Cross",
+                [8] = "|TInterface\\TargetingFrame\\UI-RaidTargetingIcons:14:14:0:0:256:256:192:256:64:128|t Skull",
+            },
+            set = function(info, val)
+                BisTooltipAddon.db.char.favorite_icon = val
+                if BisTooltipAddon.RefreshItemStateVisuals then
+                    BisTooltipAddon.RefreshItemStateVisuals()
+                end
+                if BisTooltipAddon.RefreshFavoritesWindow then
+                    BisTooltipAddon:RefreshFavoritesWindow()
+                end
+                if BisTooltipAddon.ClearTooltipCache then
+                    BisTooltipAddon:ClearTooltipCache()
+                end
+            end,
+            get = function(info)
+                return BisTooltipAddon.db.char.favorite_icon or 1
+            end
+        },
+
+        favorite_color = {
+            name = "Favorite Text Color",
+            order = 22,
+            desc = "Changes the text color of the 'Favorite' indicator in tooltips",
+            type = "select",
+            width = "full",
+            values = {
+                ["purple"]    = "Purple",
+                ["green"]     = "Green",
+                ["red"]       = "Red",
+                ["lightblue"] = "Light Blue",
+                ["yellow"]    = "Yellow",
+                ["orange"]    = "Orange",
+                ["pink"]      = "Pink",
+                ["cyan"]      = "Cyan",
+                ["white"]     = "White"
+            },
+            set = function(info, val)
+                BisTooltipAddon.db.char.favorite_color = val
+                if BisTooltipAddon.ClearTooltipCache then
+                    BisTooltipAddon:ClearTooltipCache()
+                end
+            end,
+            get = function(info)
+                return BisTooltipAddon.db.char.favorite_color or "yellow"
+            end
+        },
+
         filter_specs = {
             name = "Hide Specs (Hold Alt to show)",
             order = 30,
@@ -314,6 +383,12 @@ local function migrateAddonDB()
     if not BisTooltipAddon.db.char.source_color then BisTooltipAddon.db.char.source_color = "green" end
     if BisTooltipAddon.db.char.dark_tooltips == nil then BisTooltipAddon.db.char.dark_tooltips = false end
     if BisTooltipAddon.db.char.show_item_borders == nil then BisTooltipAddon.db.char.show_item_borders = true end
+
+    if not BisTooltipAddon.db.char.favorites then BisTooltipAddon.db.char.favorites = {} end
+    if not BisTooltipAddon.db.char.favorite_icon or BisTooltipAddon.db.char.favorite_icon > 8 then BisTooltipAddon.db.char.favorite_icon = 1 end
+    if not BisTooltipAddon.db.char.favorite_color then BisTooltipAddon.db.char.favorite_color = "yellow" end
+    if not BisTooltipAddon.db.char.fav_counter then BisTooltipAddon.db.char.fav_counter = 0 end
+    if not BisTooltipAddon.db.char.fav_scroll_status then BisTooltipAddon.db.char.fav_scroll_status = {} end
 end
 
 function BisTooltipAddon:openConfigDialog()
@@ -334,12 +409,20 @@ function BisTooltipAddon:addMapIcon()
             local PC_MinimapBtn = LDB:NewDataObject(icon_name, {
                 type = "launcher", text = "BiS-Tooltip Renewed", icon = "interface/icons/inv_weapon_glave_01.blp",
                 OnClick = function(_, button)
-                    if button == "LeftButton" then BisTooltipAddon:createMainFrame() end
-                    if button == "RightButton" then BisTooltipAddon:openConfigDialog() end
+                    if button == "LeftButton" then
+                        if IsShiftKeyDown() then
+                            BisTooltipAddon:ToggleFavoritesFrame()
+                        else
+                            BisTooltipAddon:createMainFrame()
+                        end
+                    elseif button == "RightButton" then
+                        BisTooltipAddon:openConfigDialog()
+                    end
                 end,
                 OnTooltipShow = function(tt)
                     tt:AddLine(BisTooltipAddon.AddonNameAndVersion)
                     tt:AddLine("|cffffff00Left click|r to open the BiS lists window")
+                    tt:AddLine("|cffffff00Shift + Left click|r to open Favorites list")
                     tt:AddLine("|cffffff00Right click|r to open addon configuration window")
                 end
             })

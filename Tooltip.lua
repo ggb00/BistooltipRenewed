@@ -29,6 +29,15 @@ local source_hex_colors = {
     ["white"]     = "FFFFFF",
 }
 
+local RAID_ICON_STRINGS = {}
+for i = 1, 8 do
+    local col = (i - 1) % 4
+    local row = math.floor((i - 1) / 4)
+    local l, r = col * 64, (col + 1) * 64
+    local t, b = row * 64, (row + 1) * 64
+    RAID_ICON_STRINGS[i] = string.format("|TInterface\\TargetingFrame\\UI-RaidTargetingIcons:14:14:0:0:256:256:%d:%d:%d:%d|t", l, r, t, b)
+end
+
 local DARK_BACKDROP = {
     bgFile = "Interface\\ChatFrame\\ChatFrameBackground",
     edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
@@ -187,6 +196,15 @@ local function ProcessTooltip(tooltip, link)
         elseif type(sources) == "string" then
             tt:AddLine(string.format("%s |cFF%s%s|r", icon, hexColor, sources), 1, 1, 1, true)
         end
+    end
+
+    if BisTooltipAddon.IsFavorite and (BisTooltipAddon:IsFavorite(itemId) or (translated_id and BisTooltipAddon:IsFavorite(translated_id))) then
+        local markIndex = (db and db.favorite_icon) or 1
+        if markIndex < 1 or markIndex > 8 then markIndex = 1 end
+        local iconStr = RAID_ICON_STRINGS[markIndex] or RAID_ICON_STRINGS[1]
+        local colorKey = (db and db.favorite_color) or "yellow"
+        local hexColor = source_hex_colors[colorKey] or "FFD100"
+        tt:AddLine(string.format("%s |cFF%sFavorite|r", iconStr, hexColor), 1, 1, 1, true)
     end
 
     local showItemStates = (db.show_item_states == nil) or db.show_item_states
