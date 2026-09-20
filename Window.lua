@@ -19,6 +19,13 @@ local classDropdown = nil
 local specDropdown = nil
 local phaseDropDown = nil
 
+local favorites_frame = nil
+local favorites_scroll = nil
+local FAVORITES_WINDOW_FRAME_NAME = "BisTooltipRenewed_FavoritesWindow"
+local isSpecialFavFrameRegistered = false
+local displayed_fav_widgets = {}
+local fav_widget_pool = {}
+
 local function IsPlayerHorde()
     return UnitFactionGroup("player") == "Horde"
 end
@@ -37,6 +44,53 @@ local isSpecialFrameRegistered = false
 
 local EMPTY_TABLE = {}
 
+StaticPopupDialogs["BISTOOLTIP_CONFIRM_CLEAR_FAVORITES"] = {
+    text = "Are you sure you want to remove all items from your Favorites?",
+    button1 = YES,
+    button2 = NO,
+    OnAccept = function()
+        if BisTooltipAddon.db and BisTooltipAddon.db.char then
+            wipe(BisTooltipAddon.db.char.favorites)
+            BisTooltipAddon.db.char.fav_counter = 0
+            if BisTooltipAddon.db.char.fav_scroll_status then
+                BisTooltipAddon.db.char.fav_scroll_status.scrollvalue = 0
+            end
+        end
+        if BisTooltipAddon.RefreshFavoritesWindow then
+            BisTooltipAddon:RefreshFavoritesWindow()
+        end
+        if BisTooltipAddon.RefreshItemStateVisuals then
+            BisTooltipAddon.RefreshItemStateVisuals()
+        end
+    end,
+    OnShow = function(self)
+        self:SetFrameStrata("TOOLTIP")
+        local text = _G[self:GetName() .. "Text"]
+        if text then
+            text:SetJustifyH("CENTER")
+        end
+    end,
+    OnHide = function(self)
+        self:SetFrameStrata("DIALOG")
+    end,
+    timeout = 0,
+    whileDead = 1,
+    hideOnEscape = 1,
+    preferredIndex = 3,
+}
+
+local function SetupSeparatorHeading(sep)
+    sep:SetText("")
+    sep:SetFullWidth(true)
+    if sep.left then
+        sep.left:SetTexture("Interface\\Tooltips\\UI-Tooltip-Border")
+        sep.left:SetTexCoord(0.81, 0.94, 0.5, 1)
+        sep.left:SetVertexColor(1, 1, 1, 1)
+        sep.left:SetDrawLayer("ARTWORK")
+    end
+    if sep.right then sep.right:Hide() end
+end
+
 local function HandleItemTooltip(widget, item_id)
     GameTooltip:SetOwner(widget.frame, "ANCHOR_NONE")
     GameTooltip:SetPoint("TOPRIGHT", widget.frame, "TOPRIGHT", 220, -13)
@@ -45,6 +99,13 @@ local function HandleItemTooltip(widget, item_id)
     local validLink = link or ("item:" .. item_id .. ":0:0:0:0:0:0:0")
 
     GameTooltip:SetHyperlink(validLink)
+
+    if BisTooltipAddon:IsFavorite(item_id) then
+        GameTooltip:AddLine("|cff888888(Right-click to remove from Favorites)|r")
+    else
+        GameTooltip:AddLine("|cff888888<Right-click to add to Favorites>|r")
+    end
+
     GameTooltip:Show()
     if IsShiftKeyDown() or IsModifiedClick("COMPAREITEMS") or (GetCVarBool and GetCVarBool("alwaysCompareItems")) then
         GameTooltip_ShowCompareItem(GameTooltip)
@@ -52,11 +113,33 @@ local function HandleItemTooltip(widget, item_id)
 end
 
 local function ApplyItemStateVisuals(widget, item_id, is_missing)
+    local markIndex = (BisTooltipAddon.db and BisTooltipAddon.db.char and BisTooltipAddon.db.char.favorite_icon) or 1
+    if markIndex < 1 or markIndex > 8 then markIndex = 1 end
+
     if is_missing then
         widget.image:SetVertexColor(1, 1, 1, 1)
         widget.frame.bisCheckMark:Hide()
         if widget.frame.bisBorder then widget.frame.bisBorder:Hide() end
+        if widget.frame.bisStarMark then
+            if BisTooltipAddon:IsFavorite(item_id) then
+                widget.frame.bisStarMark:SetTexture("Interface\\TargetingFrame\\UI-RaidTargetingIcons")
+                SetRaidTargetIconTexture(widget.frame.bisStarMark, markIndex)
+                widget.frame.bisStarMark:Show()
+            else
+                widget.frame.bisStarMark:Hide()
+            end
+        end
         return
+    end
+
+    if widget.frame.bisStarMark then
+        if BisTooltipAddon:IsFavorite(item_id) then
+            widget.frame.bisStarMark:SetTexture("Interface\\TargetingFrame\\UI-RaidTargetingIcons")
+            SetRaidTargetIconTexture(widget.frame.bisStarMark, markIndex)
+            widget.frame.bisStarMark:Show()
+        else
+            widget.frame.bisStarMark:Hide()
+        end
     end
 
     local state = BisTooltipAddon:GetItemState(item_id)
@@ -109,18 +192,28 @@ local function ApplyItemStateVisuals(widget, item_id, is_missing)
 end
 
 local function RefreshItemStateVisuals()
-    if not main_frame or not main_frame.frame:IsShown() then return end
-    for i = 1, #displayed_item_widgets do
-        local entry = displayed_item_widgets[i]
-        if entry.widget and entry.widget.frame then
-            ApplyItemStateVisuals(entry.widget, entry.item_id, false)
+    if main_frame and main_frame.frame:IsShown() then
+        for i = 1, #displayed_item_widgets do
+            local entry = displayed_item_widgets[i]
+            if entry.widget and entry.widget.frame then
+                ApplyItemStateVisuals(entry.widget, entry.item_id, false)
+            end
+        end
+    end
+    if favorites_frame and favorites_frame.frame:IsShown() then
+        for i = 1, #displayed_fav_widgets do
+            local entry = displayed_fav_widgets[i]
+            if entry.widget and entry.widget.frame then
+                ApplyItemStateVisuals(entry.widget, entry.item_id, false)
+            end
         end
     end
 end
 BisTooltipAddon.RefreshItemStateVisuals = RefreshItemStateVisuals
 
 function BisTooltipAddon:IsWindowOpen()
-    return main_frame and main_frame.frame and main_frame.frame:IsShown()
+    return (main_frame and main_frame.frame and main_frame.frame:IsShown())
+        or (favorites_frame and favorites_frame.frame and favorites_frame.frame:IsShown())
 end
 
 local function ProcessMissingItems(self, elapsed)
@@ -129,10 +222,13 @@ local function ProcessMissingItems(self, elapsed)
     fetch_timer = 0
 
     local hasRemaining = false
+    local resolvedAny = false
+
     for item_id, widgets in pairs(missing_widgets) do
         local itemName, _, _, _, _, _, _, _, _, itemIcon, _, _, _, bindType = GetItemInfo(item_id)
 
         if itemName then
+            resolvedAny = true
             for _, widget in ipairs(widgets) do
                 if widget and widget.frame and widget.frame:IsShown() then
                     widget:SetImage(itemIcon)
@@ -159,6 +255,10 @@ local function ProcessMissingItems(self, elapsed)
 
     if not hasRemaining then
         item_fetch_frame:SetScript("OnUpdate", nil)
+    end
+
+    if resolvedAny and favorites_frame and favorites_frame.frame:IsShown() then
+        BisTooltipAddon:RefreshFavoritesWindow()
     end
 end
 
@@ -187,6 +287,7 @@ local function createItemFrame(item_id, size)
         if empty_icon.frame.bisCheckMark then empty_icon.frame.bisCheckMark:Hide() end
         if empty_icon.frame.bisBoeMark then empty_icon.frame.bisBoeMark:Hide() end
         if empty_icon.frame.bisBorder then empty_icon.frame.bisBorder:Hide() end
+        if empty_icon.frame.bisStarMark then empty_icon.frame.bisStarMark:Hide() end
         empty_icon:SetImage("")
 
         return empty_icon
@@ -196,6 +297,7 @@ local function createItemFrame(item_id, size)
     item_frame:SetImageSize(size, size)
 
     item_frame.frame:EnableMouse(true)
+    item_frame.frame:RegisterForClicks("LeftButtonUp", "RightButtonUp")
 
     if not item_frame.frame.bisBorder then
         item_frame.frame.bisBorder = item_frame.frame:CreateTexture(nil, "ARTWORK")
@@ -215,12 +317,33 @@ local function createItemFrame(item_id, size)
         item_frame.frame.bisBoeMark = item_frame.frame:CreateTexture(nil, "OVERLAY")
         item_frame.frame.bisBoeMark:SetWidth(12)
         item_frame.frame.bisBoeMark:SetHeight(12)
-        item_frame.frame.bisBoeMark:SetPoint("TOPLEFT", 2, -5)
+        item_frame.frame.bisBoeMark:SetPoint("TOPRIGHT", -2, -5)
         item_frame.frame.bisBoeMark:SetTexture("Interface\\Icons\\INV_Misc_Coin_01")
     end
     item_frame.frame.bisBoeMark:SetDrawLayer("OVERLAY", 2)
 
-    item_frame:SetCallback("OnClick", function()
+    if not item_frame.frame.bisStarMark then
+        item_frame.frame.bisStarMark = item_frame.frame:CreateTexture(nil, "OVERLAY")
+        item_frame.frame.bisStarMark:SetTexture("Interface\\TargetingFrame\\UI-RaidTargetingIcons")
+    end
+    item_frame.frame.bisStarMark:SetDrawLayer("OVERLAY", 3)
+    local starSize = (size < 30) and 10 or 14
+    item_frame.frame.bisStarMark:SetWidth(starSize)
+    item_frame.frame.bisStarMark:SetHeight(starSize)
+    item_frame.frame.bisStarMark:ClearAllPoints()
+    item_frame.frame.bisStarMark:SetPoint("TOPLEFT", item_frame.image, "TOPLEFT", -2, 2)
+
+    item_frame:SetCallback("OnClick", function(widget, _, button)
+        if button == "RightButton" then
+            BisTooltipAddon:ToggleFavorite(item_id)
+            if widget.frame and widget.frame:IsShown() and GameTooltip:IsOwned(widget.frame) then
+                HandleItemTooltip(widget, item_id)
+            else
+                GameTooltip:Hide()
+            end
+            return
+        end
+
         local _, link = GetItemInfo(item_id)
         local validLink = link or ("item:" .. item_id .. ":0:0:0:0:0:0:0")
         if IsModifiedClick() then
@@ -265,6 +388,7 @@ local function createSpellFrame(spell_id, size)
         if empty_spell.frame.bisCheckMark then empty_spell.frame.bisCheckMark:Hide() end
         if empty_spell.frame.bisBoeMark then empty_spell.frame.bisBoeMark:Hide() end
         if empty_spell.frame.bisBorder then empty_spell.frame.bisBorder:Hide() end
+        if empty_spell.frame.bisStarMark then empty_spell.frame.bisStarMark:Hide() end
         empty_spell:SetImage("")
 
         return empty_spell
@@ -279,6 +403,7 @@ local function createSpellFrame(spell_id, size)
     if spell_frame.frame.bisCheckMark then spell_frame.frame.bisCheckMark:Hide() end
     if spell_frame.frame.bisBoeMark then spell_frame.frame.bisBoeMark:Hide() end
     if spell_frame.frame.bisBorder then spell_frame.frame.bisBorder:Hide() end
+    if spell_frame.frame.bisStarMark then spell_frame.frame.bisStarMark:Hide() end
 
     local name, _, icon = GetSpellInfo(spell_id)
     if not name then return spell_frame end
@@ -573,6 +698,275 @@ local function createSpecFrame()
     spec_frame = frame
 end
 
+function BisTooltipAddon:RefreshFavoritesWindow()
+    if not favorites_frame or not favorites_frame.frame:IsShown() or not favorites_scroll then return end
+
+    for i = 1, #displayed_fav_widgets do
+        fav_widget_pool[#fav_widget_pool + 1] = displayed_fav_widgets[i]
+    end
+    wipe(displayed_fav_widgets)
+
+    local targetScroll = 0
+    if BisTooltipAddon.db.char.fav_scroll_status and BisTooltipAddon.db.char.fav_scroll_status.scrollvalue then
+        targetScroll = BisTooltipAddon.db.char.fav_scroll_status.scrollvalue
+    end
+
+    favorites_scroll:ReleaseChildren()
+
+    local favList = {}
+    local favData = self.db and self.db.char and self.db.char.favorites
+    if favData then
+        for itemID, orderVal in pairs(favData) do
+            if orderVal then table.insert(favList, tonumber(itemID)) end
+        end
+    end
+
+    if #favList == 0 then
+        local emptyLabel = AceGUI:Create("Label")
+        emptyLabel:SetText("\n\n|cffffd100No favorite items yet.|r\n\nRight-click any item in the BiS list to add it to your Favorites!")
+        emptyLabel:SetFont("Fonts\\FRIZQT__.TTF", 14, "")
+        emptyLabel:SetFullWidth(true)
+        emptyLabel.label:SetJustifyH("CENTER")
+        favorites_scroll:AddChild(emptyLabel)
+    else
+        table.sort(favList, function(a, b)
+            local orderA = (favData and type(favData[a]) == "number") and favData[a] or 0
+            local orderB = (favData and type(favData[b]) == "number") and favData[b] or 0
+            return orderA > orderB
+        end)
+
+        for _, itemID in ipairs(favList) do
+            local row = AceGUI:Create("SimpleGroup")
+            row:SetLayout("Table")
+            row:SetFullWidth(true)
+            row:SetUserData("table", { columns = {42, 330, 26}, space = 4, align = "middle" })
+
+            local itemWidget = createItemFrame(itemID, 36)
+            local entry = table.remove(fav_widget_pool) or {}
+            entry.widget = itemWidget
+            entry.item_id = itemID
+            displayed_fav_widgets[#displayed_fav_widgets + 1] = entry
+            row:AddChild(itemWidget)
+
+            local itemName, _, itemRarity, _, _, _, itemSubType, _, equipSlot = GetItemInfo(itemID)
+            local infoGroup = AceGUI:Create("SimpleGroup")
+            infoGroup:SetLayout("List")
+            infoGroup:SetWidth(330)
+
+            local nameLabel = AceGUI:Create("InteractiveLabel")
+            if itemName then
+                local r, g, b = GetItemQualityColor(itemRarity or 1)
+                nameLabel:SetText(itemName)
+                nameLabel:SetColor(r, g, b)
+            else
+                nameLabel:SetText("Item #" .. itemID)
+                nameLabel:SetColor(0.75, 0.75, 0.75)
+            end
+            nameLabel:SetFont("Fonts\\FRIZQT__.TTF", 13, "")
+            nameLabel:SetFullWidth(true)
+
+            local nameHeight = math.max(14, nameLabel.label:GetStringHeight() or 14)
+            nameLabel:SetHeight(nameHeight)
+
+            nameLabel:SetCallback("OnClick", function()
+                local _, link = GetItemInfo(itemID)
+                local validLink = link or ("item:" .. itemID .. ":0:0:0:0:0:0:0")
+                if IsModifiedClick() then
+                    HandleModifiedItemClick(validLink)
+                else
+                    SetItemRef(validLink, validLink, "LeftButton")
+                end
+            end)
+            nameLabel:SetCallback("OnEnter", function(widget) HandleItemTooltip(widget, itemID) end)
+            nameLabel:SetCallback("OnLeave", function() GameTooltip:Hide() end)
+            infoGroup:AddChild(nameLabel)
+
+            local slotText = (equipSlot and _G[equipSlot]) or itemSubType
+            if slotText and slotText ~= "" then
+                local spacer = AceGUI:Create("Label")
+                spacer:SetText(" ")
+                spacer:SetHeight(6)
+                spacer:SetFullWidth(true)
+                infoGroup:AddChild(spacer)
+
+                local subLabel = AceGUI:Create("Label")
+                subLabel:SetText(slotText)
+                subLabel:SetFont("Fonts\\FRIZQT__.TTF", 10, "")
+                subLabel:SetColor(0.75, 0.75, 0.75)
+                subLabel:SetFullWidth(true)
+                subLabel:SetHeight(12)
+                infoGroup:AddChild(subLabel)
+            end
+
+            row:AddChild(infoGroup)
+
+            local removeBtn = AceGUI:Create("Button")
+            removeBtn:SetText("X")
+            removeBtn:SetWidth(26)
+            if removeBtn.text then
+                removeBtn.text:ClearAllPoints()
+                removeBtn.text:SetPoint("CENTER", 0, 0)
+            end
+            removeBtn:SetCallback("OnClick", function()
+                BisTooltipAddon:ToggleFavorite(itemID)
+                GameTooltip:Hide()
+            end)
+            removeBtn:SetCallback("OnEnter", function(widget)
+                GameTooltip:SetOwner(widget.frame, "ANCHOR_RIGHT")
+                GameTooltip:AddLine("Remove from Favorites", 1, 1, 1)
+                GameTooltip:Show()
+            end)
+            removeBtn:SetCallback("OnLeave", function() GameTooltip:Hide() end)
+            row:AddChild(removeBtn)
+
+            favorites_scroll:AddChild(row)
+        end
+    end
+
+    if targetScroll > 0 then
+        favorites_scroll:SetScroll(targetScroll)
+    end
+
+    if favorites_frame.clearBtn then
+        favorites_frame.clearBtn:SetDisabled(#favList == 0)
+    end
+end
+
+function BisTooltipAddon:OpenFavoritesFrame()
+    if favorites_frame and favorites_frame.frame:IsShown() then return end
+
+    if not favorites_frame then
+        favorites_frame = AceGUI:Create("Window")
+        favorites_frame:SetWidth(460)
+        favorites_frame:SetHeight(570)
+        favorites_frame:EnableResize(false)
+        favorites_frame:SetTitle("BiS-Tooltip Renewed - Favorites List")
+
+        local pos = BisTooltipAddon.db.char.favorites_pos
+        if pos and pos.x and pos.y then
+            favorites_frame.frame:ClearAllPoints()
+            favorites_frame.frame:SetPoint("TOPLEFT", UIParent, "BOTTOMLEFT", pos.x, pos.y)
+        elseif main_frame and main_frame.frame:IsShown() then
+            favorites_frame.frame:ClearAllPoints()
+            favorites_frame.frame:SetPoint("TOPLEFT", main_frame.frame, "TOPRIGHT", 10, 0)
+        end
+
+        _G[FAVORITES_WINDOW_FRAME_NAME] = favorites_frame.frame
+        if not isSpecialFavFrameRegistered then
+            tinsert(UISpecialFrames, FAVORITES_WINDOW_FRAME_NAME)
+            isSpecialFavFrameRegistered = true
+        end
+
+        favorites_frame.frame:HookScript("OnHide", function()
+            StaticPopup_Hide("BISTOOLTIP_CONFIRM_CLEAR_FAVORITES")
+        end)
+
+        hooksecurefunc(favorites_frame.frame, "StopMovingOrSizing", function(self)
+            local x = self:GetLeft()
+            local y = self:GetTop()
+            if not x or not y then return end
+
+            local screenW = UIParent:GetRight()
+            local screenH = UIParent:GetTop()
+            local w = self:GetWidth()
+            local h = self:GetHeight()
+
+            local clamped = false
+            if x < 0 then x = 0; clamped = true end
+            if y > screenH then y = screenH; clamped = true end
+            if x + w > screenW then x = screenW - w; clamped = true end
+            if y - h < 0 then y = h; clamped = true end
+
+            BisTooltipAddon.db.char.favorites_pos = { x = x, y = y }
+
+            if clamped then
+                self:ClearAllPoints()
+                self:SetPoint("TOPLEFT", UIParent, "BOTTOMLEFT", x, y)
+            end
+        end)
+
+        if not favorites_frame.frame.darkOverlay then
+            favorites_frame.frame.darkOverlay = favorites_frame.frame:CreateTexture(nil, "BACKGROUND", nil, -1)
+            favorites_frame.frame.darkOverlay:SetPoint("TOPLEFT", favorites_frame.frame, "TOPLEFT", 8, -24)
+            favorites_frame.frame.darkOverlay:SetPoint("BOTTOMRIGHT", favorites_frame.frame, "BOTTOMRIGHT", -8, 8)
+            favorites_frame.frame.darkOverlay:SetTexture(0, 0, 0, 0.60)
+        end
+
+        favorites_frame:SetCallback("OnClose", function()
+            StaticPopup_Hide("BISTOOLTIP_CONFIRM_CLEAR_FAVORITES")
+            BisTooltipAddon:CloseFavoritesFrame()
+        end)
+        favorites_frame:SetLayout("List")
+
+        favorites_scroll = AceGUI:Create("ScrollFrame")
+        favorites_scroll:SetLayout("Flow")
+        favorites_scroll:SetFullWidth(true)
+        favorites_scroll:SetHeight(457)
+        favorites_scroll:SetAutoAdjustHeight(false)
+
+        BisTooltipAddon.db.char.fav_scroll_status = BisTooltipAddon.db.char.fav_scroll_status or {}
+        favorites_scroll:SetStatusTable(BisTooltipAddon.db.char.fav_scroll_status)
+        favorites_frame:AddChild(favorites_scroll)
+
+        local sep = AceGUI:Create("Heading")
+        SetupSeparatorHeading(sep)
+        favorites_frame:AddChild(sep)
+
+        local bottomGroup = AceGUI:Create("SimpleGroup")
+        bottomGroup:SetLayout("Table")
+        bottomGroup:SetFullWidth(true)
+        bottomGroup:SetUserData("table", { columns = {153, 120, 153}, space = 0, align = "middle" })
+
+        local spacerL = AceGUI:Create("Label"); spacerL:SetText(" "); bottomGroup:AddChild(spacerL)
+
+        local clearBtn = AceGUI:Create("Button")
+        clearBtn:SetText("Clear All")
+        clearBtn:SetWidth(120)
+        clearBtn:SetCallback("OnClick", function()
+            StaticPopup_Show("BISTOOLTIP_CONFIRM_CLEAR_FAVORITES")
+        end)
+        clearBtn:SetCallback("OnEnter", function(widget)
+            GameTooltip:SetOwner(widget.frame, "ANCHOR_TOP")
+            GameTooltip:AddLine("Clear All Favorites", 1, 1, 1)
+            GameTooltip:AddLine("Remove all saved items from your character's Favorites list.", 1, 0.82, 0, 1)
+            GameTooltip:Show()
+        end)
+        clearBtn:SetCallback("OnLeave", function() GameTooltip:Hide() end)
+        bottomGroup:AddChild(clearBtn)
+        favorites_frame.clearBtn = clearBtn
+
+        local spacerR = AceGUI:Create("Label"); spacerR:SetText(" "); bottomGroup:AddChild(spacerR)
+
+        favorites_frame:AddChild(bottomGroup)
+
+        sep.frame:ClearAllPoints()
+        sep.frame:SetPoint("BOTTOMLEFT", favorites_frame.frame, "BOTTOMLEFT", 17, 50)
+        sep.frame:SetPoint("BOTTOMRIGHT", favorites_frame.frame, "BOTTOMRIGHT", -17, 50)
+
+        bottomGroup.frame:ClearAllPoints()
+        bottomGroup.frame:SetPoint("BOTTOMLEFT", favorites_frame.frame, "BOTTOMLEFT", 17, 14)
+        bottomGroup.frame:SetPoint("BOTTOMRIGHT", favorites_frame.frame, "BOTTOMRIGHT", -17, 14)
+    end
+
+    favorites_frame:Show()
+    self:RefreshFavoritesWindow()
+end
+
+function BisTooltipAddon:CloseFavoritesFrame()
+    StaticPopup_Hide("BISTOOLTIP_CONFIRM_CLEAR_FAVORITES")
+    if favorites_frame and favorites_frame.frame:IsShown() then
+        favorites_frame:Hide()
+    end
+end
+
+function BisTooltipAddon:ToggleFavoritesFrame()
+    if favorites_frame and favorites_frame.frame:IsShown() then
+        self:CloseFavoritesFrame()
+    else
+        self:OpenFavoritesFrame()
+    end
+end
+
 function BisTooltipAddon:reloadData()
     buildClassDict()
     loadData()
@@ -623,8 +1017,11 @@ function BisTooltipAddon:createMainFrame()
         isSpecialFrameRegistered = true
     end
 
-    main_frame.frame:SetScript("OnHide", function()
+    main_frame.frame:HookScript("OnHide", function()
         item_fetch_frame:SetScript("OnUpdate", nil)
+        if not (favorites_frame and favorites_frame.frame and favorites_frame.frame:IsShown()) then
+            StaticPopup_Hide("BISTOOLTIP_CONFIRM_CLEAR_FAVORITES")
+        end
     end)
 
     hooksecurefunc(main_frame.frame, "StopMovingOrSizing", function(self)
@@ -643,7 +1040,7 @@ function BisTooltipAddon:createMainFrame()
         if x + w > screenW then x = screenW - w; clamped = true end
         if y - h < 0 then y = h; clamped = true end
 
-        BisTooltipAddon.db.char.frame_pos = {x = x, y = y}
+        BisTooltipAddon.db.char.frame_pos = { x = x, y = y }
 
         if clamped then
             self:ClearAllPoints()
@@ -659,6 +1056,9 @@ function BisTooltipAddon:createMainFrame()
     end
 
     main_frame:SetCallback("OnClose", function()
+        if not (favorites_frame and favorites_frame.frame and favorites_frame.frame:IsShown()) then
+            StaticPopup_Hide("BISTOOLTIP_CONFIRM_CLEAR_FAVORITES")
+        end
         BisTooltipAddon:closeMainFrame()
     end)
     main_frame:SetLayout("List")
@@ -669,14 +1069,13 @@ function BisTooltipAddon:createMainFrame()
     drawSpecData()
 
     local sep = AceGUI:Create("Heading")
-    sep:SetText("")
-    sep:SetFullWidth(true)
+    SetupSeparatorHeading(sep)
     main_frame:AddChild(sep)
 
     local buttonContainer = AceGUI:Create("SimpleGroup")
     buttonContainer:SetFullWidth(true)
     buttonContainer:SetLayout("Table")
-    buttonContainer:SetUserData("table", { columns = {105, 120, 120}, space = 15, align = "middle" })
+    buttonContainer:SetUserData("table", { columns = {25, 120, 120, 120}, space = 15, align = "middle" })
 
     local bSpacer1 = AceGUI:Create("Label"); bSpacer1:SetText(" "); buttonContainer:AddChild(bSpacer1)
 
@@ -695,21 +1094,49 @@ function BisTooltipAddon:createMainFrame()
 
     buttonContainer:AddChild(reloadButton)
 
+    local favoritesButton = AceGUI:Create("Button")
+    favoritesButton:SetText("Favorites")
+    favoritesButton:SetWidth(120)
+    favoritesButton:SetCallback("OnClick", function()
+        BisTooltipAddon:ToggleFavoritesFrame()
+    end)
+    favoritesButton:SetCallback("OnEnter", function(widget)
+        GameTooltip:SetOwner(widget.frame, "ANCHOR_TOP")
+        GameTooltip:AddLine("Favorites", 1, 1, 1)
+        GameTooltip:AddLine("Open the Favorites list to view your saved items.", 1, 0.82, 0, 1)
+        GameTooltip:Show()
+    end)
+    favoritesButton:SetCallback("OnLeave", function() GameTooltip:Hide() end)
+    buttonContainer:AddChild(favoritesButton)
+
     local configButton = AceGUI:Create("Button")
     configButton:SetText("Config")
     configButton:SetWidth(120)
     configButton:SetCallback("OnClick", function() BisTooltipAddon:openConfigDialog() end)
+    configButton:SetCallback("OnEnter", function(widget)
+        GameTooltip:SetOwner(widget.frame, "ANCHOR_TOP")
+        GameTooltip:AddLine("Configuration", 1, 1, 1)
+        GameTooltip:AddLine("Open addon configuration and filter settings.", 1, 0.82, 0, 1)
+        GameTooltip:Show()
+    end)
+    configButton:SetCallback("OnLeave", function() GameTooltip:Hide() end)
     buttonContainer:AddChild(configButton)
 
     main_frame:AddChild(buttonContainer)
 
-    local bottomSpacer = AceGUI:Create("Label")
-    bottomSpacer:SetText(" ")
-    bottomSpacer:SetHeight(15)
-    main_frame:AddChild(bottomSpacer)
+    sep.frame:ClearAllPoints()
+    sep.frame:SetPoint("BOTTOMLEFT", main_frame.frame, "BOTTOMLEFT", 17, 50)
+    sep.frame:SetPoint("BOTTOMRIGHT", main_frame.frame, "BOTTOMRIGHT", -17, 50)
+
+    buttonContainer.frame:ClearAllPoints()
+    buttonContainer.frame:SetPoint("BOTTOMLEFT", main_frame.frame, "BOTTOMLEFT", 17, 14)
+    buttonContainer.frame:SetPoint("BOTTOMRIGHT", main_frame.frame, "BOTTOMRIGHT", -17, 14)
 end
 
 function BisTooltipAddon:closeMainFrame()
+    if not (favorites_frame and favorites_frame.frame and favorites_frame.frame:IsShown()) then
+        StaticPopup_Hide("BISTOOLTIP_CONFIRM_CLEAR_FAVORITES")
+    end
     if main_frame and main_frame.frame:IsShown() then
         item_fetch_frame:SetScript("OnUpdate", nil)
         main_frame:Hide()
