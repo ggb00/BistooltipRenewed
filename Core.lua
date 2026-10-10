@@ -3,6 +3,18 @@ BisTooltipAddon = LibStub("AceAddon-3.0"):NewAddon("BiS-Tooltip Renewed", "AceCo
 BisTooltip_AliToHorde = {}
 BisTooltip_EquippedCache = {}
 
+BisTooltip_HexColors = {
+    ["purple"]    = "CC4CFF",
+    ["green"]     = "19FF19",
+    ["red"]       = "FF3333",
+    ["lightblue"] = "4CCCFF",
+    ["yellow"]    = "FFD100",
+    ["orange"]    = "FF7F00",
+    ["pink"]      = "FF66B2",
+    ["cyan"]      = "00FFFF",
+    ["white"]     = "FFFFFF"
+}
+
 local bagUpdateFrame = CreateFrame("Frame")
 bagUpdateFrame:Hide()
 bagUpdateFrame:SetScript("OnUpdate", function(self)
