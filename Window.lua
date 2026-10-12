@@ -356,10 +356,9 @@ local function createItemFrame(item_id, size)
 
     if not item_frame.frame.bisILvl then
         item_frame.frame.bisILvl = item_frame.frame:CreateFontString(nil, "OVERLAY")
-        item_frame.frame.bisILvl:SetFont("Fonts\\FRIZQT__.TTF", 10, "OUTLINE")
-        item_frame.frame.bisILvl:SetShadowColor(0, 0, 0, 1)
+        item_frame.frame.bisILvl:SetFont("Fonts\\ARIALN.TTF", 13, "OUTLINE")
         item_frame.frame.bisILvl:SetShadowOffset(0, 0)
-        item_frame.frame.bisILvl:SetPoint("BOTTOMLEFT", item_frame.image, "BOTTOMLEFT", -4, -4)
+        item_frame.frame.bisILvl:SetPoint("BOTTOMLEFT", item_frame.image, "BOTTOMLEFT", -4, -2)
         item_frame.frame.bisILvl:SetJustifyH("LEFT")
     end
 
