@@ -30,7 +30,7 @@ local db_defaults = {
         show_sources = true, source_color = "green",
         show_item_states = true, dark_tooltips = false,
         show_item_borders = true, frame_pos = nil, scroll_status = {},
-        show_ilvl = true, ilvl_color = "white",
+        show_ilvl = false, ilvl_color = "white",
         favorites = {}, favorites_pos = nil, fav_counter = 0, favorite_icon = 1,
         favorite_color = "yellow", fav_scroll_status = {}
     }
