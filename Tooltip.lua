@@ -155,7 +155,7 @@ local function ProcessTooltip(tooltip, link)
                 if fSpec then
                     lineText = filterClassNames and fSpec.withoutClass or fSpec.withClass
                 else
-                    lineText = dClass .. " " .. dSpec
+                    lineText = (fData and fData[dSpec] and fData[dSpec].plain) or (dClass .. " " .. dSpec)
                 end
 
                 local r1, g1, b1, r2, g2, b2
