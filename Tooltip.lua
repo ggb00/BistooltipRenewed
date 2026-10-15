@@ -52,12 +52,35 @@ local DEFAULT_BACKDROP = {
     insets = { left = 5, right = 5, top = 5, bottom = 5 }
 }
 
-local function GetItemSources(itemId, translatedId)
-    local sources = BisTooltip_ItemSources and BisTooltip_ItemSources[itemId]
-    if not sources and translatedId and BisTooltip_ItemSources then
-        sources = BisTooltip_ItemSources[translatedId]
+local function ResolveSource(sourceRef)
+    if not sourceRef then return nil end
+    local strTable = BisTooltip_SourceStrings
+
+    if type(sourceRef) == "number" then
+        return strTable and strTable[sourceRef] or nil
+    elseif type(sourceRef) == "table" then
+        local resolved = {}
+        for i = 1, #sourceRef do
+            local ref = sourceRef[i]
+            if type(ref) == "number" and strTable then
+                resolved[i] = strTable[ref]
+            else
+                resolved[i] = ref
+            end
+        end
+        return resolved
+    elseif type(sourceRef) == "string" then
+        return sourceRef
     end
-    return sources
+    return nil
+end
+
+local function GetItemSources(itemId, translatedId)
+    local raw = BisTooltip_ItemSources and BisTooltip_ItemSources[itemId]
+    if not raw and translatedId and BisTooltip_ItemSources then
+        raw = BisTooltip_ItemSources[translatedId]
+    end
+    return ResolveSource(raw)
 end
 
 local function StyleTooltip(tooltip, isForcedItem)
