@@ -121,7 +121,8 @@ function BisTooltipAddon:BuildReverseLookup()
                 local iconStr = icon and string.format("|T%s:18|t", icon) or ""
                 self.FormattedNames[class][spec] = {
                     withClass = string.format("%s %s - %s", iconStr, class, spec),
-                    withoutClass = string.format("%s %s", iconStr, spec)
+                    withoutClass = string.format("%s %s", iconStr, spec),
+                    plain = class .. " " .. spec
                 }
                 specKeys[class][spec] = class .. ":" .. spec
             end
@@ -133,11 +134,17 @@ function BisTooltipAddon:BuildReverseLookup()
 
     local function assignRank(targetId, cls, spc, phs, rank)
         local tItem = tempLookup[targetId]
-        if not tItem then tItem = {}; tempLookup[targetId] = tItem end
+        if not tItem then
+            tItem = {}
+            tempLookup[targetId] = tItem
+        end
 
         local key = (specKeys[cls] and specKeys[cls][spc]) or (cls .. ":" .. spc)
         local tSpec = tItem[key]
-        if not tSpec then tSpec = { class = cls, spec = spc }; tItem[key] = tSpec end
+        if not tSpec then
+            tSpec = { class = cls, spec = spc }
+            tItem[key] = tSpec
+        end
 
         local currentRank = tSpec[phs]
         if not currentRank or rank < currentRank then
@@ -154,9 +161,9 @@ function BisTooltipAddon:BuildReverseLookup()
                     if items then
                         for _, itemData in pairs(items) do
                             if type(itemData) == "table" then
-                                for i, itemId in ipairs(itemData) do
+                                for i = 1, #itemData do
+                                    local itemId = itemData[i]
                                     if type(itemId) == "number" and itemId > 0 then
-
                                         assignRank(itemId, class, spec, phase, i)
 
                                         if BisTooltip_FactionMap and BisTooltip_FactionMap[itemId] then
@@ -164,7 +171,6 @@ function BisTooltipAddon:BuildReverseLookup()
                                         elseif BisTooltip_AliToHorde and BisTooltip_AliToHorde[itemId] then
                                             assignRank(BisTooltip_AliToHorde[itemId], class, spec, phase, i)
                                         end
-
                                     end
                                 end
                             end
@@ -176,25 +182,26 @@ function BisTooltipAddon:BuildReverseLookup()
     end
 
     self.ReverseLookup = {}
+    local labels = {}
+
     for itemId, classes in pairs(tempLookup) do
         local flatList = {}
         for _, entry in pairs(classes) do
-            local labels = {}
-
-            for _, phase in ipairs(sortedPhases) do
+            wipe(labels)
+            for p = 1, #sortedPhases do
+                local phase = sortedPhases[p]
                 local rank = entry[phase]
                 if rank then
-                    local phaseLabel = (rank == 1) and (phase .. " BIS") or (phase .. " alt " .. (rank - 1))
-                    table.insert(labels, phaseLabel)
+                    labels[#labels + 1] = (rank == 1) and (phase .. " BIS") or (phase .. " alt " .. (rank - 1))
                 end
             end
 
             if #labels > 0 then
-                table.insert(flatList, {
+                flatList[#flatList + 1] = {
                     class = entry.class,
                     spec = entry.spec,
                     rightText = table.concat(labels, " / ")
-                })
+                }
             end
         end
 
@@ -204,6 +211,12 @@ function BisTooltipAddon:BuildReverseLookup()
         end)
         self.ReverseLookup[itemId] = flatList
     end
+
+    tempLookup = nil
+    canonicalClasses = nil
+    specKeys = nil
+    labels = nil
+    collectgarbage("step", 100)
 end
 
 function BisTooltipAddon:HandleChatCommand(input)
