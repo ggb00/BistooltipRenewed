@@ -496,9 +496,15 @@ local function createEnhancementsFrame(enhancements)
     return frame
 end
 
-local function drawItemSlot(slot)
+local SLOT_DISPLAY_ORDER = {
+    "Head", "Neck", "Shoulder", "Back", "Chest", "Wrist",
+    "Hands", "Waist", "Legs", "Feet", "Finger 1", "Finger 2",
+    "Trinket 1", "Trinket 2", "Weapon", "Off hand", "Ranged"
+}
+
+local function drawItemSlot(slot_name, item_list)
     local f = AceGUI:Create("Label")
-    f:SetText(slot.slot_name)
+    f:SetText(slot_name)
     f:SetFont("Fonts\\FRIZQT__.TTF", 14, "")
     f:SetWidth(85)
     f.label:SetJustifyH("LEFT")
@@ -507,13 +513,13 @@ local function drawItemSlot(slot)
     local enhs = EMPTY_TABLE
     local enh_class = BisTooltip_Enhancements and BisTooltip_Enhancements[class]
     if enh_class and enh_class[spec] and enh_class[spec][phase] then
-        enhs = enh_class[spec][phase][slot.slot_name] or EMPTY_TABLE
+        enhs = enh_class[spec][phase][slot_name] or EMPTY_TABLE
     end
 
     spec_frame:AddChild(createEnhancementsFrame(enhs))
 
     local count = 0
-    for _, original_item_id in ipairs(slot) do
+    for _, original_item_id in ipairs(item_list) do
         if count >= 6 then break end
 
         local display_id = original_item_id
@@ -606,7 +612,18 @@ local function drawSpecData()
     local slots = list_class[spec][phase]
     if not slots then return end
 
-    for _, slot in ipairs(slots) do drawItemSlot(slot) end
+    if slots[1] then
+        for _, slot in ipairs(slots) do
+            drawItemSlot(slot.slot_name, slot)
+        end
+    else
+        for _, slot_name in ipairs(SLOT_DISPLAY_ORDER) do
+            local item_list = slots[slot_name]
+            if item_list then
+                drawItemSlot(slot_name, item_list)
+            end
+        end
+    end
 
     if targetScroll > 0 then
         spec_frame:SetScroll(targetScroll)
