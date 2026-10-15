@@ -3,437 +3,437 @@ BisTooltip_ItemLists = BisTooltip_ItemLists or {}
 BisTooltip_ItemLists["Mage"] = BisTooltip_ItemLists["Mage"] or {}
 BisTooltip_ItemLists["Mage"]["Arcane"] = BisTooltip_ItemLists["Mage"]["Arcane"] or {}
 BisTooltip_ItemLists["Mage"]["Arcane"]["PR"] = BisTooltip_ItemLists["Mage"]["Arcane"]["PR"] or {}
-BisTooltip_ItemLists["Mage"]["Arcane"]["PR"][1] = {["slot_name"] = "Head", [1] = 37294, [2] = 44910, [3] = 42553, [4] = 37684, [5] = 41984, [6] = 34340 }
-BisTooltip_ItemLists["Mage"]["Arcane"]["PR"][2] = {["slot_name"] = "Neck", [1] = 40680, [2] = 37595, [3] = 42024, [4] = 44017, [5] = 42647, [6] = 37683 }
-BisTooltip_ItemLists["Mage"]["Arcane"]["PR"][3] = {["slot_name"] = "Shoulder", [1] = 34210, [2] = 37673, [3] = 37655, [4] = 37196, [5] = 41550, [6] = 44370 }
-BisTooltip_ItemLists["Mage"]["Arcane"]["PR"][4] = {["slot_name"] = "Back", [1] = 41610, [2] = 42057, [3] = 44242, [4] = 36983, [5] = 37291, [6] = 34242 }
-BisTooltip_ItemLists["Mage"]["Arcane"]["PR"][5] = {["slot_name"] = "Chest", [1] = 39492, [2] = 42102, [3] = 43401, [4] = 37258, [5] = 37222, [6] = 34399 }
-BisTooltip_ItemLists["Mage"]["Arcane"]["PR"][6] = {["slot_name"] = "Wrist", [1] = 37361, [2] = 37725, [3] = 37884, [4] = 34447, [5] = 44200, [6] = 41555 }
-BisTooltip_ItemLists["Mage"]["Arcane"]["PR"][7] = {["slot_name"] = "Hands", [1] = 39495, [2] = 42113, [3] = 37172, [4] = 37825, [5] = 34406, [6] = 43287 }
-BisTooltip_ItemLists["Mage"]["Arcane"]["PR"][8] = {["slot_name"] = "Waist", [1] = 40696, [2] = 37408, [3] = 37850, [4] = 37680, [5] = 44302, [6] = 34557 }
-BisTooltip_ItemLists["Mage"]["Arcane"]["PR"][9] = {["slot_name"] = "Legs", [1] = 34181, [2] = 37854, [3] = 37189, [4] = 41553, [5] = 43375, [6] = 37369 }
-BisTooltip_ItemLists["Mage"]["Arcane"]["PR"][10] = {["slot_name"] = "Feet", [1] = 44202, [2] = 44899, [3] = 37730, [4] = 34574, [5] = 36954, [6] = 37867 }
-BisTooltip_ItemLists["Mage"]["Arcane"]["PR"][11] = {["slot_name"] = "Finger 1", [1] = 40585, [2] = 37651, [3] = 43253, [4] = 37694, [5] = 37192, [6] = 44283 }
-BisTooltip_ItemLists["Mage"]["Arcane"]["PR"][12] = {["slot_name"] = "Finger 2", [1] = 37694, [2] = 37651, [3] = 43253, [4] = 40585, [5] = 37192, [6] = 44283 }
-BisTooltip_ItemLists["Mage"]["Arcane"]["PR"][13] = {["slot_name"] = "Trinket 1", [1] = 37873, [2] = 42395, [3] = 40682, [4] = 37660, [5] = 36972, [6] = 44322 }
-BisTooltip_ItemLists["Mage"]["Arcane"]["PR"][14] = {["slot_name"] = "Trinket 2", [1] = 40682, [2] = 37873, [3] = 42395, [4] = 37660, [5] = 36972, [6] = 44322 }
-BisTooltip_ItemLists["Mage"]["Arcane"]["PR"][15] = {["slot_name"] = "Weapon", [1] = 37360, [2] = 45085, [3] = 44173, [4] = 37721, [5] = 37377, [6] = 37060 }
-BisTooltip_ItemLists["Mage"]["Arcane"]["PR"][16] = {["slot_name"] = "Off hand", [1] = 40698, [2] = 37134, [3] = 44210, [4] = 37718, [5] = 37051 }
-BisTooltip_ItemLists["Mage"]["Arcane"]["PR"][17] = {["slot_name"] = "Ranged", [1] = 37177, [2] = 38206, [3] = 34347, [4] = 36989, [5] = 37238, [6] = 37619 }
+BisTooltip_ItemLists["Mage"]["Arcane"]["PR"]["Head"] = { 37294, 44910, 42553, 37684, 41984, 34340 }
+BisTooltip_ItemLists["Mage"]["Arcane"]["PR"]["Neck"] = { 40680, 37595, 42024, 44017, 42647, 37683 }
+BisTooltip_ItemLists["Mage"]["Arcane"]["PR"]["Shoulder"] = { 34210, 37673, 37655, 37196, 41550, 44370 }
+BisTooltip_ItemLists["Mage"]["Arcane"]["PR"]["Back"] = { 41610, 42057, 36983, 44242, 37291, 34242 }
+BisTooltip_ItemLists["Mage"]["Arcane"]["PR"]["Chest"] = { 39492, 42102, 43401, 37258, 37222, 34399 }
+BisTooltip_ItemLists["Mage"]["Arcane"]["PR"]["Wrist"] = { 37361, 37725, 37884, 34447, 44200, 41555 }
+BisTooltip_ItemLists["Mage"]["Arcane"]["PR"]["Hands"] = { 39495, 42113, 37172, 37825, 34406, 43287 }
+BisTooltip_ItemLists["Mage"]["Arcane"]["PR"]["Waist"] = { 40696, 37408, 37850, 37680, 44302, 34557 }
+BisTooltip_ItemLists["Mage"]["Arcane"]["PR"]["Legs"] = { 34181, 37854, 37189, 41553, 43375, 37369 }
+BisTooltip_ItemLists["Mage"]["Arcane"]["PR"]["Feet"] = { 44202, 44899, 37730, 34574, 36954, 37867 }
+BisTooltip_ItemLists["Mage"]["Arcane"]["PR"]["Finger 1"] = { 40585, 37651, 43253, 37694, 37192, 44283 }
+BisTooltip_ItemLists["Mage"]["Arcane"]["PR"]["Finger 2"] = { 37694, 37651, 43253, 40585, 37192, 44283 }
+BisTooltip_ItemLists["Mage"]["Arcane"]["PR"]["Trinket 1"] = { 37873, 42395, 40682, 37660, 36972, 44322 }
+BisTooltip_ItemLists["Mage"]["Arcane"]["PR"]["Trinket 2"] = { 40682, 37873, 42395, 37660, 36972, 44322 }
+BisTooltip_ItemLists["Mage"]["Arcane"]["PR"]["Weapon"] = { 37360, 45085, 44173, 37721, 37377, 37060 }
+BisTooltip_ItemLists["Mage"]["Arcane"]["PR"]["Off hand"] = { 40698, 37134, 44210, 37718, 37051 }
+BisTooltip_ItemLists["Mage"]["Arcane"]["PR"]["Ranged"] = { 37177, 38206, 34347, 36989, 37238, 37619 }
 BisTooltip_ItemLists["Mage"]["Arcane"]["T7"] = BisTooltip_ItemLists["Mage"]["Arcane"]["T7"] or {}
-BisTooltip_ItemLists["Mage"]["Arcane"]["T7"][1] = {["slot_name"] = "Head", [1] = 40416, [2] = 40562, [3] = 40287, [4] = 40339, [5] = 44910, [6] = 43995 }
-BisTooltip_ItemLists["Mage"]["Arcane"]["T7"][2] = {["slot_name"] = "Neck", [1] = 44661, [2] = 44658, [3] = 39472, [4] = 40064, [5] = 40427, [6] = 40374 }
-BisTooltip_ItemLists["Mage"]["Arcane"]["T7"][3] = {["slot_name"] = "Shoulder", [1] = 40419, [2] = 40286, [3] = 40351, [4] = 39719, [5] = 40555, [6] = 39494 }
-BisTooltip_ItemLists["Mage"]["Arcane"]["T7"][4] = {["slot_name"] = "Back", [1] = 44005, [2] = 39241, [3] = 40723, [4] = 40405, [5] = 41610, [6] = 40251 }
-BisTooltip_ItemLists["Mage"]["Arcane"]["T7"][5] = {["slot_name"] = "Chest", [1] = 44002, [2] = 40526, [3] = 40234, [4] = 39396, [5] = 42102, [6] = 40418 }
-BisTooltip_ItemLists["Mage"]["Arcane"]["T7"][6] = {["slot_name"] = "Wrist", [1] = 44008, [2] = 40325, [3] = 40740, [4] = 39252, [5] = 39731, [6] = 40198 }
-BisTooltip_ItemLists["Mage"]["Arcane"]["T7"][7] = {["slot_name"] = "Hands", [1] = 40415, [2] = 40380, [3] = 40197, [4] = 42113, [5] = 39495, [6] = 39733 }
-BisTooltip_ItemLists["Mage"]["Arcane"]["T7"][8] = {["slot_name"] = "Waist", [1] = 40561, [2] = 40301, [3] = 40696, [4] = 37408, [5] = 37850, [6] = 39735 }
-BisTooltip_ItemLists["Mage"]["Arcane"]["T7"][9] = {["slot_name"] = "Legs", [1] = 40417, [2] = 40560, [3] = 40376, [4] = 39720, [5] = 39493, [6] = 40398 }
-BisTooltip_ItemLists["Mage"]["Arcane"]["T7"][10] = {["slot_name"] = "Feet", [1] = 40558, [2] = 40246, [3] = 40750, [4] = 40326, [5] = 44202, [6] = 44899 }
-BisTooltip_ItemLists["Mage"]["Arcane"]["T7"][11] = {["slot_name"] = "Finger 1", [1] = 40399, [2] = 39389, [3] = 37651, [4] = 40719, [5] = 43253, [6] = 39250 }
-BisTooltip_ItemLists["Mage"]["Arcane"]["T7"][12] = {["slot_name"] = "Finger 2", [1] = 40719, [2] = 39389, [3] = 40399, [4] = 37651, [5] = 43253, [6] = 39250 }
-BisTooltip_ItemLists["Mage"]["Arcane"]["T7"][13] = {["slot_name"] = "Trinket 1", [1] = 40255, [2] = 37873, [3] = 39229, [4] = 40432, [5] = 42395, [6] = 40682 }
-BisTooltip_ItemLists["Mage"]["Arcane"]["T7"][14] = {["slot_name"] = "Trinket 2", [1] = 39229, [2] = 40255, [3] = 37873, [4] = 40432, [5] = 42395, [6] = 40682 }
-BisTooltip_ItemLists["Mage"]["Arcane"]["T7"][15] = {["slot_name"] = "Weapon", [1] = 40396, [2] = 40489, [3] = 40408, [4] = 39424, [5] = 40336, [6] = 42346 }
-BisTooltip_ItemLists["Mage"]["Arcane"]["T7"][16] = {["slot_name"] = "Off hand", [1] = 40273, [2] = 40698, [3] = 39199, [4] = 37134, [5] = 39766, [6] = 40192 }
-BisTooltip_ItemLists["Mage"]["Arcane"]["T7"][17] = {["slot_name"] = "Ranged", [1] = 39426, [2] = 39712, [3] = 37177, [4] = 38206, [5] = 40284, [6] = 40245 }
+BisTooltip_ItemLists["Mage"]["Arcane"]["T7"]["Head"] = { 40416, 40562, 40287, 40339, 44910, 43995 }
+BisTooltip_ItemLists["Mage"]["Arcane"]["T7"]["Neck"] = { 44661, 44658, 39472, 40064, 40427, 40374 }
+BisTooltip_ItemLists["Mage"]["Arcane"]["T7"]["Shoulder"] = { 40419, 40286, 40351, 39719, 40555, 39494 }
+BisTooltip_ItemLists["Mage"]["Arcane"]["T7"]["Back"] = { 44005, 39241, 40723, 40405, 41610, 40251 }
+BisTooltip_ItemLists["Mage"]["Arcane"]["T7"]["Chest"] = { 44002, 40526, 40234, 39396, 42102, 40418 }
+BisTooltip_ItemLists["Mage"]["Arcane"]["T7"]["Wrist"] = { 44008, 40325, 40740, 39252, 39731, 40198 }
+BisTooltip_ItemLists["Mage"]["Arcane"]["T7"]["Hands"] = { 40415, 40380, 40197, 42113, 39495, 39733 }
+BisTooltip_ItemLists["Mage"]["Arcane"]["T7"]["Waist"] = { 40561, 40301, 40696, 37408, 37850, 39735 }
+BisTooltip_ItemLists["Mage"]["Arcane"]["T7"]["Legs"] = { 40417, 40560, 40376, 39720, 39493, 40398 }
+BisTooltip_ItemLists["Mage"]["Arcane"]["T7"]["Feet"] = { 40558, 40246, 40750, 40326, 44202, 44899 }
+BisTooltip_ItemLists["Mage"]["Arcane"]["T7"]["Finger 1"] = { 40399, 39389, 37651, 40719, 43253, 39250 }
+BisTooltip_ItemLists["Mage"]["Arcane"]["T7"]["Finger 2"] = { 40719, 39389, 40399, 37651, 43253, 39250 }
+BisTooltip_ItemLists["Mage"]["Arcane"]["T7"]["Trinket 1"] = { 40255, 37873, 39229, 40432, 42395, 40682 }
+BisTooltip_ItemLists["Mage"]["Arcane"]["T7"]["Trinket 2"] = { 39229, 40255, 37873, 40432, 42395, 40682 }
+BisTooltip_ItemLists["Mage"]["Arcane"]["T7"]["Weapon"] = { 40396, 40489, 40408, 39424, 40336, 42346 }
+BisTooltip_ItemLists["Mage"]["Arcane"]["T7"]["Off hand"] = { 40273, 40698, 39199, 37134, 39766, 40192 }
+BisTooltip_ItemLists["Mage"]["Arcane"]["T7"]["Ranged"] = { 39426, 39712, 37177, 38206, 40284, 40245 }
 BisTooltip_ItemLists["Mage"]["Arcane"]["T8"] = BisTooltip_ItemLists["Mage"]["Arcane"]["T8"] or {}
-BisTooltip_ItemLists["Mage"]["Arcane"]["T8"][1] = {["slot_name"] = "Head", [1] = 45497, [2] = 46129, [3] = 45365, [4] = 45150, [5] = 45289, [6] = 40562 }
-BisTooltip_ItemLists["Mage"]["Arcane"]["T8"][2] = {["slot_name"] = "Neck", [1] = 45243, [2] = 45133, [3] = 45539, [4] = 45699, [5] = 44661, [6] = 44658 }
-BisTooltip_ItemLists["Mage"]["Arcane"]["T8"][3] = {["slot_name"] = "Shoulder", [1] = 46134, [2] = 45186, [3] = 46068, [4] = 40286, [5] = 45369, [6] = 45253 }
-BisTooltip_ItemLists["Mage"]["Arcane"]["T8"][4] = {["slot_name"] = "Back", [1] = 45618, [2] = 45242, [3] = 46042, [4] = 46321, [5] = 44005, [6] = 45486 }
-BisTooltip_ItemLists["Mage"]["Arcane"]["T8"][5] = {["slot_name"] = "Chest", [1] = 46130, [2] = 45865, [3] = 40526, [4] = 40234, [5] = 45272, [6] = 45240 }
-BisTooltip_ItemLists["Mage"]["Arcane"]["T8"][6] = {["slot_name"] = "Wrist", [1] = 45446, [2] = 45549, [3] = 45275, [4] = 45291, [5] = 40325, [6] = 44008 }
-BisTooltip_ItemLists["Mage"]["Arcane"]["T8"][7] = {["slot_name"] = "Hands", [1] = 45665, [2] = 46045, [3] = 46132, [4] = 46131, [5] = 45976, [6] = 45520 }
-BisTooltip_ItemLists["Mage"]["Arcane"]["T8"][8] = {["slot_name"] = "Waist", [1] = 45619, [2] = 45557, [3] = 45508, [4] = 40301, [5] = 45119, [6] = 40561 }
-BisTooltip_ItemLists["Mage"]["Arcane"]["T8"][9] = {["slot_name"] = "Legs", [1] = 45488, [2] = 45238, [3] = 40560, [4] = 46133, [5] = 45367, [6] = 40417 }
-BisTooltip_ItemLists["Mage"]["Arcane"]["T8"][10] = {["slot_name"] = "Feet", [1] = 45135, [2] = 45258, [3] = 45537, [4] = 40246, [5] = 45566, [6] = 45483 }
-BisTooltip_ItemLists["Mage"]["Arcane"]["T8"][11] = {["slot_name"] = "Finger 1", [1] = 45495, [2] = 45297, [3] = 45451, [4] = 45515, [5] = 39389, [6] = 46046 }
-BisTooltip_ItemLists["Mage"]["Arcane"]["T8"][12] = {["slot_name"] = "Finger 2", [1] = 46046, [2] = 45297, [3] = 45451, [4] = 45495, [5] = 39389, [6] = 40399 }
-BisTooltip_ItemLists["Mage"]["Arcane"]["T8"][13] = {["slot_name"] = "Trinket 1", [1] = 45466, [2] = 45148, [3] = 45866, [4] = 40255, [5] = 45518, [6] = 45490 }
-BisTooltip_ItemLists["Mage"]["Arcane"]["T8"][14] = {["slot_name"] = "Trinket 2", [1] = 45518, [2] = 45148, [3] = 45866, [4] = 40255, [5] = 45466, [6] = 45490 }
-BisTooltip_ItemLists["Mage"]["Arcane"]["T8"][15] = {["slot_name"] = "Weapon", [1] = 45620, [2] = 45990, [3] = 45171, [4] = 45527, [5] = 45437, [6] = 45886 }
-BisTooltip_ItemLists["Mage"]["Arcane"]["T8"][16] = {["slot_name"] = "Off hand", [1] = 45617, [2] = 45115, [3] = 40273, [4] = 45271, [5] = 40698, [6] = 39199 }
-BisTooltip_ItemLists["Mage"]["Arcane"]["T8"][17] = {["slot_name"] = "Ranged", [1] = 45294, [2] = 45257, [3] = 39712, [4] = 45511, [5] = 45170, [6] = 37177 }
+BisTooltip_ItemLists["Mage"]["Arcane"]["T8"]["Head"] = { 45497, 46129, 45365, 45150, 45289, 40562 }
+BisTooltip_ItemLists["Mage"]["Arcane"]["T8"]["Neck"] = { 45243, 45133, 45539, 45699, 44661, 44658 }
+BisTooltip_ItemLists["Mage"]["Arcane"]["T8"]["Shoulder"] = { 46134, 45186, 46068, 40286, 45369, 45253 }
+BisTooltip_ItemLists["Mage"]["Arcane"]["T8"]["Back"] = { 45618, 45242, 46042, 46321, 44005, 45486 }
+BisTooltip_ItemLists["Mage"]["Arcane"]["T8"]["Chest"] = { 46130, 45865, 40526, 40234, 45272, 45240 }
+BisTooltip_ItemLists["Mage"]["Arcane"]["T8"]["Wrist"] = { 45446, 45549, 45275, 45291, 40325, 44008 }
+BisTooltip_ItemLists["Mage"]["Arcane"]["T8"]["Hands"] = { 45665, 46045, 46132, 46131, 45976, 45520 }
+BisTooltip_ItemLists["Mage"]["Arcane"]["T8"]["Waist"] = { 45619, 45557, 45508, 40301, 45119, 40561 }
+BisTooltip_ItemLists["Mage"]["Arcane"]["T8"]["Legs"] = { 45488, 45238, 40560, 46133, 45367, 40417 }
+BisTooltip_ItemLists["Mage"]["Arcane"]["T8"]["Feet"] = { 45135, 45258, 45537, 40246, 45566, 45483 }
+BisTooltip_ItemLists["Mage"]["Arcane"]["T8"]["Finger 1"] = { 45495, 45297, 45451, 45515, 39389, 46046 }
+BisTooltip_ItemLists["Mage"]["Arcane"]["T8"]["Finger 2"] = { 46046, 45297, 45451, 45495, 39389, 40399 }
+BisTooltip_ItemLists["Mage"]["Arcane"]["T8"]["Trinket 1"] = { 45466, 45148, 45866, 40255, 45518, 45490 }
+BisTooltip_ItemLists["Mage"]["Arcane"]["T8"]["Trinket 2"] = { 45518, 45148, 45866, 40255, 45466, 45490 }
+BisTooltip_ItemLists["Mage"]["Arcane"]["T8"]["Weapon"] = { 45620, 45990, 45171, 45527, 45437, 45886 }
+BisTooltip_ItemLists["Mage"]["Arcane"]["T8"]["Off hand"] = { 45617, 45115, 40273, 45271, 40698, 39199 }
+BisTooltip_ItemLists["Mage"]["Arcane"]["T8"]["Ranged"] = { 45294, 45257, 39712, 45511, 45170, 37177 }
 BisTooltip_ItemLists["Mage"]["Arcane"]["T9"] = BisTooltip_ItemLists["Mage"]["Arcane"]["T9"] or {}
-BisTooltip_ItemLists["Mage"]["Arcane"]["T9"][1] = {["slot_name"] = "Head", [1] = 47764, [2] = 47692, [3] = 47771, [4] = 49481, [5] = 46129, [6] = 45365 }
-BisTooltip_ItemLists["Mage"]["Arcane"]["T9"][2] = {["slot_name"] = "Neck", [1] = 47468, [2] = 45133, [3] = 48030, [4] = 45539, [5] = 45699, [6] = 47890 }
-BisTooltip_ItemLists["Mage"]["Arcane"]["T9"][3] = {["slot_name"] = "Shoulder", [1] = 47767, [2] = 47714, [3] = 45186, [4] = 46068, [5] = 47768, [6] = 40286 }
-BisTooltip_ItemLists["Mage"]["Arcane"]["T9"][4] = {["slot_name"] = "Back", [1] = 47554, [2] = 47452, [3] = 45242, [4] = 47291, [5] = 47551, [6] = 46042 }
-BisTooltip_ItemLists["Mage"]["Arcane"]["T9"][5] = {["slot_name"] = "Chest", [1] = 47425, [2] = 47462, [3] = 47766, [4] = 48051, [5] = 47301, [6] = 47769 }
-BisTooltip_ItemLists["Mage"]["Arcane"]["T9"][6] = {["slot_name"] = "Wrist", [1] = 47485, [2] = 47467, [3] = 48000, [4] = 47306, [5] = 45549, [6] = 47861 }
-BisTooltip_ItemLists["Mage"]["Arcane"]["T9"][7] = {["slot_name"] = "Hands", [1] = 47763, [2] = 48028, [3] = 46045, [4] = 46132, [5] = 47889, [6] = 45665 }
-BisTooltip_ItemLists["Mage"]["Arcane"]["T9"][8] = {["slot_name"] = "Waist", [1] = 47419, [2] = 47447, [3] = 47994, [4] = 47286, [5] = 47855, [6] = 45557 }
-BisTooltip_ItemLists["Mage"]["Arcane"]["T9"][9] = {["slot_name"] = "Legs", [1] = 47765, [2] = 47478, [3] = 45488, [4] = 47317, [5] = 45238, [6] = 47435 }
-BisTooltip_ItemLists["Mage"]["Arcane"]["T9"][10] = {["slot_name"] = "Feet", [1] = 47454, [2] = 47482, [3] = 47321, [4] = 48012, [5] = 45135, [6] = 45258 }
-BisTooltip_ItemLists["Mage"]["Arcane"]["T9"][11] = {["slot_name"] = "Finger 1", [1] = 47489, [2] = 48001, [3] = 45297, [4] = 45451, [5] = 47862, [6] = 45495 }
-BisTooltip_ItemLists["Mage"]["Arcane"]["T9"][12] = {["slot_name"] = "Finger 2", [1] = 45495, [2] = 48001, [3] = 45297, [4] = 45451, [5] = 47862, [6] = 47489 }
-BisTooltip_ItemLists["Mage"]["Arcane"]["T9"][13] = {["slot_name"] = "Trinket 1", [1] = 47477, [2] = 47316, [3] = 45148, [4] = 45866, [5] = 40255, [6] = 45518 }
-BisTooltip_ItemLists["Mage"]["Arcane"]["T9"][14] = {["slot_name"] = "Trinket 2", [1] = 45518, [2] = 47477, [3] = 47316, [4] = 45148, [5] = 45866, [6] = 40255 }
-BisTooltip_ItemLists["Mage"]["Arcane"]["T9"][15] = {["slot_name"] = "Weapon", [1] = 47422, [2] = 45620, [3] = 45990, [4] = 47518, [5] = 45171, [6] = 47525 }
-BisTooltip_ItemLists["Mage"]["Arcane"]["T9"][16] = {["slot_name"] = "Off hand", [1] = 48032, [2] = 47437, [3] = 45617, [4] = 47276, [5] = 47913, [6] = 45115 }
-BisTooltip_ItemLists["Mage"]["Arcane"]["T9"][17] = {["slot_name"] = "Ranged", [1] = 45294, [2] = 47658, [3] = 45257, [4] = 39712, [5] = 47995, [6] = 45511 }
+BisTooltip_ItemLists["Mage"]["Arcane"]["T9"]["Head"] = { 47764, 47692, 47771, 49481, 46129, 45365 }
+BisTooltip_ItemLists["Mage"]["Arcane"]["T9"]["Neck"] = { 47468, 45133, 48030, 45539, 45699, 47890 }
+BisTooltip_ItemLists["Mage"]["Arcane"]["T9"]["Shoulder"] = { 47767, 47714, 45186, 46068, 47768, 40286 }
+BisTooltip_ItemLists["Mage"]["Arcane"]["T9"]["Back"] = { 47554, 47452, 45242, 47291, 47551, 46042 }
+BisTooltip_ItemLists["Mage"]["Arcane"]["T9"]["Chest"] = { 47425, 47462, 47766, 48051, 47301, 47769 }
+BisTooltip_ItemLists["Mage"]["Arcane"]["T9"]["Wrist"] = { 47485, 47467, 48000, 47306, 45549, 47861 }
+BisTooltip_ItemLists["Mage"]["Arcane"]["T9"]["Hands"] = { 47763, 48028, 46045, 46132, 47889, 45665 }
+BisTooltip_ItemLists["Mage"]["Arcane"]["T9"]["Waist"] = { 47419, 47447, 47994, 47286, 47855, 45557 }
+BisTooltip_ItemLists["Mage"]["Arcane"]["T9"]["Legs"] = { 47765, 47478, 45488, 47317, 45238, 47435 }
+BisTooltip_ItemLists["Mage"]["Arcane"]["T9"]["Feet"] = { 47454, 47482, 47321, 48012, 45135, 45258 }
+BisTooltip_ItemLists["Mage"]["Arcane"]["T9"]["Finger 1"] = { 47489, 48001, 45297, 45451, 47862, 45495 }
+BisTooltip_ItemLists["Mage"]["Arcane"]["T9"]["Finger 2"] = { 45495, 48001, 45297, 45451, 47862, 47489 }
+BisTooltip_ItemLists["Mage"]["Arcane"]["T9"]["Trinket 1"] = { 47477, 47316, 45148, 45866, 40255, 45518 }
+BisTooltip_ItemLists["Mage"]["Arcane"]["T9"]["Trinket 2"] = { 45518, 47477, 47316, 45148, 45866, 40255 }
+BisTooltip_ItemLists["Mage"]["Arcane"]["T9"]["Weapon"] = { 47422, 45620, 45990, 47518, 45171, 47525 }
+BisTooltip_ItemLists["Mage"]["Arcane"]["T9"]["Off hand"] = { 48032, 47437, 45617, 47276, 47913, 45115 }
+BisTooltip_ItemLists["Mage"]["Arcane"]["T9"]["Ranged"] = { 45294, 47658, 45257, 39712, 47995, 45511 }
 BisTooltip_ItemLists["Mage"]["Arcane"]["T10"] = BisTooltip_ItemLists["Mage"]["Arcane"]["T10"] or {}
-BisTooltip_ItemLists["Mage"]["Arcane"]["T10"][1] = {["slot_name"] = "Head", [1] = 51281, [2] = 47764, [3] = 50661, [4] = 47692, [5] = 47771, [6] = 51896 }
-BisTooltip_ItemLists["Mage"]["Arcane"]["T10"][2] = {["slot_name"] = "Neck", [1] = 50658, [2] = 50005, [3] = 51863, [4] = 45133, [5] = 50609, [6] = 50724 }
-BisTooltip_ItemLists["Mage"]["Arcane"]["T10"][3] = {["slot_name"] = "Shoulder", [1] = 51284, [2] = 50643, [3] = 49991, [4] = 51859, [5] = 50449, [6] = 51883 }
-BisTooltip_ItemLists["Mage"]["Arcane"]["T10"][4] = {["slot_name"] = "Back", [1] = 50628, [2] = 51826, [3] = 47452, [4] = 54583, [5] = 45242, [6] = 50668 }
-BisTooltip_ItemLists["Mage"]["Arcane"]["T10"][5] = {["slot_name"] = "Chest", [1] = 51283, [2] = 50629, [3] = 50418, [4] = 47462, [5] = 47766, [6] = 50717 }
-BisTooltip_ItemLists["Mage"]["Arcane"]["T10"][6] = {["slot_name"] = "Wrist", [1] = 50686, [2] = 50651, [3] = 49994, [4] = 51872, [5] = 54582, [6] = 47467 }
-BisTooltip_ItemLists["Mage"]["Arcane"]["T10"][7] = {["slot_name"] = "Hands", [1] = 50722, [2] = 50663, [3] = 51280, [4] = 51921, [5] = 50011, [6] = 51159 }
-BisTooltip_ItemLists["Mage"]["Arcane"]["T10"][8] = {["slot_name"] = "Waist", [1] = 50613, [2] = 54562, [3] = 50996, [4] = 47447, [5] = 47994, [6] = 50702 }
-BisTooltip_ItemLists["Mage"]["Arcane"]["T10"][9] = {["slot_name"] = "Legs", [1] = 51282, [2] = 50694, [3] = 50056, [4] = 51157, [5] = 47478, [6] = 51823 }
-BisTooltip_ItemLists["Mage"]["Arcane"]["T10"][10] = {["slot_name"] = "Feet", [1] = 50699, [2] = 49890, [3] = 47482, [4] = 51899, [5] = 47321, [6] = 47454 }
-BisTooltip_ItemLists["Mage"]["Arcane"]["T10"][11] = {["slot_name"] = "Finger 1", [1] = 50398, [2] = 50614, [3] = 54563, [4] = 50714, [5] = 50636, [6] = 50664 }
-BisTooltip_ItemLists["Mage"]["Arcane"]["T10"][12] = {["slot_name"] = "Finger 2", [1] = 50636, [2] = 50398, [3] = 50614, [4] = 54563, [5] = 50714, [6] = 50644 }
-BisTooltip_ItemLists["Mage"]["Arcane"]["T10"][13] = {["slot_name"] = "Trinket 1", [1] = 50348, [2] = 54588, [3] = 50353, [4] = 54572, [5] = 47477, [6] = 50345 }
-BisTooltip_ItemLists["Mage"]["Arcane"]["T10"][14] = {["slot_name"] = "Trinket 2", [1] = 47477, [2] = 50348, [3] = 54588, [4] = 50353, [5] = 54572, [6] = 50345 }
-BisTooltip_ItemLists["Mage"]["Arcane"]["T10"][15] = {["slot_name"] = "Weapon", [1] = 50732, [2] = 50704, [3] = 50731, [4] = 50608, [5] = 50725, [6] = 51939 }
-BisTooltip_ItemLists["Mage"]["Arcane"]["T10"][16] = {["slot_name"] = "Off hand", [1] = 50719, [2] = 51922, [3] = 47437, [4] = 45617, [5] = 50635, [6] = 50423 }
-BisTooltip_ItemLists["Mage"]["Arcane"]["T10"][17] = {["slot_name"] = "Ranged", [1] = 50684, [2] = 51852, [3] = 45294, [4] = 50631, [5] = 51838, [6] = 50033 }
+BisTooltip_ItemLists["Mage"]["Arcane"]["T10"]["Head"] = { 51281, 47764, 50661, 47692, 47771, 51896 }
+BisTooltip_ItemLists["Mage"]["Arcane"]["T10"]["Neck"] = { 50658, 50005, 51863, 45133, 50609, 50724 }
+BisTooltip_ItemLists["Mage"]["Arcane"]["T10"]["Shoulder"] = { 51284, 50643, 49991, 51859, 50449, 51883 }
+BisTooltip_ItemLists["Mage"]["Arcane"]["T10"]["Back"] = { 50628, 51826, 47452, 54583, 45242, 50668 }
+BisTooltip_ItemLists["Mage"]["Arcane"]["T10"]["Chest"] = { 51283, 50629, 50418, 47462, 47766, 50717 }
+BisTooltip_ItemLists["Mage"]["Arcane"]["T10"]["Wrist"] = { 50686, 50651, 49994, 51872, 54582, 47467 }
+BisTooltip_ItemLists["Mage"]["Arcane"]["T10"]["Hands"] = { 50722, 50663, 51280, 51921, 50011, 51159 }
+BisTooltip_ItemLists["Mage"]["Arcane"]["T10"]["Waist"] = { 50613, 54562, 50996, 47447, 47994, 50702 }
+BisTooltip_ItemLists["Mage"]["Arcane"]["T10"]["Legs"] = { 51282, 50694, 50056, 51157, 47478, 51823 }
+BisTooltip_ItemLists["Mage"]["Arcane"]["T10"]["Feet"] = { 50699, 49890, 47482, 51899, 47321, 47454 }
+BisTooltip_ItemLists["Mage"]["Arcane"]["T10"]["Finger 1"] = { 50398, 50614, 54563, 50714, 50636, 50664 }
+BisTooltip_ItemLists["Mage"]["Arcane"]["T10"]["Finger 2"] = { 50636, 50398, 50614, 54563, 50714, 50644 }
+BisTooltip_ItemLists["Mage"]["Arcane"]["T10"]["Trinket 1"] = { 50348, 54588, 50353, 54572, 47477, 50345 }
+BisTooltip_ItemLists["Mage"]["Arcane"]["T10"]["Trinket 2"] = { 47477, 50348, 54588, 50353, 54572, 50345 }
+BisTooltip_ItemLists["Mage"]["Arcane"]["T10"]["Weapon"] = { 50732, 50704, 50731, 50608, 50725, 51939 }
+BisTooltip_ItemLists["Mage"]["Arcane"]["T10"]["Off hand"] = { 50719, 51922, 47437, 45617, 50635, 50423 }
+BisTooltip_ItemLists["Mage"]["Arcane"]["T10"]["Ranged"] = { 50684, 51852, 45294, 50631, 51838, 50033 }
 BisTooltip_ItemLists["Mage"]["Arcane"]["RS"] = BisTooltip_ItemLists["Mage"]["Arcane"]["RS"] or {}
-BisTooltip_ItemLists["Mage"]["Arcane"]["RS"][1] = {["slot_name"] = "Head", [1] = 51281, [2] = 47764, [3] = 50661, [4] = 47692, [5] = 47771, [6] = 51896 }
-BisTooltip_ItemLists["Mage"]["Arcane"]["RS"][2] = {["slot_name"] = "Neck", [1] = 50658, [2] = 50005, [3] = 51863, [4] = 50609, [5] = 50724, [6] = 48030 }
-BisTooltip_ItemLists["Mage"]["Arcane"]["RS"][3] = {["slot_name"] = "Shoulder", [1] = 51284, [2] = 50643, [3] = 49991, [4] = 51859, [5] = 50449, [6] = 51883 }
-BisTooltip_ItemLists["Mage"]["Arcane"]["RS"][4] = {["slot_name"] = "Back", [1] = 54583, [2] = 51826, [3] = 47452, [4] = 50628, [5] = 50668, [6] = 47291 }
-BisTooltip_ItemLists["Mage"]["Arcane"]["RS"][5] = {["slot_name"] = "Chest", [1] = 51283, [2] = 50629, [3] = 50418, [4] = 47462, [5] = 47766, [6] = 50717 }
-BisTooltip_ItemLists["Mage"]["Arcane"]["RS"][6] = {["slot_name"] = "Wrist", [1] = 54582, [2] = 50651, [3] = 49994, [4] = 51872, [5] = 47467, [6] = 50686 }
-BisTooltip_ItemLists["Mage"]["Arcane"]["RS"][7] = {["slot_name"] = "Hands", [1] = 50722, [2] = 50663, [3] = 51280, [4] = 51921, [5] = 50011, [6] = 51159 }
-BisTooltip_ItemLists["Mage"]["Arcane"]["RS"][8] = {["slot_name"] = "Waist", [1] = 50613, [2] = 54562, [3] = 50996, [4] = 47447, [5] = 47994, [6] = 50702 }
-BisTooltip_ItemLists["Mage"]["Arcane"]["RS"][9] = {["slot_name"] = "Legs", [1] = 51282, [2] = 50694, [3] = 50056, [4] = 51157, [5] = 47478, [6] = 51823 }
-BisTooltip_ItemLists["Mage"]["Arcane"]["RS"][10] = {["slot_name"] = "Feet", [1] = 50699, [2] = 49890, [3] = 47482, [4] = 51899, [5] = 47321, [6] = 47454 }
-BisTooltip_ItemLists["Mage"]["Arcane"]["RS"][11] = {["slot_name"] = "Finger 1", [1] = 50398, [2] = 50614, [3] = 54563, [4] = 50714, [5] = 50636, [6] = 50664 }
-BisTooltip_ItemLists["Mage"]["Arcane"]["RS"][12] = {["slot_name"] = "Finger 2", [1] = 50636, [2] = 50398, [3] = 50614, [4] = 54563, [5] = 50714, [6] = 50644 }
-BisTooltip_ItemLists["Mage"]["Arcane"]["RS"][13] = {["slot_name"] = "Trinket 1", [1] = 50348, [2] = 54588, [3] = 50353, [4] = 54572, [5] = 47477, [6] = 50345 }
-BisTooltip_ItemLists["Mage"]["Arcane"]["RS"][14] = {["slot_name"] = "Trinket 2", [1] = 54588, [2] = 50348, [3] = 50353, [4] = 54572, [5] = 47477, [6] = 50345 }
-BisTooltip_ItemLists["Mage"]["Arcane"]["RS"][15] = {["slot_name"] = "Weapon", [1] = 50732, [2] = 50704, [3] = 50731, [4] = 50608, [5] = 50725, [6] = 51939 }
-BisTooltip_ItemLists["Mage"]["Arcane"]["RS"][16] = {["slot_name"] = "Off hand", [1] = 50719, [2] = 51922, [3] = 47437, [4] = 50635, [5] = 50423, [6] = 48032 }
-BisTooltip_ItemLists["Mage"]["Arcane"]["RS"][17] = {["slot_name"] = "Ranged", [1] = 50684, [2] = 51852, [3] = 50631, [4] = 51838, [5] = 50033, [6] = 47658 }
+BisTooltip_ItemLists["Mage"]["Arcane"]["RS"]["Head"] = { 51281, 47764, 50661, 47692, 47771, 51896 }
+BisTooltip_ItemLists["Mage"]["Arcane"]["RS"]["Neck"] = { 50658, 50005, 51863, 50609, 50724, 48030 }
+BisTooltip_ItemLists["Mage"]["Arcane"]["RS"]["Shoulder"] = { 51284, 50643, 49991, 51859, 50449, 51883 }
+BisTooltip_ItemLists["Mage"]["Arcane"]["RS"]["Back"] = { 54583, 51826, 47452, 50628, 50668, 47291 }
+BisTooltip_ItemLists["Mage"]["Arcane"]["RS"]["Chest"] = { 51283, 50629, 50418, 47462, 47766, 50717 }
+BisTooltip_ItemLists["Mage"]["Arcane"]["RS"]["Wrist"] = { 54582, 50651, 49994, 51872, 47467, 50686 }
+BisTooltip_ItemLists["Mage"]["Arcane"]["RS"]["Hands"] = { 50722, 50663, 51280, 51921, 50011, 51159 }
+BisTooltip_ItemLists["Mage"]["Arcane"]["RS"]["Waist"] = { 50613, 54562, 50996, 47447, 47994, 50702 }
+BisTooltip_ItemLists["Mage"]["Arcane"]["RS"]["Legs"] = { 51282, 50694, 50056, 51157, 47478, 51823 }
+BisTooltip_ItemLists["Mage"]["Arcane"]["RS"]["Feet"] = { 50699, 49890, 47482, 51899, 47321, 47454 }
+BisTooltip_ItemLists["Mage"]["Arcane"]["RS"]["Finger 1"] = { 50398, 50614, 54563, 50714, 50636, 50664 }
+BisTooltip_ItemLists["Mage"]["Arcane"]["RS"]["Finger 2"] = { 50636, 50398, 50614, 54563, 50714, 50644 }
+BisTooltip_ItemLists["Mage"]["Arcane"]["RS"]["Trinket 1"] = { 50348, 54588, 50353, 54572, 47477, 50345 }
+BisTooltip_ItemLists["Mage"]["Arcane"]["RS"]["Trinket 2"] = { 54588, 50348, 50353, 54572, 47477, 50345 }
+BisTooltip_ItemLists["Mage"]["Arcane"]["RS"]["Weapon"] = { 50732, 50704, 50731, 50608, 50725, 51939 }
+BisTooltip_ItemLists["Mage"]["Arcane"]["RS"]["Off hand"] = { 50719, 51922, 47437, 50635, 50423, 48032 }
+BisTooltip_ItemLists["Mage"]["Arcane"]["RS"]["Ranged"] = { 50684, 51852, 50631, 51838, 50033, 47658 }
 BisTooltip_ItemLists["Mage"]["Fire"] = BisTooltip_ItemLists["Mage"]["Fire"] or {}
 BisTooltip_ItemLists["Mage"]["Fire"]["PR"] = BisTooltip_ItemLists["Mage"]["Fire"]["PR"] or {}
-BisTooltip_ItemLists["Mage"]["Fire"]["PR"][1] = {["slot_name"] = "Head", [1] = 37294, [2] = 44910, [3] = 42553, [4] = 41984, [5] = 37684, [6] = 34340 }
-BisTooltip_ItemLists["Mage"]["Fire"]["PR"][2] = {["slot_name"] = "Neck", [1] = 40680, [2] = 37595, [3] = 42024, [4] = 42647, [5] = 44017, [6] = 37683 }
-BisTooltip_ItemLists["Mage"]["Fire"]["PR"][3] = {["slot_name"] = "Shoulder", [1] = 34210, [2] = 37196, [3] = 37673, [4] = 37655, [5] = 37691, [6] = 44370 }
-BisTooltip_ItemLists["Mage"]["Fire"]["PR"][4] = {["slot_name"] = "Back", [1] = 41610, [2] = 42057, [3] = 44242, [4] = 36983, [5] = 37799, [6] = 34242 }
-BisTooltip_ItemLists["Mage"]["Fire"]["PR"][5] = {["slot_name"] = "Chest", [1] = 39492, [2] = 43401, [3] = 42102, [4] = 34399, [5] = 37258, [6] = 37222 }
-BisTooltip_ItemLists["Mage"]["Fire"]["PR"][6] = {["slot_name"] = "Wrist", [1] = 37361, [2] = 37884, [3] = 44200, [4] = 34447, [5] = 37725, [6] = 36945 }
-BisTooltip_ItemLists["Mage"]["Fire"]["PR"][7] = {["slot_name"] = "Hands", [1] = 39495, [2] = 42113, [3] = 34344, [4] = 37172, [5] = 37798, [6] = 37825 }
-BisTooltip_ItemLists["Mage"]["Fire"]["PR"][8] = {["slot_name"] = "Waist", [1] = 40696, [2] = 37408, [3] = 37850, [4] = 37680, [5] = 34557, [6] = 37242 }
-BisTooltip_ItemLists["Mage"]["Fire"]["PR"][9] = {["slot_name"] = "Legs", [1] = 37854, [2] = 34181, [3] = 37189, [4] = 37369, [5] = 37876, [6] = 37731 }
-BisTooltip_ItemLists["Mage"]["Fire"]["PR"][10] = {["slot_name"] = "Feet", [1] = 44202, [2] = 44899, [3] = 34574, [4] = 37730, [5] = 37218, [6] = 37867 }
-BisTooltip_ItemLists["Mage"]["Fire"]["PR"][11] = {["slot_name"] = "Finger 1", [1] = 43253, [2] = 37651, [3] = 40585, [4] = 42644, [5] = 37694, [6] = 37192 }
-BisTooltip_ItemLists["Mage"]["Fire"]["PR"][12] = {["slot_name"] = "Finger 2", [1] = 40585, [2] = 43253, [3] = 37651, [4] = 42644, [5] = 37694, [6] = 37192 }
-BisTooltip_ItemLists["Mage"]["Fire"]["PR"][13] = {["slot_name"] = "Trinket 1", [1] = 37873, [2] = 42395, [3] = 40682, [4] = 37660, [5] = 32483, [6] = 36972 }
-BisTooltip_ItemLists["Mage"]["Fire"]["PR"][14] = {["slot_name"] = "Trinket 2", [1] = 40682, [2] = 37873, [3] = 42395, [4] = 37660, [5] = 32483, [6] = 36972 }
-BisTooltip_ItemLists["Mage"]["Fire"]["PR"][15] = {["slot_name"] = "Weapon", [1] = 45085, [2] = 44173, [3] = 37721, [4] = 37377, [5] = 37360, [6] = 37060 }
-BisTooltip_ItemLists["Mage"]["Fire"]["PR"][16] = {["slot_name"] = "Off hand", [1] = 40698, [2] = 37134, [3] = 44210, [4] = 30872, [5] = 37718, [6] = 37086 }
-BisTooltip_ItemLists["Mage"]["Fire"]["PR"][17] = {["slot_name"] = "Ranged", [1] = 37177, [2] = 38206, [3] = 37238, [4] = 34347, [5] = 36989, [6] = 37619 }
+BisTooltip_ItemLists["Mage"]["Fire"]["PR"]["Head"] = { 37294, 44910, 42553, 41984, 37684, 34340 }
+BisTooltip_ItemLists["Mage"]["Fire"]["PR"]["Neck"] = { 40680, 37595, 42024, 42647, 44017, 37683 }
+BisTooltip_ItemLists["Mage"]["Fire"]["PR"]["Shoulder"] = { 34210, 37196, 37673, 37655, 37691, 44370 }
+BisTooltip_ItemLists["Mage"]["Fire"]["PR"]["Back"] = { 41610, 42057, 36983, 44242, 37799, 34242 }
+BisTooltip_ItemLists["Mage"]["Fire"]["PR"]["Chest"] = { 39492, 43401, 42102, 34399, 37258, 37222 }
+BisTooltip_ItemLists["Mage"]["Fire"]["PR"]["Wrist"] = { 37361, 37884, 44200, 34447, 37725, 36945 }
+BisTooltip_ItemLists["Mage"]["Fire"]["PR"]["Hands"] = { 39495, 42113, 34344, 37172, 37798, 37825 }
+BisTooltip_ItemLists["Mage"]["Fire"]["PR"]["Waist"] = { 40696, 37408, 37850, 37680, 34557, 37242 }
+BisTooltip_ItemLists["Mage"]["Fire"]["PR"]["Legs"] = { 37854, 34181, 37189, 37369, 37876, 37731 }
+BisTooltip_ItemLists["Mage"]["Fire"]["PR"]["Feet"] = { 44202, 44899, 34574, 37730, 37218, 37867 }
+BisTooltip_ItemLists["Mage"]["Fire"]["PR"]["Finger 1"] = { 43253, 37651, 40585, 42644, 37694, 37192 }
+BisTooltip_ItemLists["Mage"]["Fire"]["PR"]["Finger 2"] = { 40585, 43253, 37651, 42644, 37694, 37192 }
+BisTooltip_ItemLists["Mage"]["Fire"]["PR"]["Trinket 1"] = { 37873, 42395, 40682, 37660, 32483, 36972 }
+BisTooltip_ItemLists["Mage"]["Fire"]["PR"]["Trinket 2"] = { 40682, 37873, 42395, 37660, 32483, 36972 }
+BisTooltip_ItemLists["Mage"]["Fire"]["PR"]["Weapon"] = { 45085, 44173, 37721, 37377, 37360, 37060 }
+BisTooltip_ItemLists["Mage"]["Fire"]["PR"]["Off hand"] = { 40698, 37134, 44210, 30872, 37718, 37086 }
+BisTooltip_ItemLists["Mage"]["Fire"]["PR"]["Ranged"] = { 37177, 38206, 37238, 34347, 36989, 37619 }
 BisTooltip_ItemLists["Mage"]["Fire"]["T7"] = BisTooltip_ItemLists["Mage"]["Fire"]["T7"] or {}
-BisTooltip_ItemLists["Mage"]["Fire"]["T7"][1] = {["slot_name"] = "Head", [1] = 40416, [2] = 40562, [3] = 43995, [4] = 40287, [5] = 40339, [6] = 39491 }
-BisTooltip_ItemLists["Mage"]["Fire"]["T7"][2] = {["slot_name"] = "Neck", [1] = 44661, [2] = 44658, [3] = 39472, [4] = 40427, [5] = 40064, [6] = 40374 }
-BisTooltip_ItemLists["Mage"]["Fire"]["T7"][3] = {["slot_name"] = "Shoulder", [1] = 40419, [2] = 40286, [3] = 40351, [4] = 40555, [5] = 39719, [6] = 39494 }
-BisTooltip_ItemLists["Mage"]["Fire"]["T7"][4] = {["slot_name"] = "Back", [1] = 44005, [2] = 40405, [3] = 41610, [4] = 39241, [5] = 40251, [6] = 40723 }
-BisTooltip_ItemLists["Mage"]["Fire"]["T7"][5] = {["slot_name"] = "Chest", [1] = 40418, [2] = 40526, [3] = 40234, [4] = 39396, [5] = 44002, [6] = 40062 }
-BisTooltip_ItemLists["Mage"]["Fire"]["T7"][6] = {["slot_name"] = "Wrist", [1] = 44008, [2] = 40325, [3] = 40740, [4] = 39252, [5] = 40198, [6] = 39731 }
-BisTooltip_ItemLists["Mage"]["Fire"]["T7"][7] = {["slot_name"] = "Hands", [1] = 40415, [2] = 40380, [3] = 39495, [4] = 40197, [5] = 39192, [6] = 42113 }
-BisTooltip_ItemLists["Mage"]["Fire"]["T7"][8] = {["slot_name"] = "Waist", [1] = 40561, [2] = 40301, [3] = 37408, [4] = 40696, [5] = 39735, [6] = 37850 }
-BisTooltip_ItemLists["Mage"]["Fire"]["T7"][9] = {["slot_name"] = "Legs", [1] = 40560, [2] = 39720, [3] = 40417, [4] = 40376, [5] = 39493, [6] = 40398 }
-BisTooltip_ItemLists["Mage"]["Fire"]["T7"][10] = {["slot_name"] = "Feet", [1] = 40558, [2] = 40246, [3] = 40750, [4] = 40326, [5] = 40269, [6] = 40751 }
-BisTooltip_ItemLists["Mage"]["Fire"]["T7"][11] = {["slot_name"] = "Finger 1", [1] = 39389, [2] = 40399, [3] = 43253, [4] = 37651, [5] = 40080, [6] = 40719 }
-BisTooltip_ItemLists["Mage"]["Fire"]["T7"][12] = {["slot_name"] = "Finger 2", [1] = 40399, [2] = 39389, [3] = 43253, [4] = 37651, [5] = 40080, [6] = 40719 }
-BisTooltip_ItemLists["Mage"]["Fire"]["T7"][13] = {["slot_name"] = "Trinket 1", [1] = 40255, [2] = 37873, [3] = 40432, [4] = 39229, [5] = 42395, [6] = 40682 }
-BisTooltip_ItemLists["Mage"]["Fire"]["T7"][14] = {["slot_name"] = "Trinket 2", [1] = 40432, [2] = 40255, [3] = 37873, [4] = 39229, [5] = 42395, [6] = 40682 }
-BisTooltip_ItemLists["Mage"]["Fire"]["T7"][15] = {["slot_name"] = "Weapon", [1] = 40396, [2] = 40489, [3] = 40408, [4] = 39424, [5] = 40336, [6] = 45085 }
-BisTooltip_ItemLists["Mage"]["Fire"]["T7"][16] = {["slot_name"] = "Off hand", [1] = 40273, [2] = 40698, [3] = 39199, [4] = 37134, [5] = 40192, [6] = 39766 }
-BisTooltip_ItemLists["Mage"]["Fire"]["T7"][17] = {["slot_name"] = "Ranged", [1] = 39712, [2] = 37177, [3] = 40284, [4] = 39426, [5] = 38206, [6] = 37238 }
+BisTooltip_ItemLists["Mage"]["Fire"]["T7"]["Head"] = { 40416, 40562, 43995, 40287, 40339, 39491 }
+BisTooltip_ItemLists["Mage"]["Fire"]["T7"]["Neck"] = { 44661, 44658, 39472, 40427, 40064, 40374 }
+BisTooltip_ItemLists["Mage"]["Fire"]["T7"]["Shoulder"] = { 40419, 40286, 40351, 40555, 39719, 39494 }
+BisTooltip_ItemLists["Mage"]["Fire"]["T7"]["Back"] = { 44005, 40405, 41610, 39241, 40251, 40723 }
+BisTooltip_ItemLists["Mage"]["Fire"]["T7"]["Chest"] = { 40418, 40526, 40234, 39396, 44002, 40062 }
+BisTooltip_ItemLists["Mage"]["Fire"]["T7"]["Wrist"] = { 44008, 40325, 40740, 39252, 40198, 39731 }
+BisTooltip_ItemLists["Mage"]["Fire"]["T7"]["Hands"] = { 40415, 40380, 39495, 40197, 39192, 42113 }
+BisTooltip_ItemLists["Mage"]["Fire"]["T7"]["Waist"] = { 40561, 40301, 37408, 40696, 39735, 37850 }
+BisTooltip_ItemLists["Mage"]["Fire"]["T7"]["Legs"] = { 40560, 39720, 40417, 40376, 39493, 40398 }
+BisTooltip_ItemLists["Mage"]["Fire"]["T7"]["Feet"] = { 40558, 40246, 40750, 40326, 40269, 40751 }
+BisTooltip_ItemLists["Mage"]["Fire"]["T7"]["Finger 1"] = { 39389, 40399, 43253, 37651, 40080, 40719 }
+BisTooltip_ItemLists["Mage"]["Fire"]["T7"]["Finger 2"] = { 40399, 39389, 43253, 37651, 40080, 40719 }
+BisTooltip_ItemLists["Mage"]["Fire"]["T7"]["Trinket 1"] = { 40255, 37873, 40432, 39229, 42395, 40682 }
+BisTooltip_ItemLists["Mage"]["Fire"]["T7"]["Trinket 2"] = { 40432, 40255, 37873, 39229, 42395, 40682 }
+BisTooltip_ItemLists["Mage"]["Fire"]["T7"]["Weapon"] = { 40396, 40489, 40408, 39424, 40336, 45085 }
+BisTooltip_ItemLists["Mage"]["Fire"]["T7"]["Off hand"] = { 40273, 40698, 39199, 37134, 40192, 39766 }
+BisTooltip_ItemLists["Mage"]["Fire"]["T7"]["Ranged"] = { 39712, 37177, 40284, 39426, 38206, 37238 }
 BisTooltip_ItemLists["Mage"]["Fire"]["T8"] = BisTooltip_ItemLists["Mage"]["Fire"]["T8"] or {}
-BisTooltip_ItemLists["Mage"]["Fire"]["T8"][1] = {["slot_name"] = "Head", [1] = 46129, [2] = 45150, [3] = 45365, [4] = 45497, [5] = 45532, [6] = 40562 }
-BisTooltip_ItemLists["Mage"]["Fire"]["T8"][2] = {["slot_name"] = "Neck", [1] = 45133, [2] = 45699, [3] = 44661, [4] = 45539, [5] = 45933, [6] = 45243 }
-BisTooltip_ItemLists["Mage"]["Fire"]["T8"][3] = {["slot_name"] = "Shoulder", [1] = 46134, [2] = 46068, [3] = 45186, [4] = 40286, [5] = 45253, [6] = 45369 }
-BisTooltip_ItemLists["Mage"]["Fire"]["T8"][4] = {["slot_name"] = "Back", [1] = 45242, [2] = 46042, [3] = 45618, [4] = 46321, [5] = 44005, [6] = 45493 }
-BisTooltip_ItemLists["Mage"]["Fire"]["T8"][5] = {["slot_name"] = "Chest", [1] = 46130, [2] = 45865, [3] = 40526, [4] = 45272, [5] = 40234, [6] = 45240 }
-BisTooltip_ItemLists["Mage"]["Fire"]["T8"][6] = {["slot_name"] = "Wrist", [1] = 45446, [2] = 45275, [3] = 45549, [4] = 45291, [5] = 40325, [6] = 45146 }
-BisTooltip_ItemLists["Mage"]["Fire"]["T8"][7] = {["slot_name"] = "Hands", [1] = 45665, [2] = 46045, [3] = 46132, [4] = 46131, [5] = 45520, [6] = 45976 }
-BisTooltip_ItemLists["Mage"]["Fire"]["T8"][8] = {["slot_name"] = "Waist", [1] = 45619, [2] = 45557, [3] = 45508, [4] = 40301, [5] = 45119, [6] = 45558 }
-BisTooltip_ItemLists["Mage"]["Fire"]["T8"][9] = {["slot_name"] = "Legs", [1] = 46133, [2] = 45488, [3] = 45238, [4] = 40560, [5] = 45367, [6] = 46034 }
-BisTooltip_ItemLists["Mage"]["Fire"]["T8"][10] = {["slot_name"] = "Feet", [1] = 45537, [2] = 45258, [3] = 45135, [4] = 46050, [5] = 45566, [6] = 40246 }
-BisTooltip_ItemLists["Mage"]["Fire"]["T8"][11] = {["slot_name"] = "Finger 1", [1] = 45495, [2] = 45297, [3] = 45451, [4] = 46046, [5] = 45515, [6] = 39389 }
-BisTooltip_ItemLists["Mage"]["Fire"]["T8"][12] = {["slot_name"] = "Finger 2", [1] = 46046, [2] = 45297, [3] = 45451, [4] = 45495, [5] = 45515, [6] = 39389 }
-BisTooltip_ItemLists["Mage"]["Fire"]["T8"][13] = {["slot_name"] = "Trinket 1", [1] = 45518, [2] = 45148, [3] = 45866, [4] = 40255, [5] = 45466, [6] = 45308 }
-BisTooltip_ItemLists["Mage"]["Fire"]["T8"][14] = {["slot_name"] = "Trinket 2", [1] = 45466, [2] = 45148, [3] = 45866, [4] = 40255, [5] = 45518, [6] = 45308 }
-BisTooltip_ItemLists["Mage"]["Fire"]["T8"][15] = {["slot_name"] = "Weapon", [1] = 45620, [2] = 45990, [3] = 45527, [4] = 45437, [5] = 45171, [6] = 45457 }
-BisTooltip_ItemLists["Mage"]["Fire"]["T8"][16] = {["slot_name"] = "Off hand", [1] = 45617, [2] = 45115, [3] = 40273, [4] = 40698, [5] = 45271, [6] = 45314 }
-BisTooltip_ItemLists["Mage"]["Fire"]["T8"][17] = {["slot_name"] = "Ranged", [1] = 45294, [2] = 45257, [3] = 45511, [4] = 39712, [5] = 45170, [6] = 37177 }
+BisTooltip_ItemLists["Mage"]["Fire"]["T8"]["Head"] = { 46129, 45150, 45365, 45497, 45532, 40562 }
+BisTooltip_ItemLists["Mage"]["Fire"]["T8"]["Neck"] = { 45133, 45699, 44661, 45539, 45933, 45243 }
+BisTooltip_ItemLists["Mage"]["Fire"]["T8"]["Shoulder"] = { 46134, 46068, 45186, 40286, 45253, 45369 }
+BisTooltip_ItemLists["Mage"]["Fire"]["T8"]["Back"] = { 45242, 46042, 45618, 46321, 44005, 45493 }
+BisTooltip_ItemLists["Mage"]["Fire"]["T8"]["Chest"] = { 46130, 45865, 40526, 45272, 40234, 45240 }
+BisTooltip_ItemLists["Mage"]["Fire"]["T8"]["Wrist"] = { 45446, 45275, 45549, 45291, 40325, 45146 }
+BisTooltip_ItemLists["Mage"]["Fire"]["T8"]["Hands"] = { 45665, 46045, 46132, 46131, 45520, 45976 }
+BisTooltip_ItemLists["Mage"]["Fire"]["T8"]["Waist"] = { 45619, 45557, 45508, 40301, 45119, 45558 }
+BisTooltip_ItemLists["Mage"]["Fire"]["T8"]["Legs"] = { 46133, 45488, 45238, 40560, 45367, 46034 }
+BisTooltip_ItemLists["Mage"]["Fire"]["T8"]["Feet"] = { 45537, 45258, 45135, 46050, 45566, 40246 }
+BisTooltip_ItemLists["Mage"]["Fire"]["T8"]["Finger 1"] = { 45495, 45297, 45451, 46046, 45515, 39389 }
+BisTooltip_ItemLists["Mage"]["Fire"]["T8"]["Finger 2"] = { 46046, 45297, 45451, 45495, 45515, 39389 }
+BisTooltip_ItemLists["Mage"]["Fire"]["T8"]["Trinket 1"] = { 45518, 45148, 45866, 40255, 45466, 45308 }
+BisTooltip_ItemLists["Mage"]["Fire"]["T8"]["Trinket 2"] = { 45466, 45148, 45866, 40255, 45518, 45308 }
+BisTooltip_ItemLists["Mage"]["Fire"]["T8"]["Weapon"] = { 45620, 45990, 45527, 45437, 45171, 45457 }
+BisTooltip_ItemLists["Mage"]["Fire"]["T8"]["Off hand"] = { 45617, 45115, 40273, 40698, 45271, 45314 }
+BisTooltip_ItemLists["Mage"]["Fire"]["T8"]["Ranged"] = { 45294, 45257, 45511, 39712, 45170, 37177 }
 BisTooltip_ItemLists["Mage"]["Fire"]["T9"] = BisTooltip_ItemLists["Mage"]["Fire"]["T9"] or {}
-BisTooltip_ItemLists["Mage"]["Fire"]["T9"][1] = {["slot_name"] = "Head", [1] = 47764, [2] = 49481, [3] = 47692, [4] = 47771, [5] = 46129, [6] = 45150 }
-BisTooltip_ItemLists["Mage"]["Fire"]["T9"][2] = {["slot_name"] = "Neck", [1] = 47468, [2] = 45133, [3] = 48030, [4] = 47890, [5] = 45699, [6] = 44661 }
-BisTooltip_ItemLists["Mage"]["Fire"]["T9"][3] = {["slot_name"] = "Shoulder", [1] = 47767, [2] = 47714, [3] = 46068, [4] = 45186, [5] = 47768, [6] = 47777 }
-BisTooltip_ItemLists["Mage"]["Fire"]["T9"][4] = {["slot_name"] = "Back", [1] = 47551, [2] = 47452, [3] = 45242, [4] = 47291, [5] = 47554, [6] = 46042 }
-BisTooltip_ItemLists["Mage"]["Fire"]["T9"][5] = {["slot_name"] = "Chest", [1] = 47462, [2] = 47766, [3] = 48051, [4] = 47301, [5] = 47769, [6] = 47425 }
-BisTooltip_ItemLists["Mage"]["Fire"]["T9"][6] = {["slot_name"] = "Wrist", [1] = 47467, [2] = 48000, [3] = 47306, [4] = 47485, [5] = 47861, [6] = 45275 }
-BisTooltip_ItemLists["Mage"]["Fire"]["T9"][7] = {["slot_name"] = "Hands", [1] = 47763, [2] = 48028, [3] = 46045, [4] = 46132, [5] = 45665, [6] = 47487 }
-BisTooltip_ItemLists["Mage"]["Fire"]["T9"][8] = {["slot_name"] = "Waist", [1] = 47447, [2] = 47994, [3] = 47286, [4] = 47855, [5] = 45557, [6] = 47419 }
-BisTooltip_ItemLists["Mage"]["Fire"]["T9"][9] = {["slot_name"] = "Legs", [1] = 47765, [2] = 45488, [3] = 47478, [4] = 47317, [5] = 46133, [6] = 47435 }
-BisTooltip_ItemLists["Mage"]["Fire"]["T9"][10] = {["slot_name"] = "Feet", [1] = 47454, [2] = 47482, [3] = 48012, [4] = 47321, [5] = 45258, [6] = 45537 }
-BisTooltip_ItemLists["Mage"]["Fire"]["T9"][11] = {["slot_name"] = "Finger 1", [1] = 47489, [2] = 48001, [3] = 45297, [4] = 45451, [5] = 47862, [6] = 45495 }
-BisTooltip_ItemLists["Mage"]["Fire"]["T9"][12] = {["slot_name"] = "Finger 2", [1] = 45495, [2] = 48001, [3] = 45297, [4] = 45451, [5] = 47862, [6] = 47489 }
-BisTooltip_ItemLists["Mage"]["Fire"]["T9"][13] = {["slot_name"] = "Trinket 1", [1] = 47477, [2] = 45148, [3] = 45866, [4] = 40255, [5] = 45518, [6] = 47316 }
-BisTooltip_ItemLists["Mage"]["Fire"]["T9"][14] = {["slot_name"] = "Trinket 2", [1] = 45518, [2] = 45148, [3] = 45866, [4] = 40255, [5] = 47477, [6] = 47316 }
-BisTooltip_ItemLists["Mage"]["Fire"]["T9"][15] = {["slot_name"] = "Weapon", [1] = 47518, [2] = 47422, [3] = 45620, [4] = 45990, [5] = 47261, [6] = 47525 }
-BisTooltip_ItemLists["Mage"]["Fire"]["T9"][16] = {["slot_name"] = "Off hand", [1] = 47437, [2] = 45617, [3] = 48032, [4] = 47276, [5] = 47913, [6] = 45115 }
-BisTooltip_ItemLists["Mage"]["Fire"]["T9"][17] = {["slot_name"] = "Ranged", [1] = 45294, [2] = 47658, [3] = 45257, [4] = 47995, [5] = 45511, [6] = 39712 }
+BisTooltip_ItemLists["Mage"]["Fire"]["T9"]["Head"] = { 47764, 49481, 47692, 47771, 46129, 45150 }
+BisTooltip_ItemLists["Mage"]["Fire"]["T9"]["Neck"] = { 47468, 45133, 48030, 47890, 45699, 44661 }
+BisTooltip_ItemLists["Mage"]["Fire"]["T9"]["Shoulder"] = { 47767, 47714, 46068, 45186, 47768, 47777 }
+BisTooltip_ItemLists["Mage"]["Fire"]["T9"]["Back"] = { 47551, 47452, 45242, 47291, 47554, 46042 }
+BisTooltip_ItemLists["Mage"]["Fire"]["T9"]["Chest"] = { 47462, 47766, 48051, 47301, 47769, 47425 }
+BisTooltip_ItemLists["Mage"]["Fire"]["T9"]["Wrist"] = { 47467, 48000, 47306, 47485, 47861, 45275 }
+BisTooltip_ItemLists["Mage"]["Fire"]["T9"]["Hands"] = { 47763, 48028, 46045, 46132, 45665, 47487 }
+BisTooltip_ItemLists["Mage"]["Fire"]["T9"]["Waist"] = { 47447, 47994, 47286, 47855, 45557, 47419 }
+BisTooltip_ItemLists["Mage"]["Fire"]["T9"]["Legs"] = { 47765, 45488, 47478, 47317, 46133, 47435 }
+BisTooltip_ItemLists["Mage"]["Fire"]["T9"]["Feet"] = { 47454, 47482, 48012, 47321, 45258, 45537 }
+BisTooltip_ItemLists["Mage"]["Fire"]["T9"]["Finger 1"] = { 47489, 48001, 45297, 45451, 47862, 45495 }
+BisTooltip_ItemLists["Mage"]["Fire"]["T9"]["Finger 2"] = { 45495, 48001, 45297, 45451, 47862, 47489 }
+BisTooltip_ItemLists["Mage"]["Fire"]["T9"]["Trinket 1"] = { 47477, 45148, 45866, 40255, 45518, 47316 }
+BisTooltip_ItemLists["Mage"]["Fire"]["T9"]["Trinket 2"] = { 45518, 45148, 45866, 40255, 47477, 47316 }
+BisTooltip_ItemLists["Mage"]["Fire"]["T9"]["Weapon"] = { 47518, 47422, 45620, 45990, 47261, 47525 }
+BisTooltip_ItemLists["Mage"]["Fire"]["T9"]["Off hand"] = { 47437, 45617, 48032, 47276, 47913, 45115 }
+BisTooltip_ItemLists["Mage"]["Fire"]["T9"]["Ranged"] = { 45294, 47658, 45257, 47995, 45511, 39712 }
 BisTooltip_ItemLists["Mage"]["Fire"]["T10"] = BisTooltip_ItemLists["Mage"]["Fire"]["T10"] or {}
-BisTooltip_ItemLists["Mage"]["Fire"]["T10"][1] = {["slot_name"] = "Head", [1] = 51281, [2] = 47764, [3] = 49481, [4] = 50661, [5] = 51158, [6] = 51837 }
-BisTooltip_ItemLists["Mage"]["Fire"]["T10"][2] = {["slot_name"] = "Neck", [1] = 50724, [2] = 50658, [3] = 51863, [4] = 50005, [5] = 45133, [6] = 50609 }
-BisTooltip_ItemLists["Mage"]["Fire"]["T10"][3] = {["slot_name"] = "Shoulder", [1] = 51284, [2] = 50643, [3] = 51859, [4] = 49991, [5] = 51155, [6] = 50449 }
-BisTooltip_ItemLists["Mage"]["Fire"]["T10"][4] = {["slot_name"] = "Back", [1] = 50628, [2] = 51826, [3] = 47452, [4] = 54583, [5] = 45242, [6] = 47551 }
-BisTooltip_ItemLists["Mage"]["Fire"]["T10"][5] = {["slot_name"] = "Chest", [1] = 50629, [2] = 50418, [3] = 47462, [4] = 47766, [5] = 51283, [6] = 50717 }
-BisTooltip_ItemLists["Mage"]["Fire"]["T10"][6] = {["slot_name"] = "Wrist", [1] = 50651, [2] = 49994, [3] = 47467, [4] = 51872, [5] = 54582, [6] = 50686 }
-BisTooltip_ItemLists["Mage"]["Fire"]["T10"][7] = {["slot_name"] = "Hands", [1] = 51280, [2] = 50663, [3] = 51921, [4] = 51159, [5] = 50011, [6] = 50722 }
-BisTooltip_ItemLists["Mage"]["Fire"]["T10"][8] = {["slot_name"] = "Waist", [1] = 50613, [2] = 54562, [3] = 50996, [4] = 47447, [5] = 47994, [6] = 50702 }
-BisTooltip_ItemLists["Mage"]["Fire"]["T10"][9] = {["slot_name"] = "Legs", [1] = 51282, [2] = 50694, [3] = 51157, [4] = 50056, [5] = 45488, [6] = 51823 }
-BisTooltip_ItemLists["Mage"]["Fire"]["T10"][10] = {["slot_name"] = "Feet", [1] = 50699, [2] = 49890, [3] = 51899, [4] = 47482, [5] = 48012, [6] = 50062 }
-BisTooltip_ItemLists["Mage"]["Fire"]["T10"][11] = {["slot_name"] = "Finger 1", [1] = 50398, [2] = 50614, [3] = 54563, [4] = 50714, [5] = 50664, [6] = 50644 }
-BisTooltip_ItemLists["Mage"]["Fire"]["T10"][12] = {["slot_name"] = "Finger 2", [1] = 50664, [2] = 50398, [3] = 50614, [4] = 54563, [5] = 50714, [6] = 49977 }
-BisTooltip_ItemLists["Mage"]["Fire"]["T10"][13] = {["slot_name"] = "Trinket 1", [1] = 50365, [2] = 50360, [3] = 50348, [4] = 54588, [5] = 50345, [6] = 50353 }
-BisTooltip_ItemLists["Mage"]["Fire"]["T10"][14] = {["slot_name"] = "Trinket 2", [1] = 50348, [2] = 50365, [3] = 50360, [4] = 54588, [5] = 50345, [6] = 50353 }
-BisTooltip_ItemLists["Mage"]["Fire"]["T10"][15] = {["slot_name"] = "Weapon", [1] = 50732, [2] = 50704, [3] = 51815, [4] = 50608, [5] = 51939, [6] = 50427 }
-BisTooltip_ItemLists["Mage"]["Fire"]["T10"][16] = {["slot_name"] = "Off hand", [1] = 50719, [2] = 51922, [3] = 47437, [4] = 45617, [5] = 48032, [6] = 50635 }
-BisTooltip_ItemLists["Mage"]["Fire"]["T10"][17] = {["slot_name"] = "Ranged", [1] = 50684, [2] = 51852, [3] = 45294, [4] = 50631, [5] = 50033, [6] = 50472 }
+BisTooltip_ItemLists["Mage"]["Fire"]["T10"]["Head"] = { 51281, 47764, 49481, 50661, 51158, 51837 }
+BisTooltip_ItemLists["Mage"]["Fire"]["T10"]["Neck"] = { 50724, 50658, 51863, 50005, 45133, 50609 }
+BisTooltip_ItemLists["Mage"]["Fire"]["T10"]["Shoulder"] = { 51284, 50643, 51859, 49991, 51155, 50449 }
+BisTooltip_ItemLists["Mage"]["Fire"]["T10"]["Back"] = { 50628, 51826, 47452, 54583, 45242, 47551 }
+BisTooltip_ItemLists["Mage"]["Fire"]["T10"]["Chest"] = { 50629, 50418, 47462, 47766, 51283, 50717 }
+BisTooltip_ItemLists["Mage"]["Fire"]["T10"]["Wrist"] = { 50651, 49994, 47467, 51872, 54582, 50686 }
+BisTooltip_ItemLists["Mage"]["Fire"]["T10"]["Hands"] = { 51280, 50663, 51921, 51159, 50011, 50722 }
+BisTooltip_ItemLists["Mage"]["Fire"]["T10"]["Waist"] = { 50613, 54562, 50996, 47447, 47994, 50702 }
+BisTooltip_ItemLists["Mage"]["Fire"]["T10"]["Legs"] = { 51282, 50694, 51157, 50056, 45488, 51823 }
+BisTooltip_ItemLists["Mage"]["Fire"]["T10"]["Feet"] = { 50699, 49890, 51899, 47482, 48012, 50062 }
+BisTooltip_ItemLists["Mage"]["Fire"]["T10"]["Finger 1"] = { 50398, 50614, 54563, 50714, 50664, 50644 }
+BisTooltip_ItemLists["Mage"]["Fire"]["T10"]["Finger 2"] = { 50664, 50398, 50614, 54563, 50714, 49977 }
+BisTooltip_ItemLists["Mage"]["Fire"]["T10"]["Trinket 1"] = { 50365, 50360, 50348, 54588, 50345, 50353 }
+BisTooltip_ItemLists["Mage"]["Fire"]["T10"]["Trinket 2"] = { 50348, 50365, 50360, 54588, 50345, 50353 }
+BisTooltip_ItemLists["Mage"]["Fire"]["T10"]["Weapon"] = { 50732, 50704, 51815, 50608, 51939, 50427 }
+BisTooltip_ItemLists["Mage"]["Fire"]["T10"]["Off hand"] = { 50719, 51922, 47437, 45617, 48032, 50635 }
+BisTooltip_ItemLists["Mage"]["Fire"]["T10"]["Ranged"] = { 50684, 51852, 45294, 50631, 50033, 50472 }
 BisTooltip_ItemLists["Mage"]["Fire"]["RS"] = BisTooltip_ItemLists["Mage"]["Fire"]["RS"] or {}
-BisTooltip_ItemLists["Mage"]["Fire"]["RS"][1] = {["slot_name"] = "Head", [1] = 51281, [2] = 47764, [3] = 49481, [4] = 50661, [5] = 51158, [6] = 51837 }
-BisTooltip_ItemLists["Mage"]["Fire"]["RS"][2] = {["slot_name"] = "Neck", [1] = 50724, [2] = 50658, [3] = 51863, [4] = 50005, [5] = 50609, [6] = 48030 }
-BisTooltip_ItemLists["Mage"]["Fire"]["RS"][3] = {["slot_name"] = "Shoulder", [1] = 51284, [2] = 50643, [3] = 51859, [4] = 49991, [5] = 51155, [6] = 50449 }
-BisTooltip_ItemLists["Mage"]["Fire"]["RS"][4] = {["slot_name"] = "Back", [1] = 54583, [2] = 51826, [3] = 47452, [4] = 50628, [5] = 47551, [6] = 50668 }
-BisTooltip_ItemLists["Mage"]["Fire"]["RS"][5] = {["slot_name"] = "Chest", [1] = 50629, [2] = 50418, [3] = 47462, [4] = 47766, [5] = 51283, [6] = 50717 }
-BisTooltip_ItemLists["Mage"]["Fire"]["RS"][6] = {["slot_name"] = "Wrist", [1] = 54582, [2] = 50651, [3] = 49994, [4] = 47467, [5] = 51872, [6] = 50686 }
-BisTooltip_ItemLists["Mage"]["Fire"]["RS"][7] = {["slot_name"] = "Hands", [1] = 51280, [2] = 50663, [3] = 51921, [4] = 51159, [5] = 50011, [6] = 50722 }
-BisTooltip_ItemLists["Mage"]["Fire"]["RS"][8] = {["slot_name"] = "Waist", [1] = 50613, [2] = 54562, [3] = 50996, [4] = 47447, [5] = 47994, [6] = 50702 }
-BisTooltip_ItemLists["Mage"]["Fire"]["RS"][9] = {["slot_name"] = "Legs", [1] = 51282, [2] = 50694, [3] = 51157, [4] = 50056, [5] = 51823, [6] = 47478 }
-BisTooltip_ItemLists["Mage"]["Fire"]["RS"][10] = {["slot_name"] = "Feet", [1] = 50699, [2] = 49890, [3] = 51899, [4] = 47482, [5] = 48012, [6] = 50062 }
-BisTooltip_ItemLists["Mage"]["Fire"]["RS"][11] = {["slot_name"] = "Finger 1", [1] = 50398, [2] = 50614, [3] = 54563, [4] = 50714, [5] = 50664, [6] = 50644 }
-BisTooltip_ItemLists["Mage"]["Fire"]["RS"][12] = {["slot_name"] = "Finger 2", [1] = 50664, [2] = 50398, [3] = 50614, [4] = 54563, [5] = 50714, [6] = 49977 }
-BisTooltip_ItemLists["Mage"]["Fire"]["RS"][13] = {["slot_name"] = "Trinket 1", [1] = 50365, [2] = 50360, [3] = 50348, [4] = 54588, [5] = 50345, [6] = 50353 }
-BisTooltip_ItemLists["Mage"]["Fire"]["RS"][14] = {["slot_name"] = "Trinket 2", [1] = 50348, [2] = 50365, [3] = 50360, [4] = 54588, [5] = 50345, [6] = 50353 }
-BisTooltip_ItemLists["Mage"]["Fire"]["RS"][15] = {["slot_name"] = "Weapon", [1] = 50732, [2] = 50704, [3] = 51815, [4] = 50608, [5] = 51939, [6] = 50427 }
-BisTooltip_ItemLists["Mage"]["Fire"]["RS"][16] = {["slot_name"] = "Off hand", [1] = 50719, [2] = 51922, [3] = 47437, [4] = 48032, [5] = 50635, [6] = 47276 }
-BisTooltip_ItemLists["Mage"]["Fire"]["RS"][17] = {["slot_name"] = "Ranged", [1] = 50684, [2] = 51852, [3] = 50631, [4] = 50033, [5] = 50472, [6] = 47658 }
+BisTooltip_ItemLists["Mage"]["Fire"]["RS"]["Head"] = { 51281, 47764, 49481, 50661, 51158, 51837 }
+BisTooltip_ItemLists["Mage"]["Fire"]["RS"]["Neck"] = { 50724, 50658, 51863, 50005, 50609, 48030 }
+BisTooltip_ItemLists["Mage"]["Fire"]["RS"]["Shoulder"] = { 51284, 50643, 51859, 49991, 51155, 50449 }
+BisTooltip_ItemLists["Mage"]["Fire"]["RS"]["Back"] = { 54583, 51826, 47452, 50628, 47551, 50668 }
+BisTooltip_ItemLists["Mage"]["Fire"]["RS"]["Chest"] = { 50629, 50418, 47462, 47766, 51283, 50717 }
+BisTooltip_ItemLists["Mage"]["Fire"]["RS"]["Wrist"] = { 54582, 50651, 49994, 47467, 51872, 50686 }
+BisTooltip_ItemLists["Mage"]["Fire"]["RS"]["Hands"] = { 51280, 50663, 51921, 51159, 50011, 50722 }
+BisTooltip_ItemLists["Mage"]["Fire"]["RS"]["Waist"] = { 50613, 54562, 50996, 47447, 47994, 50702 }
+BisTooltip_ItemLists["Mage"]["Fire"]["RS"]["Legs"] = { 51282, 50694, 51157, 50056, 51823, 47478 }
+BisTooltip_ItemLists["Mage"]["Fire"]["RS"]["Feet"] = { 50699, 49890, 51899, 47482, 48012, 50062 }
+BisTooltip_ItemLists["Mage"]["Fire"]["RS"]["Finger 1"] = { 50398, 50614, 54563, 50714, 50664, 50644 }
+BisTooltip_ItemLists["Mage"]["Fire"]["RS"]["Finger 2"] = { 50664, 50398, 50614, 54563, 50714, 49977 }
+BisTooltip_ItemLists["Mage"]["Fire"]["RS"]["Trinket 1"] = { 50365, 50360, 50348, 54588, 50345, 50353 }
+BisTooltip_ItemLists["Mage"]["Fire"]["RS"]["Trinket 2"] = { 50348, 50365, 50360, 54588, 50345, 50353 }
+BisTooltip_ItemLists["Mage"]["Fire"]["RS"]["Weapon"] = { 50732, 50704, 51815, 50608, 51939, 50427 }
+BisTooltip_ItemLists["Mage"]["Fire"]["RS"]["Off hand"] = { 50719, 51922, 47437, 48032, 50635, 47276 }
+BisTooltip_ItemLists["Mage"]["Fire"]["RS"]["Ranged"] = { 50684, 51852, 50631, 50033, 50472, 47658 }
 BisTooltip_ItemLists["Mage"]["Fire FFB"] = BisTooltip_ItemLists["Mage"]["Fire FFB"] or {}
 BisTooltip_ItemLists["Mage"]["Fire FFB"]["PR"] = BisTooltip_ItemLists["Mage"]["Fire FFB"]["PR"] or {}
-BisTooltip_ItemLists["Mage"]["Fire FFB"]["PR"][1] = {["slot_name"] = "Head", [1] = 34340, [2] = 42553, [3] = 44910, [4] = 37684, [5] = 41984, [6] = 37294 }
-BisTooltip_ItemLists["Mage"]["Fire FFB"]["PR"][2] = {["slot_name"] = "Neck", [1] = 40680, [2] = 37595, [3] = 42647, [4] = 42024, [5] = 44017, [6] = 43285 }
-BisTooltip_ItemLists["Mage"]["Fire FFB"]["PR"][3] = {["slot_name"] = "Shoulder", [1] = 34210, [2] = 37673, [3] = 37196, [4] = 37655, [5] = 42842, [6] = 41550 }
-BisTooltip_ItemLists["Mage"]["Fire FFB"]["PR"][4] = {["slot_name"] = "Back", [1] = 41610, [2] = 42057, [3] = 44242, [4] = 36983, [5] = 34242, [6] = 37291 }
-BisTooltip_ItemLists["Mage"]["Fire FFB"]["PR"][5] = {["slot_name"] = "Chest", [1] = 39492, [2] = 42102, [3] = 43401, [4] = 34399, [5] = 37222, [6] = 37258 }
-BisTooltip_ItemLists["Mage"]["Fire FFB"]["PR"][6] = {["slot_name"] = "Wrist", [1] = 37361, [2] = 37884, [3] = 34447, [4] = 37725, [5] = 41907, [6] = 44200 }
-BisTooltip_ItemLists["Mage"]["Fire FFB"]["PR"][7] = {["slot_name"] = "Hands", [1] = 39495, [2] = 42113, [3] = 34344, [4] = 37172, [5] = 43287, [6] = 37825 }
-BisTooltip_ItemLists["Mage"]["Fire FFB"]["PR"][8] = {["slot_name"] = "Waist", [1] = 40696, [2] = 37408, [3] = 37850, [4] = 34557, [5] = 37242, [6] = 44302 }
-BisTooltip_ItemLists["Mage"]["Fire FFB"]["PR"][9] = {["slot_name"] = "Legs", [1] = 34181, [2] = 37854, [3] = 37369, [4] = 37189, [5] = 43375, [6] = 41553 }
-BisTooltip_ItemLists["Mage"]["Fire FFB"]["PR"][10] = {["slot_name"] = "Feet", [1] = 44202, [2] = 34574, [3] = 44899, [4] = 37730, [5] = 37218, [6] = 37629 }
-BisTooltip_ItemLists["Mage"]["Fire FFB"]["PR"][11] = {["slot_name"] = "Finger 1", [1] = 43253, [2] = 40585, [3] = 37651, [4] = 42644, [5] = 37694, [6] = 37192 }
-BisTooltip_ItemLists["Mage"]["Fire FFB"]["PR"][12] = {["slot_name"] = "Finger 2", [1] = 40585, [2] = 43253, [3] = 37651, [4] = 42644, [5] = 37694, [6] = 37192 }
-BisTooltip_ItemLists["Mage"]["Fire FFB"]["PR"][13] = {["slot_name"] = "Trinket 1", [1] = 37873, [2] = 42395, [3] = 40682, [4] = 37660, [5] = 36972 }
-BisTooltip_ItemLists["Mage"]["Fire FFB"]["PR"][14] = {["slot_name"] = "Trinket 2", [1] = 40682, [2] = 37873, [3] = 42395, [4] = 37660, [5] = 36972 }
-BisTooltip_ItemLists["Mage"]["Fire FFB"]["PR"][15] = {["slot_name"] = "Weapon", [1] = 45085, [2] = 44173, [3] = 37721, [4] = 37360, [5] = 37377, [6] = 37060 }
-BisTooltip_ItemLists["Mage"]["Fire FFB"]["PR"][16] = {["slot_name"] = "Off hand", [1] = 40698, [2] = 44210, [3] = 37134, [4] = 37718, [5] = 37086, [6] = 37051 }
-BisTooltip_ItemLists["Mage"]["Fire FFB"]["PR"][17] = {["slot_name"] = "Ranged", [1] = 37177, [2] = 37238, [3] = 38206, [4] = 34347, [5] = 36989, [6] = 37619 }
+BisTooltip_ItemLists["Mage"]["Fire FFB"]["PR"]["Head"] = { 34340, 42553, 44910, 37684, 41984, 37294 }
+BisTooltip_ItemLists["Mage"]["Fire FFB"]["PR"]["Neck"] = { 40680, 37595, 42647, 42024, 44017, 43285 }
+BisTooltip_ItemLists["Mage"]["Fire FFB"]["PR"]["Shoulder"] = { 34210, 37673, 37196, 37655, 42842, 41550 }
+BisTooltip_ItemLists["Mage"]["Fire FFB"]["PR"]["Back"] = { 41610, 42057, 36983, 44242, 34242, 37291 }
+BisTooltip_ItemLists["Mage"]["Fire FFB"]["PR"]["Chest"] = { 39492, 42102, 43401, 34399, 37222, 37258 }
+BisTooltip_ItemLists["Mage"]["Fire FFB"]["PR"]["Wrist"] = { 37361, 37884, 34447, 37725, 41907, 44200 }
+BisTooltip_ItemLists["Mage"]["Fire FFB"]["PR"]["Hands"] = { 39495, 42113, 34344, 37172, 43287, 37825 }
+BisTooltip_ItemLists["Mage"]["Fire FFB"]["PR"]["Waist"] = { 40696, 37408, 37850, 34557, 37242, 44302 }
+BisTooltip_ItemLists["Mage"]["Fire FFB"]["PR"]["Legs"] = { 34181, 37854, 37369, 37189, 43375, 41553 }
+BisTooltip_ItemLists["Mage"]["Fire FFB"]["PR"]["Feet"] = { 44202, 34574, 44899, 37730, 37218, 37629 }
+BisTooltip_ItemLists["Mage"]["Fire FFB"]["PR"]["Finger 1"] = { 43253, 40585, 37651, 42644, 37694, 37192 }
+BisTooltip_ItemLists["Mage"]["Fire FFB"]["PR"]["Finger 2"] = { 40585, 43253, 37651, 42644, 37694, 37192 }
+BisTooltip_ItemLists["Mage"]["Fire FFB"]["PR"]["Trinket 1"] = { 37873, 42395, 40682, 37660, 36972 }
+BisTooltip_ItemLists["Mage"]["Fire FFB"]["PR"]["Trinket 2"] = { 40682, 37873, 42395, 37660, 36972 }
+BisTooltip_ItemLists["Mage"]["Fire FFB"]["PR"]["Weapon"] = { 45085, 44173, 37721, 37360, 37377, 37060 }
+BisTooltip_ItemLists["Mage"]["Fire FFB"]["PR"]["Off hand"] = { 40698, 44210, 37134, 37718, 37086, 37051 }
+BisTooltip_ItemLists["Mage"]["Fire FFB"]["PR"]["Ranged"] = { 37177, 37238, 38206, 34347, 36989, 37619 }
 BisTooltip_ItemLists["Mage"]["Fire FFB"]["T7"] = BisTooltip_ItemLists["Mage"]["Fire FFB"]["T7"] or {}
-BisTooltip_ItemLists["Mage"]["Fire FFB"]["T7"][1] = {["slot_name"] = "Head", [1] = 40416, [2] = 40562, [3] = 43995, [4] = 40287, [5] = 40339, [6] = 39491 }
-BisTooltip_ItemLists["Mage"]["Fire FFB"]["T7"][2] = {["slot_name"] = "Neck", [1] = 44661, [2] = 44658, [3] = 39472, [4] = 40374, [5] = 40427, [6] = 40064 }
-BisTooltip_ItemLists["Mage"]["Fire FFB"]["T7"][3] = {["slot_name"] = "Shoulder", [1] = 40419, [2] = 40286, [3] = 40555, [4] = 40351, [5] = 39719, [6] = 39494 }
-BisTooltip_ItemLists["Mage"]["Fire FFB"]["T7"][4] = {["slot_name"] = "Back", [1] = 44005, [2] = 40405, [3] = 41610, [4] = 40251, [5] = 40723, [6] = 40253 }
-BisTooltip_ItemLists["Mage"]["Fire FFB"]["T7"][5] = {["slot_name"] = "Chest", [1] = 40418, [2] = 40526, [3] = 40234, [4] = 44002, [5] = 39396, [6] = 40062 }
-BisTooltip_ItemLists["Mage"]["Fire FFB"]["T7"][6] = {["slot_name"] = "Wrist", [1] = 44008, [2] = 40325, [3] = 40740, [4] = 40198, [5] = 39252, [6] = 39731 }
-BisTooltip_ItemLists["Mage"]["Fire FFB"]["T7"][7] = {["slot_name"] = "Hands", [1] = 40415, [2] = 40380, [3] = 39495, [4] = 40197, [5] = 39733, [6] = 42113 }
-BisTooltip_ItemLists["Mage"]["Fire FFB"]["T7"][8] = {["slot_name"] = "Waist", [1] = 40561, [2] = 40301, [3] = 40696, [4] = 37408, [5] = 39735, [6] = 37850 }
-BisTooltip_ItemLists["Mage"]["Fire FFB"]["T7"][9] = {["slot_name"] = "Legs", [1] = 40560, [2] = 40417, [3] = 39720, [4] = 40398, [5] = 40376, [6] = 39493 }
-BisTooltip_ItemLists["Mage"]["Fire FFB"]["T7"][10] = {["slot_name"] = "Feet", [1] = 40558, [2] = 40246, [3] = 40750, [4] = 40326, [5] = 40269, [6] = 40751 }
-BisTooltip_ItemLists["Mage"]["Fire FFB"]["T7"][11] = {["slot_name"] = "Finger 1", [1] = 40399, [2] = 39389, [3] = 43253, [4] = 40080, [5] = 40719, [6] = 40585 }
-BisTooltip_ItemLists["Mage"]["Fire FFB"]["T7"][12] = {["slot_name"] = "Finger 2", [1] = 40080, [2] = 40399, [3] = 39389, [4] = 43253, [5] = 40719, [6] = 40585 }
-BisTooltip_ItemLists["Mage"]["Fire FFB"]["T7"][13] = {["slot_name"] = "Trinket 1", [1] = 40255, [2] = 37873, [3] = 42395, [4] = 40432, [5] = 39229, [6] = 40682 }
-BisTooltip_ItemLists["Mage"]["Fire FFB"]["T7"][14] = {["slot_name"] = "Trinket 2", [1] = 40432, [2] = 40255, [3] = 37873, [4] = 42395, [5] = 39229, [6] = 40682 }
-BisTooltip_ItemLists["Mage"]["Fire FFB"]["T7"][15] = {["slot_name"] = "Weapon", [1] = 40396, [2] = 40489, [3] = 40408, [4] = 39424, [5] = 40336, [6] = 42346 }
-BisTooltip_ItemLists["Mage"]["Fire FFB"]["T7"][16] = {["slot_name"] = "Off hand", [1] = 40273, [2] = 40698, [3] = 40192, [4] = 39766, [5] = 39199, [6] = 44210 }
-BisTooltip_ItemLists["Mage"]["Fire FFB"]["T7"][17] = {["slot_name"] = "Ranged", [1] = 39712, [2] = 40284, [3] = 39426, [4] = 37177, [5] = 37238, [6] = 38206 }
+BisTooltip_ItemLists["Mage"]["Fire FFB"]["T7"]["Head"] = { 40416, 40562, 43995, 40287, 40339, 39491 }
+BisTooltip_ItemLists["Mage"]["Fire FFB"]["T7"]["Neck"] = { 44661, 44658, 39472, 40374, 40427, 40064 }
+BisTooltip_ItemLists["Mage"]["Fire FFB"]["T7"]["Shoulder"] = { 40419, 40286, 40555, 40351, 39719, 39494 }
+BisTooltip_ItemLists["Mage"]["Fire FFB"]["T7"]["Back"] = { 44005, 40405, 41610, 40251, 40723, 40253 }
+BisTooltip_ItemLists["Mage"]["Fire FFB"]["T7"]["Chest"] = { 40418, 40526, 40234, 44002, 39396, 40062 }
+BisTooltip_ItemLists["Mage"]["Fire FFB"]["T7"]["Wrist"] = { 44008, 40325, 40740, 40198, 39252, 39731 }
+BisTooltip_ItemLists["Mage"]["Fire FFB"]["T7"]["Hands"] = { 40415, 40380, 39495, 40197, 39733, 42113 }
+BisTooltip_ItemLists["Mage"]["Fire FFB"]["T7"]["Waist"] = { 40561, 40301, 40696, 37408, 39735, 37850 }
+BisTooltip_ItemLists["Mage"]["Fire FFB"]["T7"]["Legs"] = { 40560, 40417, 39720, 40398, 40376, 39493 }
+BisTooltip_ItemLists["Mage"]["Fire FFB"]["T7"]["Feet"] = { 40558, 40246, 40750, 40326, 40269, 40751 }
+BisTooltip_ItemLists["Mage"]["Fire FFB"]["T7"]["Finger 1"] = { 40399, 39389, 43253, 40080, 40719, 40585 }
+BisTooltip_ItemLists["Mage"]["Fire FFB"]["T7"]["Finger 2"] = { 40080, 40399, 39389, 43253, 40719, 40585 }
+BisTooltip_ItemLists["Mage"]["Fire FFB"]["T7"]["Trinket 1"] = { 40255, 37873, 42395, 40432, 39229, 40682 }
+BisTooltip_ItemLists["Mage"]["Fire FFB"]["T7"]["Trinket 2"] = { 40432, 40255, 37873, 42395, 39229, 40682 }
+BisTooltip_ItemLists["Mage"]["Fire FFB"]["T7"]["Weapon"] = { 40396, 40489, 40408, 39424, 40336, 42346 }
+BisTooltip_ItemLists["Mage"]["Fire FFB"]["T7"]["Off hand"] = { 40273, 40698, 40192, 39766, 39199, 44210 }
+BisTooltip_ItemLists["Mage"]["Fire FFB"]["T7"]["Ranged"] = { 39712, 40284, 39426, 37177, 37238, 38206 }
 BisTooltip_ItemLists["Mage"]["Fire FFB"]["T8"] = BisTooltip_ItemLists["Mage"]["Fire FFB"]["T8"] or {}
-BisTooltip_ItemLists["Mage"]["Fire FFB"]["T8"][1] = {["slot_name"] = "Head", [1] = 45497, [2] = 46129, [3] = 45150, [4] = 45365, [5] = 45532, [6] = 40562 }
-BisTooltip_ItemLists["Mage"]["Fire FFB"]["T8"][2] = {["slot_name"] = "Neck", [1] = 45133, [2] = 45243, [3] = 45933, [4] = 45699, [5] = 44661, [6] = 45539 }
-BisTooltip_ItemLists["Mage"]["Fire FFB"]["T8"][3] = {["slot_name"] = "Shoulder", [1] = 46134, [2] = 46068, [3] = 45186, [4] = 45514, [5] = 40286, [6] = 45253 }
-BisTooltip_ItemLists["Mage"]["Fire FFB"]["T8"][4] = {["slot_name"] = "Back", [1] = 45618, [2] = 45242, [3] = 46042, [4] = 46321, [5] = 44005, [6] = 45493 }
-BisTooltip_ItemLists["Mage"]["Fire FFB"]["T8"][5] = {["slot_name"] = "Chest", [1] = 46130, [2] = 45865, [3] = 45272, [4] = 40526, [5] = 45368, [6] = 45240 }
-BisTooltip_ItemLists["Mage"]["Fire FFB"]["T8"][6] = {["slot_name"] = "Wrist", [1] = 45446, [2] = 45275, [3] = 45549, [4] = 45291, [5] = 45146, [6] = 40325 }
-BisTooltip_ItemLists["Mage"]["Fire FFB"]["T8"][7] = {["slot_name"] = "Hands", [1] = 45665, [2] = 46045, [3] = 46132, [4] = 46131, [5] = 45520, [6] = 45976 }
-BisTooltip_ItemLists["Mage"]["Fire FFB"]["T8"][8] = {["slot_name"] = "Waist", [1] = 45619, [2] = 45557, [3] = 45508, [4] = 45558, [5] = 40301, [6] = 45119 }
-BisTooltip_ItemLists["Mage"]["Fire FFB"]["T8"][9] = {["slot_name"] = "Legs", [1] = 45488, [2] = 46133, [3] = 45238, [4] = 45367, [5] = 40560, [6] = 46034 }
-BisTooltip_ItemLists["Mage"]["Fire FFB"]["T8"][10] = {["slot_name"] = "Feet", [1] = 45537, [2] = 45135, [3] = 45258, [4] = 46050, [5] = 45566, [6] = 45483 }
-BisTooltip_ItemLists["Mage"]["Fire FFB"]["T8"][11] = {["slot_name"] = "Finger 1", [1] = 45495, [2] = 45297, [3] = 45451, [4] = 46046, [5] = 45515, [6] = 46096 }
-BisTooltip_ItemLists["Mage"]["Fire FFB"]["T8"][12] = {["slot_name"] = "Finger 2", [1] = 46046, [2] = 45495, [3] = 45297, [4] = 45451, [5] = 45515, [6] = 46096 }
-BisTooltip_ItemLists["Mage"]["Fire FFB"]["T8"][13] = {["slot_name"] = "Trinket 1", [1] = 45518, [2] = 45148, [3] = 40255, [4] = 45466, [5] = 45866, [6] = 45308 }
-BisTooltip_ItemLists["Mage"]["Fire FFB"]["T8"][14] = {["slot_name"] = "Trinket 2", [1] = 45466, [2] = 45518, [3] = 45148, [4] = 40255, [5] = 45866, [6] = 45308 }
-BisTooltip_ItemLists["Mage"]["Fire FFB"]["T8"][15] = {["slot_name"] = "Weapon", [1] = 45620, [2] = 45990, [3] = 45457, [4] = 45527, [5] = 45437, [6] = 45171 }
-BisTooltip_ItemLists["Mage"]["Fire FFB"]["T8"][16] = {["slot_name"] = "Off hand", [1] = 45617, [2] = 45115, [3] = 40273, [4] = 45271, [5] = 45314, [6] = 40698 }
-BisTooltip_ItemLists["Mage"]["Fire FFB"]["T8"][17] = {["slot_name"] = "Ranged", [1] = 45294, [2] = 45257, [3] = 45511, [4] = 45170, [5] = 39712, [6] = 45713 }
+BisTooltip_ItemLists["Mage"]["Fire FFB"]["T8"]["Head"] = { 45497, 46129, 45150, 45365, 45532, 40562 }
+BisTooltip_ItemLists["Mage"]["Fire FFB"]["T8"]["Neck"] = { 45133, 45243, 45933, 45699, 44661, 45539 }
+BisTooltip_ItemLists["Mage"]["Fire FFB"]["T8"]["Shoulder"] = { 46134, 46068, 45186, 45514, 40286, 45253 }
+BisTooltip_ItemLists["Mage"]["Fire FFB"]["T8"]["Back"] = { 45618, 45242, 46042, 46321, 44005, 45493 }
+BisTooltip_ItemLists["Mage"]["Fire FFB"]["T8"]["Chest"] = { 46130, 45865, 45272, 40526, 45368, 45240 }
+BisTooltip_ItemLists["Mage"]["Fire FFB"]["T8"]["Wrist"] = { 45446, 45275, 45549, 45291, 45146, 40325 }
+BisTooltip_ItemLists["Mage"]["Fire FFB"]["T8"]["Hands"] = { 45665, 46045, 46132, 46131, 45520, 45976 }
+BisTooltip_ItemLists["Mage"]["Fire FFB"]["T8"]["Waist"] = { 45619, 45557, 45508, 45558, 40301, 45119 }
+BisTooltip_ItemLists["Mage"]["Fire FFB"]["T8"]["Legs"] = { 45488, 46133, 45238, 45367, 40560, 46034 }
+BisTooltip_ItemLists["Mage"]["Fire FFB"]["T8"]["Feet"] = { 45537, 45135, 45258, 46050, 45566, 45483 }
+BisTooltip_ItemLists["Mage"]["Fire FFB"]["T8"]["Finger 1"] = { 45495, 45297, 45451, 46046, 45515, 46096 }
+BisTooltip_ItemLists["Mage"]["Fire FFB"]["T8"]["Finger 2"] = { 46046, 45495, 45297, 45451, 45515, 46096 }
+BisTooltip_ItemLists["Mage"]["Fire FFB"]["T8"]["Trinket 1"] = { 45518, 45148, 40255, 45466, 45866, 45308 }
+BisTooltip_ItemLists["Mage"]["Fire FFB"]["T8"]["Trinket 2"] = { 45466, 45518, 45148, 40255, 45866, 45308 }
+BisTooltip_ItemLists["Mage"]["Fire FFB"]["T8"]["Weapon"] = { 45620, 45990, 45457, 45527, 45437, 45171 }
+BisTooltip_ItemLists["Mage"]["Fire FFB"]["T8"]["Off hand"] = { 45617, 45115, 40273, 45271, 45314, 40698 }
+BisTooltip_ItemLists["Mage"]["Fire FFB"]["T8"]["Ranged"] = { 45294, 45257, 45511, 45170, 39712, 45713 }
 BisTooltip_ItemLists["Mage"]["Fire FFB"]["T9"] = BisTooltip_ItemLists["Mage"]["Fire FFB"]["T9"] or {}
-BisTooltip_ItemLists["Mage"]["Fire FFB"]["T9"][1] = {["slot_name"] = "Head", [1] = 47764, [2] = 47692, [3] = 47771, [4] = 49481, [5] = 47774, [6] = 46129 }
-BisTooltip_ItemLists["Mage"]["Fire FFB"]["T9"][2] = {["slot_name"] = "Neck", [1] = 47468, [2] = 45133, [3] = 48030, [4] = 47890, [5] = 45243, [6] = 45933 }
-BisTooltip_ItemLists["Mage"]["Fire FFB"]["T9"][3] = {["slot_name"] = "Shoulder", [1] = 47767, [2] = 47714, [3] = 46068, [4] = 47768, [5] = 47777, [6] = 45186 }
-BisTooltip_ItemLists["Mage"]["Fire FFB"]["T9"][4] = {["slot_name"] = "Back", [1] = 47551, [2] = 47554, [3] = 47452, [4] = 45242, [5] = 47291, [6] = 48666 }
-BisTooltip_ItemLists["Mage"]["Fire FFB"]["T9"][5] = {["slot_name"] = "Chest", [1] = 47425, [2] = 47462, [3] = 47766, [4] = 48051, [5] = 47301, [6] = 47769 }
-BisTooltip_ItemLists["Mage"]["Fire FFB"]["T9"][6] = {["slot_name"] = "Wrist", [1] = 47467, [2] = 48000, [3] = 47485, [4] = 47306, [5] = 47585, [6] = 45446 }
-BisTooltip_ItemLists["Mage"]["Fire FFB"]["T9"][7] = {["slot_name"] = "Hands", [1] = 47763, [2] = 45665, [3] = 48028, [4] = 46045, [5] = 47487, [6] = 46132 }
-BisTooltip_ItemLists["Mage"]["Fire FFB"]["T9"][8] = {["slot_name"] = "Waist", [1] = 47447, [2] = 47994, [3] = 47286, [4] = 47419, [5] = 47855, [6] = 45557 }
-BisTooltip_ItemLists["Mage"]["Fire FFB"]["T9"][9] = {["slot_name"] = "Legs", [1] = 47765, [2] = 47478, [3] = 45488, [4] = 47317, [5] = 47435, [6] = 46133 }
-BisTooltip_ItemLists["Mage"]["Fire FFB"]["T9"][10] = {["slot_name"] = "Feet", [1] = 47454, [2] = 47482, [3] = 47321, [4] = 48012, [5] = 45537, [6] = 45135 }
-BisTooltip_ItemLists["Mage"]["Fire FFB"]["T9"][11] = {["slot_name"] = "Finger 1", [1] = 45495, [2] = 48001, [3] = 47489, [4] = 45297, [5] = 45451, [6] = 46046 }
-BisTooltip_ItemLists["Mage"]["Fire FFB"]["T9"][12] = {["slot_name"] = "Finger 2", [1] = 47489, [2] = 48001, [3] = 45495, [4] = 45297, [5] = 45451, [6] = 46046 }
-BisTooltip_ItemLists["Mage"]["Fire FFB"]["T9"][13] = {["slot_name"] = "Trinket 1", [1] = 47477, [2] = 45518, [3] = 45148, [4] = 47316, [5] = 40255, [6] = 45466 }
-BisTooltip_ItemLists["Mage"]["Fire FFB"]["T9"][14] = {["slot_name"] = "Trinket 2", [1] = 45518, [2] = 47477, [3] = 45148, [4] = 47316, [5] = 40255, [6] = 45466 }
-BisTooltip_ItemLists["Mage"]["Fire FFB"]["T9"][15] = {["slot_name"] = "Weapon", [1] = 47518, [2] = 47422, [3] = 45620, [4] = 45990, [5] = 48701, [6] = 47525 }
-BisTooltip_ItemLists["Mage"]["Fire FFB"]["T9"][16] = {["slot_name"] = "Off hand", [1] = 47437, [2] = 45617, [3] = 48032, [4] = 47276, [5] = 47913, [6] = 47470 }
-BisTooltip_ItemLists["Mage"]["Fire FFB"]["T9"][17] = {["slot_name"] = "Ranged", [1] = 45294, [2] = 47658, [3] = 45257, [4] = 47995, [5] = 45511, [6] = 47856 }
+BisTooltip_ItemLists["Mage"]["Fire FFB"]["T9"]["Head"] = { 47764, 47692, 47771, 49481, 47774, 46129 }
+BisTooltip_ItemLists["Mage"]["Fire FFB"]["T9"]["Neck"] = { 47468, 45133, 48030, 47890, 45243, 45933 }
+BisTooltip_ItemLists["Mage"]["Fire FFB"]["T9"]["Shoulder"] = { 47767, 47714, 46068, 47768, 47777, 45186 }
+BisTooltip_ItemLists["Mage"]["Fire FFB"]["T9"]["Back"] = { 47551, 47554, 47452, 45242, 47291, 48666 }
+BisTooltip_ItemLists["Mage"]["Fire FFB"]["T9"]["Chest"] = { 47425, 47462, 47766, 48051, 47301, 47769 }
+BisTooltip_ItemLists["Mage"]["Fire FFB"]["T9"]["Wrist"] = { 47467, 48000, 47485, 47306, 47585, 45446 }
+BisTooltip_ItemLists["Mage"]["Fire FFB"]["T9"]["Hands"] = { 47763, 45665, 48028, 46045, 47487, 46132 }
+BisTooltip_ItemLists["Mage"]["Fire FFB"]["T9"]["Waist"] = { 47447, 47994, 47286, 47419, 47855, 45557 }
+BisTooltip_ItemLists["Mage"]["Fire FFB"]["T9"]["Legs"] = { 47765, 47478, 45488, 47317, 47435, 46133 }
+BisTooltip_ItemLists["Mage"]["Fire FFB"]["T9"]["Feet"] = { 47454, 47482, 47321, 48012, 45537, 45135 }
+BisTooltip_ItemLists["Mage"]["Fire FFB"]["T9"]["Finger 1"] = { 45495, 48001, 47489, 45297, 45451, 46046 }
+BisTooltip_ItemLists["Mage"]["Fire FFB"]["T9"]["Finger 2"] = { 47489, 48001, 45495, 45297, 45451, 46046 }
+BisTooltip_ItemLists["Mage"]["Fire FFB"]["T9"]["Trinket 1"] = { 47477, 45518, 45148, 47316, 40255, 45466 }
+BisTooltip_ItemLists["Mage"]["Fire FFB"]["T9"]["Trinket 2"] = { 45518, 47477, 45148, 47316, 40255, 45466 }
+BisTooltip_ItemLists["Mage"]["Fire FFB"]["T9"]["Weapon"] = { 47518, 47422, 45620, 45990, 48701, 47525 }
+BisTooltip_ItemLists["Mage"]["Fire FFB"]["T9"]["Off hand"] = { 47437, 45617, 48032, 47276, 47913, 47470 }
+BisTooltip_ItemLists["Mage"]["Fire FFB"]["T9"]["Ranged"] = { 45294, 47658, 45257, 47995, 45511, 47856 }
 BisTooltip_ItemLists["Mage"]["Fire FFB"]["T10"] = BisTooltip_ItemLists["Mage"]["Fire FFB"]["T10"] or {}
-BisTooltip_ItemLists["Mage"]["Fire FFB"]["T10"][1] = {["slot_name"] = "Head", [1] = 51281, [2] = 50661, [3] = 51158, [4] = 51837, [5] = 47764, [6] = 50006 }
-BisTooltip_ItemLists["Mage"]["Fire FFB"]["T10"][2] = {["slot_name"] = "Neck", [1] = 50724, [2] = 50658, [3] = 51863, [4] = 50005, [5] = 50609, [6] = 51894 }
-BisTooltip_ItemLists["Mage"]["Fire FFB"]["T10"][3] = {["slot_name"] = "Shoulder", [1] = 51284, [2] = 50643, [3] = 49991, [4] = 51859, [5] = 51155, [6] = 50449 }
-BisTooltip_ItemLists["Mage"]["Fire FFB"]["T10"][4] = {["slot_name"] = "Back", [1] = 50628, [2] = 54583, [3] = 47551, [4] = 53489, [5] = 51826, [6] = 50668 }
-BisTooltip_ItemLists["Mage"]["Fire FFB"]["T10"][5] = {["slot_name"] = "Chest", [1] = 51283, [2] = 50629, [3] = 50418, [4] = 50717, [5] = 51813, [6] = 51156 }
-BisTooltip_ItemLists["Mage"]["Fire FFB"]["T10"][6] = {["slot_name"] = "Wrist", [1] = 50651, [2] = 54582, [3] = 50686, [4] = 49994, [5] = 47467, [6] = 51872 }
-BisTooltip_ItemLists["Mage"]["Fire FFB"]["T10"][7] = {["slot_name"] = "Hands", [1] = 51280, [2] = 50663, [3] = 51159, [4] = 51921, [5] = 50722, [6] = 50983 }
-BisTooltip_ItemLists["Mage"]["Fire FFB"]["T10"][8] = {["slot_name"] = "Waist", [1] = 50613, [2] = 54562, [3] = 50996, [4] = 50702, [5] = 47447, [6] = 51862 }
-BisTooltip_ItemLists["Mage"]["Fire FFB"]["T10"][9] = {["slot_name"] = "Legs", [1] = 51282, [2] = 50694, [3] = 51157, [4] = 51882, [5] = 51823, [6] = 49891 }
-BisTooltip_ItemLists["Mage"]["Fire FFB"]["T10"][10] = {["slot_name"] = "Feet", [1] = 50699, [2] = 49890, [3] = 51899, [4] = 50062, [5] = 51850, [6] = 47482 }
-BisTooltip_ItemLists["Mage"]["Fire FFB"]["T10"][11] = {["slot_name"] = "Finger 1", [1] = 50398, [2] = 50614, [3] = 54563, [4] = 50664, [5] = 50714, [6] = 50644 }
-BisTooltip_ItemLists["Mage"]["Fire FFB"]["T10"][12] = {["slot_name"] = "Finger 2", [1] = 50664, [2] = 50398, [3] = 50614, [4] = 54563, [5] = 50714, [6] = 50644 }
-BisTooltip_ItemLists["Mage"]["Fire FFB"]["T10"][13] = {["slot_name"] = "Trinket 1", [1] = 50365, [2] = 50360, [3] = 50348, [4] = 54588, [5] = 50345, [6] = 50353 }
-BisTooltip_ItemLists["Mage"]["Fire FFB"]["T10"][14] = {["slot_name"] = "Trinket 2", [1] = 50348, [2] = 50365, [3] = 50360, [4] = 54588, [5] = 50345, [6] = 50353 }
-BisTooltip_ItemLists["Mage"]["Fire FFB"]["T10"][15] = {["slot_name"] = "Weapon", [1] = 50732, [2] = 50704, [3] = 50608, [4] = 50731, [5] = 51939, [6] = 51943 }
-BisTooltip_ItemLists["Mage"]["Fire FFB"]["T10"][16] = {["slot_name"] = "Off hand", [1] = 50719, [2] = 51922, [3] = 47437, [4] = 50635, [5] = 50173, [6] = 45617 }
-BisTooltip_ItemLists["Mage"]["Fire FFB"]["T10"][17] = {["slot_name"] = "Ranged", [1] = 50684, [2] = 50631, [3] = 51852, [4] = 45294, [5] = 50033, [6] = 51838 }
+BisTooltip_ItemLists["Mage"]["Fire FFB"]["T10"]["Head"] = { 51281, 50661, 51158, 51837, 47764, 50006 }
+BisTooltip_ItemLists["Mage"]["Fire FFB"]["T10"]["Neck"] = { 50724, 50658, 51863, 50005, 50609, 51894 }
+BisTooltip_ItemLists["Mage"]["Fire FFB"]["T10"]["Shoulder"] = { 51284, 50643, 49991, 51859, 51155, 50449 }
+BisTooltip_ItemLists["Mage"]["Fire FFB"]["T10"]["Back"] = { 50628, 54583, 47551, 53489, 51826, 50668 }
+BisTooltip_ItemLists["Mage"]["Fire FFB"]["T10"]["Chest"] = { 51283, 50629, 50418, 50717, 51813, 51156 }
+BisTooltip_ItemLists["Mage"]["Fire FFB"]["T10"]["Wrist"] = { 50651, 54582, 50686, 49994, 47467, 51872 }
+BisTooltip_ItemLists["Mage"]["Fire FFB"]["T10"]["Hands"] = { 51280, 50663, 51159, 51921, 50722, 50983 }
+BisTooltip_ItemLists["Mage"]["Fire FFB"]["T10"]["Waist"] = { 50613, 54562, 50996, 50702, 47447, 51862 }
+BisTooltip_ItemLists["Mage"]["Fire FFB"]["T10"]["Legs"] = { 51282, 50694, 51157, 51882, 51823, 49891 }
+BisTooltip_ItemLists["Mage"]["Fire FFB"]["T10"]["Feet"] = { 50699, 49890, 51899, 50062, 51850, 47482 }
+BisTooltip_ItemLists["Mage"]["Fire FFB"]["T10"]["Finger 1"] = { 50398, 50614, 54563, 50664, 50714, 50644 }
+BisTooltip_ItemLists["Mage"]["Fire FFB"]["T10"]["Finger 2"] = { 50664, 50398, 50614, 54563, 50714, 50644 }
+BisTooltip_ItemLists["Mage"]["Fire FFB"]["T10"]["Trinket 1"] = { 50365, 50360, 50348, 54588, 50345, 50353 }
+BisTooltip_ItemLists["Mage"]["Fire FFB"]["T10"]["Trinket 2"] = { 50348, 50365, 50360, 54588, 50345, 50353 }
+BisTooltip_ItemLists["Mage"]["Fire FFB"]["T10"]["Weapon"] = { 50732, 50704, 50608, 50731, 51939, 51943 }
+BisTooltip_ItemLists["Mage"]["Fire FFB"]["T10"]["Off hand"] = { 50719, 51922, 47437, 50635, 50173, 45617 }
+BisTooltip_ItemLists["Mage"]["Fire FFB"]["T10"]["Ranged"] = { 50684, 50631, 51852, 45294, 50033, 51838 }
 BisTooltip_ItemLists["Mage"]["Fire FFB"]["RS"] = BisTooltip_ItemLists["Mage"]["Fire FFB"]["RS"] or {}
-BisTooltip_ItemLists["Mage"]["Fire FFB"]["RS"][1] = {["slot_name"] = "Head", [1] = 51281, [2] = 50661, [3] = 51158, [4] = 51837, [5] = 47764, [6] = 50006 }
-BisTooltip_ItemLists["Mage"]["Fire FFB"]["RS"][2] = {["slot_name"] = "Neck", [1] = 50724, [2] = 50658, [3] = 51863, [4] = 50005, [5] = 50609, [6] = 51894 }
-BisTooltip_ItemLists["Mage"]["Fire FFB"]["RS"][3] = {["slot_name"] = "Shoulder", [1] = 51284, [2] = 50643, [3] = 49991, [4] = 51859, [5] = 51155, [6] = 50449 }
-BisTooltip_ItemLists["Mage"]["Fire FFB"]["RS"][4] = {["slot_name"] = "Back", [1] = 54583, [2] = 50628, [3] = 47551, [4] = 53489, [5] = 51826, [6] = 50668 }
-BisTooltip_ItemLists["Mage"]["Fire FFB"]["RS"][5] = {["slot_name"] = "Chest", [1] = 51283, [2] = 50629, [3] = 50418, [4] = 50717, [5] = 51813, [6] = 51156 }
-BisTooltip_ItemLists["Mage"]["Fire FFB"]["RS"][6] = {["slot_name"] = "Wrist", [1] = 54582, [2] = 50651, [3] = 50686, [4] = 49994, [5] = 47467, [6] = 51872 }
-BisTooltip_ItemLists["Mage"]["Fire FFB"]["RS"][7] = {["slot_name"] = "Hands", [1] = 51280, [2] = 50663, [3] = 51159, [4] = 51921, [5] = 50722, [6] = 50983 }
-BisTooltip_ItemLists["Mage"]["Fire FFB"]["RS"][8] = {["slot_name"] = "Waist", [1] = 50613, [2] = 54562, [3] = 50996, [4] = 50702, [5] = 47447, [6] = 51862 }
-BisTooltip_ItemLists["Mage"]["Fire FFB"]["RS"][9] = {["slot_name"] = "Legs", [1] = 51282, [2] = 50694, [3] = 51157, [4] = 51882, [5] = 51823, [6] = 49891 }
-BisTooltip_ItemLists["Mage"]["Fire FFB"]["RS"][10] = {["slot_name"] = "Feet", [1] = 50699, [2] = 49890, [3] = 51899, [4] = 50062, [5] = 51850, [6] = 47482 }
-BisTooltip_ItemLists["Mage"]["Fire FFB"]["RS"][11] = {["slot_name"] = "Finger 1", [1] = 50398, [2] = 50614, [3] = 54563, [4] = 50664, [5] = 50714, [6] = 50644 }
-BisTooltip_ItemLists["Mage"]["Fire FFB"]["RS"][12] = {["slot_name"] = "Finger 2", [1] = 50664, [2] = 50398, [3] = 50614, [4] = 54563, [5] = 50714, [6] = 50644 }
-BisTooltip_ItemLists["Mage"]["Fire FFB"]["RS"][13] = {["slot_name"] = "Trinket 1", [1] = 50365, [2] = 50360, [3] = 50348, [4] = 54588, [5] = 50345, [6] = 50353 }
-BisTooltip_ItemLists["Mage"]["Fire FFB"]["RS"][14] = {["slot_name"] = "Trinket 2", [1] = 50348, [2] = 50365, [3] = 50360, [4] = 54588, [5] = 50345, [6] = 50353 }
-BisTooltip_ItemLists["Mage"]["Fire FFB"]["RS"][15] = {["slot_name"] = "Weapon", [1] = 50732, [2] = 50704, [3] = 50608, [4] = 50731, [5] = 51939, [6] = 51943 }
-BisTooltip_ItemLists["Mage"]["Fire FFB"]["RS"][16] = {["slot_name"] = "Off hand", [1] = 50719, [2] = 51922, [3] = 47437, [4] = 50635, [5] = 50173, [6] = 48032 }
-BisTooltip_ItemLists["Mage"]["Fire FFB"]["RS"][17] = {["slot_name"] = "Ranged", [1] = 50684, [2] = 50631, [3] = 51852, [4] = 50033, [5] = 51838, [6] = 47658 }
+BisTooltip_ItemLists["Mage"]["Fire FFB"]["RS"]["Head"] = { 51281, 50661, 51158, 51837, 47764, 50006 }
+BisTooltip_ItemLists["Mage"]["Fire FFB"]["RS"]["Neck"] = { 50724, 50658, 51863, 50005, 50609, 51894 }
+BisTooltip_ItemLists["Mage"]["Fire FFB"]["RS"]["Shoulder"] = { 51284, 50643, 49991, 51859, 51155, 50449 }
+BisTooltip_ItemLists["Mage"]["Fire FFB"]["RS"]["Back"] = { 54583, 50628, 47551, 53489, 51826, 50668 }
+BisTooltip_ItemLists["Mage"]["Fire FFB"]["RS"]["Chest"] = { 51283, 50629, 50418, 50717, 51813, 51156 }
+BisTooltip_ItemLists["Mage"]["Fire FFB"]["RS"]["Wrist"] = { 54582, 50651, 50686, 49994, 47467, 51872 }
+BisTooltip_ItemLists["Mage"]["Fire FFB"]["RS"]["Hands"] = { 51280, 50663, 51159, 51921, 50722, 50983 }
+BisTooltip_ItemLists["Mage"]["Fire FFB"]["RS"]["Waist"] = { 50613, 54562, 50996, 50702, 47447, 51862 }
+BisTooltip_ItemLists["Mage"]["Fire FFB"]["RS"]["Legs"] = { 51282, 50694, 51157, 51882, 51823, 49891 }
+BisTooltip_ItemLists["Mage"]["Fire FFB"]["RS"]["Feet"] = { 50699, 49890, 51899, 50062, 51850, 47482 }
+BisTooltip_ItemLists["Mage"]["Fire FFB"]["RS"]["Finger 1"] = { 50398, 50614, 54563, 50664, 50714, 50644 }
+BisTooltip_ItemLists["Mage"]["Fire FFB"]["RS"]["Finger 2"] = { 50664, 50398, 50614, 54563, 50714, 50644 }
+BisTooltip_ItemLists["Mage"]["Fire FFB"]["RS"]["Trinket 1"] = { 50365, 50360, 50348, 54588, 50345, 50353 }
+BisTooltip_ItemLists["Mage"]["Fire FFB"]["RS"]["Trinket 2"] = { 50348, 50365, 50360, 54588, 50345, 50353 }
+BisTooltip_ItemLists["Mage"]["Fire FFB"]["RS"]["Weapon"] = { 50732, 50704, 50608, 50731, 51939, 51943 }
+BisTooltip_ItemLists["Mage"]["Fire FFB"]["RS"]["Off hand"] = { 50719, 51922, 47437, 50635, 50173, 48032 }
+BisTooltip_ItemLists["Mage"]["Fire FFB"]["RS"]["Ranged"] = { 50684, 50631, 51852, 50033, 51838, 47658 }
 BisTooltip_ItemLists["Mage"]["Frost"] = BisTooltip_ItemLists["Mage"]["Frost"] or {}
 BisTooltip_ItemLists["Mage"]["Frost"]["PR"] = BisTooltip_ItemLists["Mage"]["Frost"]["PR"] or {}
-BisTooltip_ItemLists["Mage"]["Frost"]["PR"][1] = {["slot_name"] = "Head", [1] = 34340, [2] = 42553, [3] = 44910, [4] = 37684, [5] = 41984, [6] = 37294 }
-BisTooltip_ItemLists["Mage"]["Frost"]["PR"][2] = {["slot_name"] = "Neck", [1] = 40680, [2] = 37595, [3] = 42647, [4] = 42024, [5] = 44017, [6] = 43285 }
-BisTooltip_ItemLists["Mage"]["Frost"]["PR"][3] = {["slot_name"] = "Shoulder", [1] = 34210, [2] = 37673, [3] = 37196, [4] = 37655, [5] = 42842, [6] = 41550 }
-BisTooltip_ItemLists["Mage"]["Frost"]["PR"][4] = {["slot_name"] = "Back", [1] = 41610, [2] = 42057, [3] = 44242, [4] = 36983, [5] = 34242, [6] = 37291 }
-BisTooltip_ItemLists["Mage"]["Frost"]["PR"][5] = {["slot_name"] = "Chest", [1] = 39492, [2] = 42102, [3] = 43401, [4] = 34399, [5] = 37222, [6] = 37258 }
-BisTooltip_ItemLists["Mage"]["Frost"]["PR"][6] = {["slot_name"] = "Wrist", [1] = 37361, [2] = 37884, [3] = 34447, [4] = 37725, [5] = 41907, [6] = 44200 }
-BisTooltip_ItemLists["Mage"]["Frost"]["PR"][7] = {["slot_name"] = "Hands", [1] = 39495, [2] = 42113, [3] = 34344, [4] = 37172, [5] = 43287, [6] = 37825 }
-BisTooltip_ItemLists["Mage"]["Frost"]["PR"][8] = {["slot_name"] = "Waist", [1] = 40696, [2] = 37408, [3] = 37850, [4] = 34557, [5] = 37242, [6] = 44302 }
-BisTooltip_ItemLists["Mage"]["Frost"]["PR"][9] = {["slot_name"] = "Legs", [1] = 34181, [2] = 37854, [3] = 37369, [4] = 37189, [5] = 43375, [6] = 41553 }
-BisTooltip_ItemLists["Mage"]["Frost"]["PR"][10] = {["slot_name"] = "Feet", [1] = 44202, [2] = 34574, [3] = 44899, [4] = 37730, [5] = 37218, [6] = 37629 }
-BisTooltip_ItemLists["Mage"]["Frost"]["PR"][11] = {["slot_name"] = "Finger 1", [1] = 43253, [2] = 40585, [3] = 37651, [4] = 42644, [5] = 37694, [6] = 37192 }
-BisTooltip_ItemLists["Mage"]["Frost"]["PR"][12] = {["slot_name"] = "Finger 2", [1] = 40585, [2] = 43253, [3] = 37651, [4] = 42644, [5] = 37694, [6] = 37192 }
-BisTooltip_ItemLists["Mage"]["Frost"]["PR"][13] = {["slot_name"] = "Trinket 1", [1] = 37873, [2] = 42395, [3] = 40682, [4] = 37660, [5] = 36972 }
-BisTooltip_ItemLists["Mage"]["Frost"]["PR"][14] = {["slot_name"] = "Trinket 2", [1] = 40682, [2] = 37873, [3] = 42395, [4] = 37660, [5] = 36972 }
-BisTooltip_ItemLists["Mage"]["Frost"]["PR"][15] = {["slot_name"] = "Weapon", [1] = 45085, [2] = 44173, [3] = 37721, [4] = 37360, [5] = 37377, [6] = 37060 }
-BisTooltip_ItemLists["Mage"]["Frost"]["PR"][16] = {["slot_name"] = "Off hand", [1] = 40698, [2] = 44210, [3] = 37134, [4] = 37718, [5] = 37086, [6] = 37051 }
-BisTooltip_ItemLists["Mage"]["Frost"]["PR"][17] = {["slot_name"] = "Ranged", [1] = 37177, [2] = 37238, [3] = 38206, [4] = 34347, [5] = 36989, [6] = 37619 }
+BisTooltip_ItemLists["Mage"]["Frost"]["PR"]["Head"] = { 34340, 42553, 44910, 37684, 41984, 37294 }
+BisTooltip_ItemLists["Mage"]["Frost"]["PR"]["Neck"] = { 40680, 37595, 42647, 42024, 44017, 43285 }
+BisTooltip_ItemLists["Mage"]["Frost"]["PR"]["Shoulder"] = { 34210, 37673, 37196, 37655, 42842, 41550 }
+BisTooltip_ItemLists["Mage"]["Frost"]["PR"]["Back"] = { 41610, 42057, 36983, 44242, 34242, 37291 }
+BisTooltip_ItemLists["Mage"]["Frost"]["PR"]["Chest"] = { 39492, 42102, 43401, 34399, 37222, 37258 }
+BisTooltip_ItemLists["Mage"]["Frost"]["PR"]["Wrist"] = { 37361, 37884, 34447, 37725, 41907, 44200 }
+BisTooltip_ItemLists["Mage"]["Frost"]["PR"]["Hands"] = { 39495, 42113, 34344, 37172, 43287, 37825 }
+BisTooltip_ItemLists["Mage"]["Frost"]["PR"]["Waist"] = { 40696, 37408, 37850, 34557, 37242, 44302 }
+BisTooltip_ItemLists["Mage"]["Frost"]["PR"]["Legs"] = { 34181, 37854, 37369, 37189, 43375, 41553 }
+BisTooltip_ItemLists["Mage"]["Frost"]["PR"]["Feet"] = { 44202, 34574, 44899, 37730, 37218, 37629 }
+BisTooltip_ItemLists["Mage"]["Frost"]["PR"]["Finger 1"] = { 43253, 40585, 37651, 42644, 37694, 37192 }
+BisTooltip_ItemLists["Mage"]["Frost"]["PR"]["Finger 2"] = { 40585, 43253, 37651, 42644, 37694, 37192 }
+BisTooltip_ItemLists["Mage"]["Frost"]["PR"]["Trinket 1"] = { 37873, 42395, 40682, 37660, 36972 }
+BisTooltip_ItemLists["Mage"]["Frost"]["PR"]["Trinket 2"] = { 40682, 37873, 42395, 37660, 36972 }
+BisTooltip_ItemLists["Mage"]["Frost"]["PR"]["Weapon"] = { 45085, 44173, 37721, 37360, 37377, 37060 }
+BisTooltip_ItemLists["Mage"]["Frost"]["PR"]["Off hand"] = { 40698, 44210, 37134, 37718, 37086, 37051 }
+BisTooltip_ItemLists["Mage"]["Frost"]["PR"]["Ranged"] = { 37177, 37238, 38206, 34347, 36989, 37619 }
 BisTooltip_ItemLists["Mage"]["Frost"]["T7"] = BisTooltip_ItemLists["Mage"]["Frost"]["T7"] or {}
-BisTooltip_ItemLists["Mage"]["Frost"]["T7"][1] = {["slot_name"] = "Head", [1] = 40416, [2] = 40562, [3] = 43995, [4] = 40287, [5] = 40339, [6] = 39491 }
-BisTooltip_ItemLists["Mage"]["Frost"]["T7"][2] = {["slot_name"] = "Neck", [1] = 44661, [2] = 44658, [3] = 39472, [4] = 40374, [5] = 40427, [6] = 40064 }
-BisTooltip_ItemLists["Mage"]["Frost"]["T7"][3] = {["slot_name"] = "Shoulder", [1] = 40419, [2] = 40286, [3] = 40555, [4] = 40351, [5] = 39719, [6] = 39494 }
-BisTooltip_ItemLists["Mage"]["Frost"]["T7"][4] = {["slot_name"] = "Back", [1] = 44005, [2] = 40405, [3] = 41610, [4] = 40251, [5] = 40723, [6] = 40253 }
-BisTooltip_ItemLists["Mage"]["Frost"]["T7"][5] = {["slot_name"] = "Chest", [1] = 40418, [2] = 40526, [3] = 40234, [4] = 44002, [5] = 39396, [6] = 40062 }
-BisTooltip_ItemLists["Mage"]["Frost"]["T7"][6] = {["slot_name"] = "Wrist", [1] = 44008, [2] = 40325, [3] = 40740, [4] = 40198, [5] = 39252, [6] = 39731 }
-BisTooltip_ItemLists["Mage"]["Frost"]["T7"][7] = {["slot_name"] = "Hands", [1] = 40415, [2] = 40380, [3] = 39495, [4] = 40197, [5] = 39733, [6] = 42113 }
-BisTooltip_ItemLists["Mage"]["Frost"]["T7"][8] = {["slot_name"] = "Waist", [1] = 40561, [2] = 40301, [3] = 40696, [4] = 37408, [5] = 39735, [6] = 37850 }
-BisTooltip_ItemLists["Mage"]["Frost"]["T7"][9] = {["slot_name"] = "Legs", [1] = 40560, [2] = 40417, [3] = 39720, [4] = 40398, [5] = 40376, [6] = 39493 }
-BisTooltip_ItemLists["Mage"]["Frost"]["T7"][10] = {["slot_name"] = "Feet", [1] = 40558, [2] = 40246, [3] = 40750, [4] = 40326, [5] = 40269, [6] = 40751 }
-BisTooltip_ItemLists["Mage"]["Frost"]["T7"][11] = {["slot_name"] = "Finger 1", [1] = 40399, [2] = 39389, [3] = 43253, [4] = 40080, [5] = 40719, [6] = 40585 }
-BisTooltip_ItemLists["Mage"]["Frost"]["T7"][12] = {["slot_name"] = "Finger 2", [1] = 40080, [2] = 40399, [3] = 39389, [4] = 43253, [5] = 40719, [6] = 40585 }
-BisTooltip_ItemLists["Mage"]["Frost"]["T7"][13] = {["slot_name"] = "Trinket 1", [1] = 40255, [2] = 37873, [3] = 42395, [4] = 40432, [5] = 39229, [6] = 40682 }
-BisTooltip_ItemLists["Mage"]["Frost"]["T7"][14] = {["slot_name"] = "Trinket 2", [1] = 40432, [2] = 40255, [3] = 37873, [4] = 42395, [5] = 39229, [6] = 40682 }
-BisTooltip_ItemLists["Mage"]["Frost"]["T7"][15] = {["slot_name"] = "Weapon", [1] = 40396, [2] = 40489, [3] = 40408, [4] = 39424, [5] = 40336, [6] = 42346 }
-BisTooltip_ItemLists["Mage"]["Frost"]["T7"][16] = {["slot_name"] = "Off hand", [1] = 40273, [2] = 40698, [3] = 40192, [4] = 39766, [5] = 39199, [6] = 44210 }
-BisTooltip_ItemLists["Mage"]["Frost"]["T7"][17] = {["slot_name"] = "Ranged", [1] = 39712, [2] = 40284, [3] = 39426, [4] = 37177, [5] = 37238, [6] = 38206 }
+BisTooltip_ItemLists["Mage"]["Frost"]["T7"]["Head"] = { 40416, 40562, 43995, 40287, 40339, 39491 }
+BisTooltip_ItemLists["Mage"]["Frost"]["T7"]["Neck"] = { 44661, 44658, 39472, 40374, 40427, 40064 }
+BisTooltip_ItemLists["Mage"]["Frost"]["T7"]["Shoulder"] = { 40419, 40286, 40555, 40351, 39719, 39494 }
+BisTooltip_ItemLists["Mage"]["Frost"]["T7"]["Back"] = { 44005, 40405, 41610, 40251, 40723, 40253 }
+BisTooltip_ItemLists["Mage"]["Frost"]["T7"]["Chest"] = { 40418, 40526, 40234, 44002, 39396, 40062 }
+BisTooltip_ItemLists["Mage"]["Frost"]["T7"]["Wrist"] = { 44008, 40325, 40740, 40198, 39252, 39731 }
+BisTooltip_ItemLists["Mage"]["Frost"]["T7"]["Hands"] = { 40415, 40380, 39495, 40197, 39733, 42113 }
+BisTooltip_ItemLists["Mage"]["Frost"]["T7"]["Waist"] = { 40561, 40301, 40696, 37408, 39735, 37850 }
+BisTooltip_ItemLists["Mage"]["Frost"]["T7"]["Legs"] = { 40560, 40417, 39720, 40398, 40376, 39493 }
+BisTooltip_ItemLists["Mage"]["Frost"]["T7"]["Feet"] = { 40558, 40246, 40750, 40326, 40269, 40751 }
+BisTooltip_ItemLists["Mage"]["Frost"]["T7"]["Finger 1"] = { 40399, 39389, 43253, 40080, 40719, 40585 }
+BisTooltip_ItemLists["Mage"]["Frost"]["T7"]["Finger 2"] = { 40080, 40399, 39389, 43253, 40719, 40585 }
+BisTooltip_ItemLists["Mage"]["Frost"]["T7"]["Trinket 1"] = { 40255, 37873, 42395, 40432, 39229, 40682 }
+BisTooltip_ItemLists["Mage"]["Frost"]["T7"]["Trinket 2"] = { 40432, 40255, 37873, 42395, 39229, 40682 }
+BisTooltip_ItemLists["Mage"]["Frost"]["T7"]["Weapon"] = { 40396, 40489, 40408, 39424, 40336, 42346 }
+BisTooltip_ItemLists["Mage"]["Frost"]["T7"]["Off hand"] = { 40273, 40698, 40192, 39766, 39199, 44210 }
+BisTooltip_ItemLists["Mage"]["Frost"]["T7"]["Ranged"] = { 39712, 40284, 39426, 37177, 37238, 38206 }
 BisTooltip_ItemLists["Mage"]["Frost"]["T8"] = BisTooltip_ItemLists["Mage"]["Frost"]["T8"] or {}
-BisTooltip_ItemLists["Mage"]["Frost"]["T8"][1] = {["slot_name"] = "Head", [1] = 45497, [2] = 46129, [3] = 45150, [4] = 45365, [5] = 45532, [6] = 40562 }
-BisTooltip_ItemLists["Mage"]["Frost"]["T8"][2] = {["slot_name"] = "Neck", [1] = 45133, [2] = 45243, [3] = 45933, [4] = 45699, [5] = 44661, [6] = 45539 }
-BisTooltip_ItemLists["Mage"]["Frost"]["T8"][3] = {["slot_name"] = "Shoulder", [1] = 46134, [2] = 46068, [3] = 45186, [4] = 45514, [5] = 40286, [6] = 45253 }
-BisTooltip_ItemLists["Mage"]["Frost"]["T8"][4] = {["slot_name"] = "Back", [1] = 45618, [2] = 45242, [3] = 46042, [4] = 46321, [5] = 44005, [6] = 45493 }
-BisTooltip_ItemLists["Mage"]["Frost"]["T8"][5] = {["slot_name"] = "Chest", [1] = 46130, [2] = 45865, [3] = 45272, [4] = 40526, [5] = 45368, [6] = 45240 }
-BisTooltip_ItemLists["Mage"]["Frost"]["T8"][6] = {["slot_name"] = "Wrist", [1] = 45446, [2] = 45275, [3] = 45549, [4] = 45291, [5] = 45146, [6] = 40325 }
-BisTooltip_ItemLists["Mage"]["Frost"]["T8"][7] = {["slot_name"] = "Hands", [1] = 45665, [2] = 46045, [3] = 46132, [4] = 46131, [5] = 45520, [6] = 45976 }
-BisTooltip_ItemLists["Mage"]["Frost"]["T8"][8] = {["slot_name"] = "Waist", [1] = 45619, [2] = 45557, [3] = 45508, [4] = 45558, [5] = 40301, [6] = 45119 }
-BisTooltip_ItemLists["Mage"]["Frost"]["T8"][9] = {["slot_name"] = "Legs", [1] = 45488, [2] = 46133, [3] = 45238, [4] = 45367, [5] = 40560, [6] = 46034 }
-BisTooltip_ItemLists["Mage"]["Frost"]["T8"][10] = {["slot_name"] = "Feet", [1] = 45537, [2] = 45135, [3] = 45258, [4] = 46050, [5] = 45566, [6] = 45483 }
-BisTooltip_ItemLists["Mage"]["Frost"]["T8"][11] = {["slot_name"] = "Finger 1", [1] = 45495, [2] = 45297, [3] = 45451, [4] = 46046, [5] = 45515, [6] = 46096 }
-BisTooltip_ItemLists["Mage"]["Frost"]["T8"][12] = {["slot_name"] = "Finger 2", [1] = 46046, [2] = 45495, [3] = 45297, [4] = 45451, [5] = 45515, [6] = 46096 }
-BisTooltip_ItemLists["Mage"]["Frost"]["T8"][13] = {["slot_name"] = "Trinket 1", [1] = 45518, [2] = 45148, [3] = 40255, [4] = 45466, [5] = 45866, [6] = 45308 }
-BisTooltip_ItemLists["Mage"]["Frost"]["T8"][14] = {["slot_name"] = "Trinket 2", [1] = 45466, [2] = 45518, [3] = 45148, [4] = 40255, [5] = 45866, [6] = 45308 }
-BisTooltip_ItemLists["Mage"]["Frost"]["T8"][15] = {["slot_name"] = "Weapon", [1] = 45620, [2] = 45990, [3] = 45457, [4] = 45527, [5] = 45437, [6] = 45171 }
-BisTooltip_ItemLists["Mage"]["Frost"]["T8"][16] = {["slot_name"] = "Off hand", [1] = 45617, [2] = 45115, [3] = 40273, [4] = 45271, [5] = 45314, [6] = 40698 }
-BisTooltip_ItemLists["Mage"]["Frost"]["T8"][17] = {["slot_name"] = "Ranged", [1] = 45294, [2] = 45257, [3] = 45511, [4] = 45170, [5] = 39712, [6] = 45713 }
+BisTooltip_ItemLists["Mage"]["Frost"]["T8"]["Head"] = { 45497, 46129, 45150, 45365, 45532, 40562 }
+BisTooltip_ItemLists["Mage"]["Frost"]["T8"]["Neck"] = { 45133, 45243, 45933, 45699, 44661, 45539 }
+BisTooltip_ItemLists["Mage"]["Frost"]["T8"]["Shoulder"] = { 46134, 46068, 45186, 45514, 40286, 45253 }
+BisTooltip_ItemLists["Mage"]["Frost"]["T8"]["Back"] = { 45618, 45242, 46042, 46321, 44005, 45493 }
+BisTooltip_ItemLists["Mage"]["Frost"]["T8"]["Chest"] = { 46130, 45865, 45272, 40526, 45368, 45240 }
+BisTooltip_ItemLists["Mage"]["Frost"]["T8"]["Wrist"] = { 45446, 45275, 45549, 45291, 45146, 40325 }
+BisTooltip_ItemLists["Mage"]["Frost"]["T8"]["Hands"] = { 45665, 46045, 46132, 46131, 45520, 45976 }
+BisTooltip_ItemLists["Mage"]["Frost"]["T8"]["Waist"] = { 45619, 45557, 45508, 45558, 40301, 45119 }
+BisTooltip_ItemLists["Mage"]["Frost"]["T8"]["Legs"] = { 45488, 46133, 45238, 45367, 40560, 46034 }
+BisTooltip_ItemLists["Mage"]["Frost"]["T8"]["Feet"] = { 45537, 45135, 45258, 46050, 45566, 45483 }
+BisTooltip_ItemLists["Mage"]["Frost"]["T8"]["Finger 1"] = { 45495, 45297, 45451, 46046, 45515, 46096 }
+BisTooltip_ItemLists["Mage"]["Frost"]["T8"]["Finger 2"] = { 46046, 45495, 45297, 45451, 45515, 46096 }
+BisTooltip_ItemLists["Mage"]["Frost"]["T8"]["Trinket 1"] = { 45518, 45148, 40255, 45466, 45866, 45308 }
+BisTooltip_ItemLists["Mage"]["Frost"]["T8"]["Trinket 2"] = { 45466, 45518, 45148, 40255, 45866, 45308 }
+BisTooltip_ItemLists["Mage"]["Frost"]["T8"]["Weapon"] = { 45620, 45990, 45457, 45527, 45437, 45171 }
+BisTooltip_ItemLists["Mage"]["Frost"]["T8"]["Off hand"] = { 45617, 45115, 40273, 45271, 45314, 40698 }
+BisTooltip_ItemLists["Mage"]["Frost"]["T8"]["Ranged"] = { 45294, 45257, 45511, 45170, 39712, 45713 }
 BisTooltip_ItemLists["Mage"]["Frost"]["T9"] = BisTooltip_ItemLists["Mage"]["Frost"]["T9"] or {}
-BisTooltip_ItemLists["Mage"]["Frost"]["T9"][1] = {["slot_name"] = "Head", [1] = 47764, [2] = 47692, [3] = 47771, [4] = 49481, [5] = 47774, [6] = 46129 }
-BisTooltip_ItemLists["Mage"]["Frost"]["T9"][2] = {["slot_name"] = "Neck", [1] = 47468, [2] = 45133, [3] = 48030, [4] = 47890, [5] = 45243, [6] = 45933 }
-BisTooltip_ItemLists["Mage"]["Frost"]["T9"][3] = {["slot_name"] = "Shoulder", [1] = 47767, [2] = 47714, [3] = 46068, [4] = 47768, [5] = 47777, [6] = 45186 }
-BisTooltip_ItemLists["Mage"]["Frost"]["T9"][4] = {["slot_name"] = "Back", [1] = 47551, [2] = 47554, [3] = 47452, [4] = 45242, [5] = 47291, [6] = 48666 }
-BisTooltip_ItemLists["Mage"]["Frost"]["T9"][5] = {["slot_name"] = "Chest", [1] = 47425, [2] = 47462, [3] = 47766, [4] = 48051, [5] = 47301, [6] = 47769 }
-BisTooltip_ItemLists["Mage"]["Frost"]["T9"][6] = {["slot_name"] = "Wrist", [1] = 47467, [2] = 48000, [3] = 47485, [4] = 47306, [5] = 47585, [6] = 45446 }
-BisTooltip_ItemLists["Mage"]["Frost"]["T9"][7] = {["slot_name"] = "Hands", [1] = 47763, [2] = 45665, [3] = 48028, [4] = 46045, [5] = 47487, [6] = 46132 }
-BisTooltip_ItemLists["Mage"]["Frost"]["T9"][8] = {["slot_name"] = "Waist", [1] = 47447, [2] = 47994, [3] = 47286, [4] = 47419, [5] = 47855, [6] = 45557 }
-BisTooltip_ItemLists["Mage"]["Frost"]["T9"][9] = {["slot_name"] = "Legs", [1] = 47765, [2] = 47478, [3] = 45488, [4] = 47317, [5] = 47435, [6] = 46133 }
-BisTooltip_ItemLists["Mage"]["Frost"]["T9"][10] = {["slot_name"] = "Feet", [1] = 47454, [2] = 47482, [3] = 47321, [4] = 48012, [5] = 45537, [6] = 45135 }
-BisTooltip_ItemLists["Mage"]["Frost"]["T9"][11] = {["slot_name"] = "Finger 1", [1] = 45495, [2] = 48001, [3] = 47489, [4] = 45297, [5] = 45451, [6] = 46046 }
-BisTooltip_ItemLists["Mage"]["Frost"]["T9"][12] = {["slot_name"] = "Finger 2", [1] = 47489, [2] = 48001, [3] = 45495, [4] = 45297, [5] = 45451, [6] = 46046 }
-BisTooltip_ItemLists["Mage"]["Frost"]["T9"][13] = {["slot_name"] = "Trinket 1", [1] = 47477, [2] = 45518, [3] = 45148, [4] = 47316, [5] = 40255, [6] = 45466 }
-BisTooltip_ItemLists["Mage"]["Frost"]["T9"][14] = {["slot_name"] = "Trinket 2", [1] = 45518, [2] = 47477, [3] = 45148, [4] = 47316, [5] = 40255, [6] = 45466 }
-BisTooltip_ItemLists["Mage"]["Frost"]["T9"][15] = {["slot_name"] = "Weapon", [1] = 47518, [2] = 47422, [3] = 45620, [4] = 45990, [5] = 48701, [6] = 47525 }
-BisTooltip_ItemLists["Mage"]["Frost"]["T9"][16] = {["slot_name"] = "Off hand", [1] = 47437, [2] = 45617, [3] = 48032, [4] = 47276, [5] = 47913, [6] = 47470 }
-BisTooltip_ItemLists["Mage"]["Frost"]["T9"][17] = {["slot_name"] = "Ranged", [1] = 45294, [2] = 47658, [3] = 45257, [4] = 47995, [5] = 45511, [6] = 47856 }
+BisTooltip_ItemLists["Mage"]["Frost"]["T9"]["Head"] = { 47764, 47692, 47771, 49481, 47774, 46129 }
+BisTooltip_ItemLists["Mage"]["Frost"]["T9"]["Neck"] = { 47468, 45133, 48030, 47890, 45243, 45933 }
+BisTooltip_ItemLists["Mage"]["Frost"]["T9"]["Shoulder"] = { 47767, 47714, 46068, 47768, 47777, 45186 }
+BisTooltip_ItemLists["Mage"]["Frost"]["T9"]["Back"] = { 47551, 47554, 47452, 45242, 47291, 48666 }
+BisTooltip_ItemLists["Mage"]["Frost"]["T9"]["Chest"] = { 47425, 47462, 47766, 48051, 47301, 47769 }
+BisTooltip_ItemLists["Mage"]["Frost"]["T9"]["Wrist"] = { 47467, 48000, 47485, 47306, 47585, 45446 }
+BisTooltip_ItemLists["Mage"]["Frost"]["T9"]["Hands"] = { 47763, 45665, 48028, 46045, 47487, 46132 }
+BisTooltip_ItemLists["Mage"]["Frost"]["T9"]["Waist"] = { 47447, 47994, 47286, 47419, 47855, 45557 }
+BisTooltip_ItemLists["Mage"]["Frost"]["T9"]["Legs"] = { 47765, 47478, 45488, 47317, 47435, 46133 }
+BisTooltip_ItemLists["Mage"]["Frost"]["T9"]["Feet"] = { 47454, 47482, 47321, 48012, 45537, 45135 }
+BisTooltip_ItemLists["Mage"]["Frost"]["T9"]["Finger 1"] = { 45495, 48001, 47489, 45297, 45451, 46046 }
+BisTooltip_ItemLists["Mage"]["Frost"]["T9"]["Finger 2"] = { 47489, 48001, 45495, 45297, 45451, 46046 }
+BisTooltip_ItemLists["Mage"]["Frost"]["T9"]["Trinket 1"] = { 47477, 45518, 45148, 47316, 40255, 45466 }
+BisTooltip_ItemLists["Mage"]["Frost"]["T9"]["Trinket 2"] = { 45518, 47477, 45148, 47316, 40255, 45466 }
+BisTooltip_ItemLists["Mage"]["Frost"]["T9"]["Weapon"] = { 47518, 47422, 45620, 45990, 48701, 47525 }
+BisTooltip_ItemLists["Mage"]["Frost"]["T9"]["Off hand"] = { 47437, 45617, 48032, 47276, 47913, 47470 }
+BisTooltip_ItemLists["Mage"]["Frost"]["T9"]["Ranged"] = { 45294, 47658, 45257, 47995, 45511, 47856 }
 BisTooltip_ItemLists["Mage"]["Frost"]["T10"] = BisTooltip_ItemLists["Mage"]["Frost"]["T10"] or {}
-BisTooltip_ItemLists["Mage"]["Frost"]["T10"][1] = {["slot_name"] = "Head", [1] = 51281, [2] = 50661, [3] = 51158, [4] = 51837, [5] = 47764, [6] = 50006 }
-BisTooltip_ItemLists["Mage"]["Frost"]["T10"][2] = {["slot_name"] = "Neck", [1] = 50724, [2] = 50658, [3] = 51863, [4] = 50005, [5] = 50609, [6] = 51894 }
-BisTooltip_ItemLists["Mage"]["Frost"]["T10"][3] = {["slot_name"] = "Shoulder", [1] = 51284, [2] = 50643, [3] = 49991, [4] = 51859, [5] = 51155, [6] = 50449 }
-BisTooltip_ItemLists["Mage"]["Frost"]["T10"][4] = {["slot_name"] = "Back", [1] = 50628, [2] = 54583, [3] = 47551, [4] = 53489, [5] = 51826, [6] = 50668 }
-BisTooltip_ItemLists["Mage"]["Frost"]["T10"][5] = {["slot_name"] = "Chest", [1] = 51283, [2] = 50629, [3] = 50418, [4] = 50717, [5] = 51813, [6] = 51156 }
-BisTooltip_ItemLists["Mage"]["Frost"]["T10"][6] = {["slot_name"] = "Wrist", [1] = 50651, [2] = 54582, [3] = 50686, [4] = 49994, [5] = 47467, [6] = 51872 }
-BisTooltip_ItemLists["Mage"]["Frost"]["T10"][7] = {["slot_name"] = "Hands", [1] = 51280, [2] = 50663, [3] = 51159, [4] = 51921, [5] = 50722, [6] = 50983 }
-BisTooltip_ItemLists["Mage"]["Frost"]["T10"][8] = {["slot_name"] = "Waist", [1] = 50613, [2] = 54562, [3] = 50996, [4] = 50702, [5] = 47447, [6] = 51862 }
-BisTooltip_ItemLists["Mage"]["Frost"]["T10"][9] = {["slot_name"] = "Legs", [1] = 51282, [2] = 50694, [3] = 51157, [4] = 51882, [5] = 51823, [6] = 49891 }
-BisTooltip_ItemLists["Mage"]["Frost"]["T10"][10] = {["slot_name"] = "Feet", [1] = 50699, [2] = 49890, [3] = 51899, [4] = 50062, [5] = 51850, [6] = 47482 }
-BisTooltip_ItemLists["Mage"]["Frost"]["T10"][11] = {["slot_name"] = "Finger 1", [1] = 50398, [2] = 50614, [3] = 54563, [4] = 50664, [5] = 50714, [6] = 50644 }
-BisTooltip_ItemLists["Mage"]["Frost"]["T10"][12] = {["slot_name"] = "Finger 2", [1] = 50664, [2] = 50398, [3] = 50614, [4] = 54563, [5] = 50714, [6] = 50644 }
-BisTooltip_ItemLists["Mage"]["Frost"]["T10"][13] = {["slot_name"] = "Trinket 1", [1] = 50365, [2] = 50360, [3] = 50348, [4] = 54588, [5] = 50345, [6] = 50353 }
-BisTooltip_ItemLists["Mage"]["Frost"]["T10"][14] = {["slot_name"] = "Trinket 2", [1] = 50348, [2] = 50365, [3] = 50360, [4] = 54588, [5] = 50345, [6] = 50353 }
-BisTooltip_ItemLists["Mage"]["Frost"]["T10"][15] = {["slot_name"] = "Weapon", [1] = 50732, [2] = 50704, [3] = 50608, [4] = 50731, [5] = 51939, [6] = 51943 }
-BisTooltip_ItemLists["Mage"]["Frost"]["T10"][16] = {["slot_name"] = "Off hand", [1] = 50719, [2] = 51922, [3] = 47437, [4] = 50635, [5] = 50173, [6] = 45617 }
-BisTooltip_ItemLists["Mage"]["Frost"]["T10"][17] = {["slot_name"] = "Ranged", [1] = 50684, [2] = 50631, [3] = 51852, [4] = 45294, [5] = 50033, [6] = 51838 }
+BisTooltip_ItemLists["Mage"]["Frost"]["T10"]["Head"] = { 51281, 50661, 51158, 51837, 47764, 50006 }
+BisTooltip_ItemLists["Mage"]["Frost"]["T10"]["Neck"] = { 50724, 50658, 51863, 50005, 50609, 51894 }
+BisTooltip_ItemLists["Mage"]["Frost"]["T10"]["Shoulder"] = { 51284, 50643, 49991, 51859, 51155, 50449 }
+BisTooltip_ItemLists["Mage"]["Frost"]["T10"]["Back"] = { 50628, 54583, 47551, 53489, 51826, 50668 }
+BisTooltip_ItemLists["Mage"]["Frost"]["T10"]["Chest"] = { 51283, 50629, 50418, 50717, 51813, 51156 }
+BisTooltip_ItemLists["Mage"]["Frost"]["T10"]["Wrist"] = { 50651, 54582, 50686, 49994, 47467, 51872 }
+BisTooltip_ItemLists["Mage"]["Frost"]["T10"]["Hands"] = { 51280, 50663, 51159, 51921, 50722, 50983 }
+BisTooltip_ItemLists["Mage"]["Frost"]["T10"]["Waist"] = { 50613, 54562, 50996, 50702, 47447, 51862 }
+BisTooltip_ItemLists["Mage"]["Frost"]["T10"]["Legs"] = { 51282, 50694, 51157, 51882, 51823, 49891 }
+BisTooltip_ItemLists["Mage"]["Frost"]["T10"]["Feet"] = { 50699, 49890, 51899, 50062, 51850, 47482 }
+BisTooltip_ItemLists["Mage"]["Frost"]["T10"]["Finger 1"] = { 50398, 50614, 54563, 50664, 50714, 50644 }
+BisTooltip_ItemLists["Mage"]["Frost"]["T10"]["Finger 2"] = { 50664, 50398, 50614, 54563, 50714, 50644 }
+BisTooltip_ItemLists["Mage"]["Frost"]["T10"]["Trinket 1"] = { 50365, 50360, 50348, 54588, 50345, 50353 }
+BisTooltip_ItemLists["Mage"]["Frost"]["T10"]["Trinket 2"] = { 50348, 50365, 50360, 54588, 50345, 50353 }
+BisTooltip_ItemLists["Mage"]["Frost"]["T10"]["Weapon"] = { 50732, 50704, 50608, 50731, 51939, 51943 }
+BisTooltip_ItemLists["Mage"]["Frost"]["T10"]["Off hand"] = { 50719, 51922, 47437, 50635, 50173, 45617 }
+BisTooltip_ItemLists["Mage"]["Frost"]["T10"]["Ranged"] = { 50684, 50631, 51852, 45294, 50033, 51838 }
 BisTooltip_ItemLists["Mage"]["Frost"]["RS"] = BisTooltip_ItemLists["Mage"]["Frost"]["RS"] or {}
-BisTooltip_ItemLists["Mage"]["Frost"]["RS"][1] = {["slot_name"] = "Head", [1] = 51281, [2] = 50661, [3] = 51158, [4] = 51837, [5] = 47764, [6] = 50006 }
-BisTooltip_ItemLists["Mage"]["Frost"]["RS"][2] = {["slot_name"] = "Neck", [1] = 50724, [2] = 50658, [3] = 51863, [4] = 50005, [5] = 50609, [6] = 51894 }
-BisTooltip_ItemLists["Mage"]["Frost"]["RS"][3] = {["slot_name"] = "Shoulder", [1] = 51284, [2] = 50643, [3] = 49991, [4] = 51859, [5] = 51155, [6] = 50449 }
-BisTooltip_ItemLists["Mage"]["Frost"]["RS"][4] = {["slot_name"] = "Back", [1] = 54583, [2] = 50628, [3] = 47551, [4] = 53489, [5] = 51826, [6] = 50668 }
-BisTooltip_ItemLists["Mage"]["Frost"]["RS"][5] = {["slot_name"] = "Chest", [1] = 51283, [2] = 50629, [3] = 50418, [4] = 50717, [5] = 51813, [6] = 51156 }
-BisTooltip_ItemLists["Mage"]["Frost"]["RS"][6] = {["slot_name"] = "Wrist", [1] = 54582, [2] = 50651, [3] = 50686, [4] = 49994, [5] = 47467, [6] = 51872 }
-BisTooltip_ItemLists["Mage"]["Frost"]["RS"][7] = {["slot_name"] = "Hands", [1] = 51280, [2] = 50663, [3] = 51159, [4] = 51921, [5] = 50722, [6] = 50983 }
-BisTooltip_ItemLists["Mage"]["Frost"]["RS"][8] = {["slot_name"] = "Waist", [1] = 50613, [2] = 54562, [3] = 50996, [4] = 50702, [5] = 47447, [6] = 51862 }
-BisTooltip_ItemLists["Mage"]["Frost"]["RS"][9] = {["slot_name"] = "Legs", [1] = 51282, [2] = 50694, [3] = 51157, [4] = 51882, [5] = 51823, [6] = 49891 }
-BisTooltip_ItemLists["Mage"]["Frost"]["RS"][10] = {["slot_name"] = "Feet", [1] = 50699, [2] = 49890, [3] = 51899, [4] = 50062, [5] = 51850, [6] = 47482 }
-BisTooltip_ItemLists["Mage"]["Frost"]["RS"][11] = {["slot_name"] = "Finger 1", [1] = 50398, [2] = 50614, [3] = 54563, [4] = 50664, [5] = 50714, [6] = 50644 }
-BisTooltip_ItemLists["Mage"]["Frost"]["RS"][12] = {["slot_name"] = "Finger 2", [1] = 50664, [2] = 50398, [3] = 50614, [4] = 54563, [5] = 50714, [6] = 50644 }
-BisTooltip_ItemLists["Mage"]["Frost"]["RS"][13] = {["slot_name"] = "Trinket 1", [1] = 50365, [2] = 50360, [3] = 50348, [4] = 54588, [5] = 50345, [6] = 50353 }
-BisTooltip_ItemLists["Mage"]["Frost"]["RS"][14] = {["slot_name"] = "Trinket 2", [1] = 50348, [2] = 50365, [3] = 50360, [4] = 54588, [5] = 50345, [6] = 50353 }
-BisTooltip_ItemLists["Mage"]["Frost"]["RS"][15] = {["slot_name"] = "Weapon", [1] = 50732, [2] = 50704, [3] = 50608, [4] = 50731, [5] = 51939, [6] = 51943 }
-BisTooltip_ItemLists["Mage"]["Frost"]["RS"][16] = {["slot_name"] = "Off hand", [1] = 50719, [2] = 51922, [3] = 47437, [4] = 50635, [5] = 50173, [6] = 48032 }
-BisTooltip_ItemLists["Mage"]["Frost"]["RS"][17] = {["slot_name"] = "Ranged", [1] = 50684, [2] = 50631, [3] = 51852, [4] = 50033, [5] = 51838, [6] = 47658 }
+BisTooltip_ItemLists["Mage"]["Frost"]["RS"]["Head"] = { 51281, 50661, 51158, 51837, 47764, 50006 }
+BisTooltip_ItemLists["Mage"]["Frost"]["RS"]["Neck"] = { 50724, 50658, 51863, 50005, 50609, 51894 }
+BisTooltip_ItemLists["Mage"]["Frost"]["RS"]["Shoulder"] = { 51284, 50643, 49991, 51859, 51155, 50449 }
+BisTooltip_ItemLists["Mage"]["Frost"]["RS"]["Back"] = { 54583, 50628, 47551, 53489, 51826, 50668 }
+BisTooltip_ItemLists["Mage"]["Frost"]["RS"]["Chest"] = { 51283, 50629, 50418, 50717, 51813, 51156 }
+BisTooltip_ItemLists["Mage"]["Frost"]["RS"]["Wrist"] = { 54582, 50651, 50686, 49994, 47467, 51872 }
+BisTooltip_ItemLists["Mage"]["Frost"]["RS"]["Hands"] = { 51280, 50663, 51159, 51921, 50722, 50983 }
+BisTooltip_ItemLists["Mage"]["Frost"]["RS"]["Waist"] = { 50613, 54562, 50996, 50702, 47447, 51862 }
+BisTooltip_ItemLists["Mage"]["Frost"]["RS"]["Legs"] = { 51282, 50694, 51157, 51882, 51823, 49891 }
+BisTooltip_ItemLists["Mage"]["Frost"]["RS"]["Feet"] = { 50699, 49890, 51899, 50062, 51850, 47482 }
+BisTooltip_ItemLists["Mage"]["Frost"]["RS"]["Finger 1"] = { 50398, 50614, 54563, 50664, 50714, 50644 }
+BisTooltip_ItemLists["Mage"]["Frost"]["RS"]["Finger 2"] = { 50664, 50398, 50614, 54563, 50714, 50644 }
+BisTooltip_ItemLists["Mage"]["Frost"]["RS"]["Trinket 1"] = { 50365, 50360, 50348, 54588, 50345, 50353 }
+BisTooltip_ItemLists["Mage"]["Frost"]["RS"]["Trinket 2"] = { 50348, 50365, 50360, 54588, 50345, 50353 }
+BisTooltip_ItemLists["Mage"]["Frost"]["RS"]["Weapon"] = { 50732, 50704, 50608, 50731, 51939, 51943 }
+BisTooltip_ItemLists["Mage"]["Frost"]["RS"]["Off hand"] = { 50719, 51922, 47437, 50635, 50173, 48032 }
+BisTooltip_ItemLists["Mage"]["Frost"]["RS"]["Ranged"] = { 50684, 50631, 51852, 50033, 51838, 47658 }
