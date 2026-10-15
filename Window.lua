@@ -116,6 +116,26 @@ local function ApplyItemStateVisuals(widget, item_id, is_missing)
     local markIndex = (BisTooltipAddon.db and BisTooltipAddon.db.char and BisTooltipAddon.db.char.favorite_icon) or 1
     if markIndex < 1 or markIndex > 8 then markIndex = 1 end
 
+    if widget.frame.bisILvl then
+        local db = BisTooltipAddon.db and BisTooltipAddon.db.char
+        local showILvl = db and (db.show_ilvl ~= false)
+        local size = widget.image and widget.image:GetWidth() or 40
+
+        if showILvl and not is_missing and size >= 30 and item_id and item_id > 0 then
+            local _, _, _, itemLevel = GetItemInfo(item_id)
+            if itemLevel and itemLevel > 0 then
+                local colorKey = (db and db.ilvl_color) or "white"
+                local hex = (BisTooltip_HexColors and BisTooltip_HexColors[colorKey]) or "FFFFFF"
+                widget.frame.bisILvl:SetText("|cFF" .. hex .. itemLevel .. "|r")
+                widget.frame.bisILvl:Show()
+            else
+                widget.frame.bisILvl:Hide()
+            end
+        else
+            widget.frame.bisILvl:Hide()
+        end
+    end
+
     if is_missing then
         widget.image:SetVertexColor(1, 1, 1, 1)
         widget.frame.bisCheckMark:Hide()
@@ -288,6 +308,7 @@ local function createItemFrame(item_id, size)
         if empty_icon.frame.bisBoeMark then empty_icon.frame.bisBoeMark:Hide() end
         if empty_icon.frame.bisBorder then empty_icon.frame.bisBorder:Hide() end
         if empty_icon.frame.bisStarMark then empty_icon.frame.bisStarMark:Hide() end
+        if empty_icon.frame.bisILvl then empty_icon.frame.bisILvl:Hide() end
         empty_icon:SetImage("")
 
         return empty_icon
@@ -332,6 +353,14 @@ local function createItemFrame(item_id, size)
     item_frame.frame.bisStarMark:SetHeight(starSize)
     item_frame.frame.bisStarMark:ClearAllPoints()
     item_frame.frame.bisStarMark:SetPoint("TOPLEFT", item_frame.image, "TOPLEFT", -2, 2)
+
+    if not item_frame.frame.bisILvl then
+        item_frame.frame.bisILvl = item_frame.frame:CreateFontString(nil, "OVERLAY")
+        item_frame.frame.bisILvl:SetFont("Fonts\\ARIALN.TTF", 13, "OUTLINE")
+        item_frame.frame.bisILvl:SetShadowOffset(0, 0)
+        item_frame.frame.bisILvl:SetPoint("BOTTOMLEFT", item_frame.image, "BOTTOMLEFT", -4, -2)
+        item_frame.frame.bisILvl:SetJustifyH("LEFT")
+    end
 
     item_frame:SetCallback("OnClick", function(widget, _, button)
         if button == "RightButton" then
@@ -389,6 +418,7 @@ local function createSpellFrame(spell_id, size)
         if empty_spell.frame.bisBoeMark then empty_spell.frame.bisBoeMark:Hide() end
         if empty_spell.frame.bisBorder then empty_spell.frame.bisBorder:Hide() end
         if empty_spell.frame.bisStarMark then empty_spell.frame.bisStarMark:Hide() end
+        if empty_spell.frame.bisILvl then empty_spell.frame.bisILvl:Hide() end
         empty_spell:SetImage("")
 
         return empty_spell
@@ -404,6 +434,7 @@ local function createSpellFrame(spell_id, size)
     if spell_frame.frame.bisBoeMark then spell_frame.frame.bisBoeMark:Hide() end
     if spell_frame.frame.bisBorder then spell_frame.frame.bisBorder:Hide() end
     if spell_frame.frame.bisStarMark then spell_frame.frame.bisStarMark:Hide() end
+    if spell_frame.frame.bisILvl then spell_frame.frame.bisILvl:Hide() end
 
     local name, _, icon = GetSpellInfo(spell_id)
     if not name then return spell_frame end

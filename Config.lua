@@ -30,6 +30,7 @@ local db_defaults = {
         show_sources = true, source_color = "green",
         show_item_states = true, dark_tooltips = false,
         show_item_borders = true, frame_pos = nil, scroll_status = {},
+        show_ilvl = false, ilvl_color = "white",
         favorites = {}, favorites_pos = nil, fav_counter = 0, favorite_icon = 1,
         favorite_color = "yellow", fav_scroll_status = {}
     }
@@ -66,7 +67,7 @@ local configTable = {
         show_item_borders = {
             name = "Show Item Borders",
             order = 3,
-            desc = "Toggle display of a colored border around equipped and banked items in the main window",
+            desc = "Toggle display of a colored border around equipped and banked items in the addon window",
             type = "toggle",
             width = "full",
             set = function(info, val)
@@ -74,6 +75,49 @@ local configTable = {
                 if BisTooltipAddon.reloadData then BisTooltipAddon:reloadData() end
             end,
             get = function(info) return BisTooltipAddon.db.char.show_item_borders end
+        },
+
+        show_ilvl = {
+            name = "Show iLvL",
+            order = 4,
+            desc = "Display item level on item icons in the addon window",
+            type = "toggle",
+            width = "full",
+            set = function(info, val)
+                BisTooltipAddon.db.char.show_ilvl = val
+                if BisTooltipAddon.RefreshItemStateVisuals then BisTooltipAddon.RefreshItemStateVisuals() end
+            end,
+            get = function(info)
+                if BisTooltipAddon.db.char.show_ilvl == nil then return true end
+                return BisTooltipAddon.db.char.show_ilvl
+            end
+        },
+
+        ilvl_color = {
+            name = "iLvL Color",
+            order = 5,
+            desc = "Changes the text color of the item level on icons",
+            type = "select",
+            width = "full",
+            disabled = function() return BisTooltipAddon.db.char.show_ilvl == false end,
+            values = {
+                ["purple"]    = "Purple",
+                ["green"]     = "Green",
+                ["red"]       = "Red",
+                ["lightblue"] = "Light Blue",
+                ["yellow"]    = "Yellow",
+                ["orange"]    = "Orange",
+                ["pink"]      = "Pink",
+                ["cyan"]      = "Cyan",
+                ["white"]     = "White"
+            },
+            set = function(info, val)
+                BisTooltipAddon.db.char.ilvl_color = val
+                if BisTooltipAddon.RefreshItemStateVisuals then BisTooltipAddon.RefreshItemStateVisuals() end
+            end,
+            get = function(info)
+                return BisTooltipAddon.db.char.ilvl_color or "white"
+            end
         },
 
         header_tooltips = {
@@ -383,9 +427,11 @@ local function migrateAddonDB()
     if not BisTooltipAddon.db.char.source_color then BisTooltipAddon.db.char.source_color = "green" end
     if BisTooltipAddon.db.char.dark_tooltips == nil then BisTooltipAddon.db.char.dark_tooltips = false end
     if BisTooltipAddon.db.char.show_item_borders == nil then BisTooltipAddon.db.char.show_item_borders = true end
+    if BisTooltipAddon.db.char.show_ilvl == nil then BisTooltipAddon.db.char.show_ilvl = true end
+    if not BisTooltipAddon.db.char.ilvl_color then BisTooltipAddon.db.char.ilvl_color = "white" end
 
     if not BisTooltipAddon.db.char.favorites then BisTooltipAddon.db.char.favorites = {} end
-    if not BisTooltipAddon.db.char.favorite_icon or BisTooltipAddon.db.char.favorite_icon > 8 then BisTooltipAddon.db.char.favorite_icon = 1 end
+    if not BisTooltipAddon.db.char.favorite_icon or BisTooltipAddon.db.char.favorite_icon < 1 or BisTooltipAddon.db.char.favorite_icon > 8 then BisTooltipAddon.db.char.favorite_icon = 1 end
     if not BisTooltipAddon.db.char.favorite_color then BisTooltipAddon.db.char.favorite_color = "yellow" end
     if not BisTooltipAddon.db.char.fav_counter then BisTooltipAddon.db.char.fav_counter = 0 end
     if not BisTooltipAddon.db.char.fav_scroll_status then BisTooltipAddon.db.char.fav_scroll_status = {} end
