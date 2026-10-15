@@ -487,10 +487,18 @@ local function createEnhancementsFrame(enhancements)
 
     for _, enhancement in ipairs(enhancements) do
         local size = 16
-        if enhancement.type == "item" then
-            frame:AddChild(createItemFrame(enhancement.id, size))
-        elseif enhancement.type == "spell" then
-            frame:AddChild(createSpellFrame(enhancement.id, size))
+        if type(enhancement) == "number" then
+            if enhancement > 0 then
+                frame:AddChild(createItemFrame(enhancement, size))
+            elseif enhancement < 0 then
+                frame:AddChild(createSpellFrame(-enhancement, size))
+            end
+        elseif type(enhancement) == "table" then
+            if enhancement.type == "item" then
+                frame:AddChild(createItemFrame(enhancement.id, size))
+            elseif enhancement.type == "spell" then
+                frame:AddChild(createSpellFrame(enhancement.id, size))
+            end
         end
     end
     return frame
