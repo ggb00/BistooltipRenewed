@@ -5,6 +5,7 @@ local LDB = LibStub("LibDataBroker-1.1", true)
 local LDBIcon = LDB and LibStub("LibDBIcon-1.0", true)
 local icon_loaded = false
 local icon_name = "BisTooltipIcon"
+local CURRENT_DB_VERSION = 8.1
 
 local keyToClassSpec = {}
 
@@ -401,13 +402,20 @@ local function buildFilterSpecOptions()
 end
 
 local function migrateAddonDB()
-    if not BisTooltipAddon.db.char.version or BisTooltipAddon.db.char.version < 8.1 then
-        BisTooltipAddon.db.char.version = 8.1
+    if not BisTooltipAddon.db.char.version or BisTooltipAddon.db.char.version < CURRENT_DB_VERSION then
+        BisTooltipAddon.db.char.version = CURRENT_DB_VERSION
         if not BisTooltipAddon.db.char.highlight_spec then BisTooltipAddon.db.char.highlight_spec = {} end
         if not BisTooltipAddon.db.char.filter_specs then BisTooltipAddon.db.char.filter_specs = {} end
-        BisTooltipAddon.db.char.class_index = GetPlayerClassIndex()
+        if not BisTooltipAddon.db.char.class_index then BisTooltipAddon.db.char.class_index = GetPlayerClassIndex() end
         if not BisTooltipAddon.db.char.spec_index then BisTooltipAddon.db.char.spec_index = 1 end
         if not BisTooltipAddon.db.char.phase_index then BisTooltipAddon.db.char.phase_index = 1 end
+
+        if not BisTooltipAddon.db.char.favorite_icon or BisTooltipAddon.db.char.favorite_icon < 1 or BisTooltipAddon.db.char.favorite_icon > 8 then
+            BisTooltipAddon.db.char.favorite_icon = 1
+        end
+        if BisTooltipAddon.db.char.fav_scroll_status then
+            BisTooltipAddon.db.char.fav_scroll_status.scrollvalue = 0
+        end
     end
 
     if not BisTooltipAddon.db.char.class_index then
@@ -431,7 +439,9 @@ local function migrateAddonDB()
     if not BisTooltipAddon.db.char.ilvl_color then BisTooltipAddon.db.char.ilvl_color = "white" end
 
     if not BisTooltipAddon.db.char.favorites then BisTooltipAddon.db.char.favorites = {} end
-    if not BisTooltipAddon.db.char.favorite_icon or BisTooltipAddon.db.char.favorite_icon < 1 or BisTooltipAddon.db.char.favorite_icon > 8 then BisTooltipAddon.db.char.favorite_icon = 1 end
+    if not BisTooltipAddon.db.char.favorite_icon or BisTooltipAddon.db.char.favorite_icon < 1 or BisTooltipAddon.db.char.favorite_icon > 8 then
+        BisTooltipAddon.db.char.favorite_icon = 1
+    end
     if not BisTooltipAddon.db.char.favorite_color then BisTooltipAddon.db.char.favorite_color = "yellow" end
     if not BisTooltipAddon.db.char.fav_counter then BisTooltipAddon.db.char.fav_counter = 0 end
     if not BisTooltipAddon.db.char.fav_scroll_status then BisTooltipAddon.db.char.fav_scroll_status = {} end
