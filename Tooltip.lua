@@ -145,12 +145,7 @@ local function ProcessTooltip(tooltip, link)
     if tt.BisTooltipRendered == itemId then return end
     tt.BisTooltipRendered = itemId
 
-    local translated_id = nil
-    if BisTooltip_FactionMap and BisTooltip_FactionMap[itemId] then
-        translated_id = BisTooltip_FactionMap[itemId]
-    elseif BisTooltip_AliToHorde and BisTooltip_AliToHorde[itemId] then
-        translated_id = BisTooltip_AliToHorde[itemId]
-    end
+    local translated_id = BisTooltipAddon.GetAltItemID and BisTooltipAddon:GetAltItemID(itemId)
 
     local itemBisData = BisTooltipAddon.ReverseLookup and (BisTooltipAddon.ReverseLookup[itemId] or (translated_id and BisTooltipAddon.ReverseLookup[translated_id]))
 

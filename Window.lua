@@ -27,7 +27,7 @@ local displayed_fav_widgets = {}
 local fav_widget_pool = {}
 
 local function IsPlayerHorde()
-    return UnitFactionGroup("player") == "Horde"
+    return BisTooltipAddon.IsHorde and BisTooltipAddon:IsHorde()
 end
 
 local missing_widgets = {}
@@ -530,13 +530,7 @@ local function drawItemSlot(slot_name, item_list)
     for _, original_item_id in ipairs(item_list) do
         if count >= 6 then break end
 
-        local display_id = original_item_id
-
-        if IsPlayerHorde() and BisTooltip_AliToHorde and BisTooltip_AliToHorde[original_item_id] then
-            display_id = BisTooltip_AliToHorde[original_item_id]
-        elseif not IsPlayerHorde() and BisTooltip_FactionMap and BisTooltip_FactionMap[original_item_id] then
-            display_id = BisTooltip_FactionMap[original_item_id]
-        end
+        local display_id = (BisTooltipAddon.GetFactionItem and BisTooltipAddon:GetFactionItem(original_item_id)) or original_item_id
 
         local item_widget = createItemFrame(display_id, 40)
         if display_id > 0 then
@@ -817,12 +811,7 @@ function BisTooltipAddon:RefreshFavoritesWindow()
         end)
 
         for _, itemID in ipairs(favList) do
-            local display_id = itemID
-            if IsPlayerHorde() and BisTooltip_AliToHorde and BisTooltip_AliToHorde[itemID] then
-                display_id = BisTooltip_AliToHorde[itemID]
-            elseif not IsPlayerHorde() and BisTooltip_FactionMap and BisTooltip_FactionMap[itemID] then
-                display_id = BisTooltip_FactionMap[itemID]
-            end
+            local display_id = (BisTooltipAddon.GetFactionItem and BisTooltipAddon:GetFactionItem(itemID)) or itemID
 
             local row = AceGUI:Create("SimpleGroup")
             row:SetLayout("Table")

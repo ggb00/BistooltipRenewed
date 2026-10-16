@@ -49,12 +49,38 @@ equipWatcher:SetScript("OnEvent", function(_, event)
     end
 end)
 
+local isHordeCache = nil
+function BisTooltipAddon:IsHorde()
+    if isHordeCache == nil then
+        isHordeCache = (UnitFactionGroup("player") == "Horde")
+    end
+    return isHordeCache
+end
+
+function BisTooltipAddon:GetAltItemID(itemID)
+    if not itemID then return nil end
+    itemID = tonumber(itemID)
+    if not itemID then return nil end
+    return (BisTooltip_FactionMap and BisTooltip_FactionMap[itemID]) or (BisTooltip_AliToHorde and BisTooltip_AliToHorde[itemID])
+end
+
+function BisTooltipAddon:GetFactionItem(itemID)
+    if not itemID then return nil end
+    itemID = tonumber(itemID)
+    if not itemID then return nil end
+    if self:IsHorde() then
+        return (BisTooltip_AliToHorde and BisTooltip_AliToHorde[itemID]) or itemID
+    else
+        return (BisTooltip_FactionMap and BisTooltip_FactionMap[itemID]) or itemID
+    end
+end
+
 function BisTooltipAddon:GetItemState(itemID)
     if not itemID then return 0 end
     itemID = tonumber(itemID)
     if not itemID then return 0 end
     if BisTooltip_EquippedCache[itemID] then return 2 end
-    local altID = (BisTooltip_FactionMap and BisTooltip_FactionMap[itemID]) or (BisTooltip_AliToHorde and BisTooltip_AliToHorde[itemID])
+    local altID = self:GetAltItemID(itemID)
     if altID and BisTooltip_EquippedCache[altID] then return 2 end
     if GetItemCount(itemID, false) > 0 or (altID and GetItemCount(altID, false) > 0) then return 1 end
     if GetItemCount(itemID, true) > 0 or (altID and GetItemCount(altID, true) > 0) then return 3 end
@@ -66,7 +92,7 @@ function BisTooltipAddon:IsFavorite(itemID)
     itemID = tonumber(itemID)
     if not itemID then return false end
     if self.db.char.favorites[itemID] then return true end
-    local altID = (BisTooltip_FactionMap and BisTooltip_FactionMap[itemID]) or (BisTooltip_AliToHorde and BisTooltip_AliToHorde[itemID])
+    local altID = self:GetAltItemID(itemID)
     if altID and self.db.char.favorites[altID] then return true end
     return false
 end
@@ -76,7 +102,7 @@ function BisTooltipAddon:ToggleFavorite(itemID)
     itemID = tonumber(itemID)
     if not itemID then return end
     self.db.char.favorites = self.db.char.favorites or {}
-    local altID = (BisTooltip_FactionMap and BisTooltip_FactionMap[itemID]) or (BisTooltip_AliToHorde and BisTooltip_AliToHorde[itemID])
+    local altID = self:GetAltItemID(itemID)
 
     if self:IsFavorite(itemID) then
         self.db.char.favorites[itemID] = nil
