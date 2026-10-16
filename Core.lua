@@ -261,7 +261,8 @@ function BisTooltipAddon:OnInitialize()
     self:BuildReverseLookup()
 
     self.AceAddonName = "BiS-Tooltip Renewed"
-    self.AddonNameAndVersion = "BiS-Tooltip Renewed"
+    local version = GetAddOnMetadata("BistooltipRenewed", "Version")
+    self.AddonNameAndVersion = version and ("BiS-Tooltip Renewed v" .. version) or "BiS-Tooltip Renewed"
     self:initConfig()
     self:addMapIcon()
     self:initBisTooltip()
