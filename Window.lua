@@ -2,6 +2,10 @@
 local addonName, addonTable = ...
 local AceGUI = LibStub("AceGUI-3.0")
 
+local GetItemInfo, GetSpellInfo, GetSpellLink = GetItemInfo, GetSpellInfo, GetSpellLink
+local tonumber, tostring, type, ipairs, pairs = tonumber, tostring, type, ipairs, pairs
+local wipe, tinsert, max = wipe, tinsert, math.max
+
 local class = nil
 local spec = nil
 local phase = nil

@@ -1,4 +1,8 @@
 -- Tooltip.lua
+local GetItemInfo = GetItemInfo
+local tonumber, tostring, type, ipairs = tonumber, tostring, type, ipairs
+local string_match, string_format = string.match, string.format
+
 local eventFrame = CreateFrame("Frame", nil, UIParent)
 
 local CLASS_COLORS = {
