@@ -15,6 +15,14 @@ BisTooltip_HexColors = {
     ["white"]     = "FFFFFF"
 }
 
+local function RebuildEquippedCache()
+    wipe(BisTooltip_EquippedCache)
+    for i = 1, 19 do
+        local itemID = GetInventoryItemID("player", i)
+        if itemID then BisTooltip_EquippedCache[itemID] = true end
+    end
+end
+
 local bagUpdateFrame = CreateFrame("Frame")
 bagUpdateFrame:Hide()
 bagUpdateFrame:SetScript("OnUpdate", function(self)
@@ -32,20 +40,14 @@ equipWatcher:RegisterEvent("PLAYERBANKSLOTS_CHANGED")
 equipWatcher:RegisterEvent("BANKFRAME_OPENED")
 equipWatcher:RegisterEvent("BANKFRAME_CLOSED")
 equipWatcher:SetScript("OnEvent", function(_, event)
-    if event == "BAG_UPDATE" or event == "PLAYERBANKSLOTS_CHANGED" or event == "BANKFRAME_OPENED" or event == "BANKFRAME_CLOSED" then
-        if BisTooltipAddon.IsWindowOpen and BisTooltipAddon:IsWindowOpen() then
-            bagUpdateFrame:Show()
-        end
-        return
+    if event == "PLAYER_EQUIPMENT_CHANGED" or event == "PLAYER_ENTERING_WORLD" then
+        RebuildEquippedCache()
     end
 
-    wipe(BisTooltip_EquippedCache)
-    for i = 1, 19 do
-        local itemID = GetInventoryItemID("player", i)
-        if itemID then BisTooltip_EquippedCache[itemID] = true end
-    end
-    if BisTooltipAddon.RefreshItemStateVisuals then
-        BisTooltipAddon.RefreshItemStateVisuals()
+    if BisTooltipAddon.IsWindowOpen and BisTooltipAddon:IsWindowOpen() then
+        if not bagUpdateFrame:IsShown() then
+            bagUpdateFrame:Show()
+        end
     end
 end)
 
