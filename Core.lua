@@ -260,6 +260,9 @@ function BisTooltipAddon:OnInitialize()
     self:BuildFactionMaps()
     self:BuildReverseLookup()
 
+    self.BuildFactionMaps = nil
+    self.BuildReverseLookup = nil
+
     self.AceAddonName = "BiS-Tooltip Renewed"
     local version = GetAddOnMetadata("BistooltipRenewed", "Version")
     self.AddonNameAndVersion = version and ("BiS-Tooltip Renewed v" .. version) or "BiS-Tooltip Renewed"
@@ -270,4 +273,6 @@ function BisTooltipAddon:OnInitialize()
     self:RegisterChatCommand("bt", "HandleChatCommand")
     self:RegisterChatCommand("bis", "HandleChatCommand")
     self:RegisterChatCommand("bistooltip", "HandleChatCommand")
+
+    collectgarbage("step", 200)
 end
