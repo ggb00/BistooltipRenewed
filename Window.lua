@@ -57,6 +57,17 @@ local function GetPhaseDropdownOptions()
     return PHASE_DROPDOWN_OPTS
 end
 
+local CLEAN_CLASS_NAMES = {
+    ["Death Knight"] = "DeathKnight",
+}
+local function GetCleanClassName(cls)
+    if not cls then return "" end
+    if not CLEAN_CLASS_NAMES[cls] then
+        CLEAN_CLASS_NAMES[cls] = cls:gsub("%s+", "")
+    end
+    return CLEAN_CLASS_NAMES[cls]
+end
+
 local EMPTY_TABLE = {}
 
 StaticPopupDialogs["BISTOOLTIP_CONFIRM_CLEAR_FAVORITES"] = {
@@ -624,7 +635,7 @@ local function drawSpecData()
     spec_frame:ReleaseChildren()
     drawTableHeader(spec_frame)
 
-    local list_class = BisTooltip_ItemLists and (BisTooltip_ItemLists[class] or BisTooltip_ItemLists[string.gsub(class, "%s+", "")])
+    local list_class = BisTooltip_ItemLists and (BisTooltip_ItemLists[class] or BisTooltip_ItemLists[GetCleanClassName(class)])
     if not spec or not phase or not list_class or not list_class[spec] then return end
     local slots = list_class[spec][phase]
     if not slots then return end
