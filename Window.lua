@@ -1037,6 +1037,9 @@ function BisTooltipAddon:CloseFavoritesFrame()
     if favorites_frame and favorites_frame.frame:IsShown() then
         favorites_frame:Hide()
     end
+    if fav_widget_pool and #fav_widget_pool > 0 then
+        wipe(fav_widget_pool)
+    end
 end
 
 function BisTooltipAddon:ToggleFavoritesFrame()
