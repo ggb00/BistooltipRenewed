@@ -102,8 +102,8 @@ local function StyleTooltip(tooltip, isForcedItem)
         if not tooltip.BisStyledDark then
             tooltip.BisStyledDark = true
             tooltip:SetBackdrop(DARK_BACKDROP)
+            tooltip:SetBackdropColor(0, 0, 0, 0.92)
         end
-        tooltip:SetBackdropColor(0, 0, 0, 0.92)
     else
         if tooltip.BisStyledDark then
             tooltip.BisStyledDark = nil
