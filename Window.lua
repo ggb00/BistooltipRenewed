@@ -46,6 +46,17 @@ local checkmark_path = "Interface\\AddOns\\" .. addonName .. "\\checkmark-16.tga
 local MAIN_WINDOW_FRAME_NAME = "BisTooltipRenewed_MainWindow"
 local isSpecialFrameRegistered = false
 
+local PHASE_DROPDOWN_OPTS = nil
+local function GetPhaseDropdownOptions()
+    if not PHASE_DROPDOWN_OPTS then
+        PHASE_DROPDOWN_OPTS = {}
+        for i, p in ipairs(BisTooltip_PhaseData) do
+            PHASE_DROPDOWN_OPTS[i] = p
+        end
+    end
+    return PHASE_DROPDOWN_OPTS
+end
+
 local EMPTY_TABLE = {}
 
 StaticPopupDialogs["BISTOOLTIP_CONFIRM_CLEAR_FAVORITES"] = {
@@ -734,9 +745,7 @@ local function drawDropdowns()
     end)
 
     classDropdown:SetList(class_options)
-    local phase_opts = {}
-    for i, p in ipairs(BisTooltip_PhaseData) do phase_opts[i] = p end
-    phaseDropDown:SetList(phase_opts)
+    phaseDropDown:SetList(GetPhaseDropdownOptions())
 
     dropDownGroup:AddChild(classDropdown)
     dropDownGroup:AddChild(specDropdown)
@@ -1059,9 +1068,7 @@ function BisTooltipAddon:reloadData()
     loadData()
 
     if main_frame then
-        local phase_opts = {}
-        for i, p in ipairs(BisTooltip_PhaseData) do phase_opts[i] = p end
-        phaseDropDown:SetList(phase_opts)
+        phaseDropDown:SetList(GetPhaseDropdownOptions())
         classDropdown:SetList(class_options)
         specDropdown:SetList(spec_options)
 
