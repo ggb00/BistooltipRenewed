@@ -1,6 +1,6 @@
 ## Interface: 30300
 ## Title: BiS-Tooltip Renewed
-## Version: 1.8
+## Version: 1.9
 ## Notes: In-game frame that shows BiS items for all classes & specs (3.3.5)
 ## Author: ggb00
 ## SavedVariables: BisTooltipRenewedDB
