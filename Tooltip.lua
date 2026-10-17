@@ -503,10 +503,13 @@ function BisTooltipAddon:initBisTooltip()
                     end
                 end
             elseif key == "LSHIFT" or key == "RSHIFT" then
-                UpdateComparison(GameTooltip)
-                UpdateComparison(AtlasLootTooltip)
-
-                if ItemRefTooltip:IsShown() then
+                if GameTooltip:IsShown() then
+                    UpdateComparison(GameTooltip)
+                end
+                if AtlasLootTooltip and AtlasLootTooltip:IsShown() then
+                    UpdateComparison(AtlasLootTooltip)
+                end
+                if ItemRefTooltip and ItemRefTooltip:IsShown() then
                     local focus = GetMouseFocus()
                     if focus and (focus == ItemRefTooltip or focus:GetParent() == ItemRefTooltip) then
                         UpdateComparison(ItemRefTooltip)
