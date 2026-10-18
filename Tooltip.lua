@@ -3,7 +3,6 @@ local GetItemInfo = GetItemInfo
 local tonumber, tostring, type, ipairs = tonumber, tostring, type, ipairs
 local string_match, string_format = string.match, string.format
 
-local LINK_TO_ID_CACHE = {}
 local RESOLVED_SOURCE_CACHE = {}
 
 local eventFrame = CreateFrame("Frame", nil, UIParent)
@@ -162,15 +161,8 @@ local function ProcessTooltip(tooltip, link)
     end
     if not link or not link:find("item:", 1, true) then return end
 
-    local itemId = LINK_TO_ID_CACHE[link]
-    if not itemId then
-        itemId = tonumber(string_match(link, "item:(%d+)"))
-        if itemId then
-            LINK_TO_ID_CACHE[link] = itemId
-        else
-            return
-        end
-    end
+    local itemId = tonumber(string_match(link, "item:(%d+)"))
+    if not itemId then return end
 
     if not GetItemInfo(itemId) then return end
 
