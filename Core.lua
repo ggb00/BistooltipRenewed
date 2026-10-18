@@ -39,9 +39,13 @@ equipWatcher:RegisterEvent("BAG_UPDATE")
 equipWatcher:RegisterEvent("PLAYERBANKSLOTS_CHANGED")
 equipWatcher:RegisterEvent("BANKFRAME_OPENED")
 equipWatcher:RegisterEvent("BANKFRAME_CLOSED")
-equipWatcher:SetScript("OnEvent", function(_, event)
+equipWatcher:SetScript("OnEvent", function(_, event, arg1)
     if event == "PLAYER_EQUIPMENT_CHANGED" or event == "PLAYER_ENTERING_WORLD" then
         RebuildEquippedCache()
+    elseif event == "BAG_UPDATE" then
+        if arg1 and (arg1 < -1 or arg1 > 11) then
+            return
+        end
     end
 
     if BisTooltipAddon.IsWindowOpen and BisTooltipAddon:IsWindowOpen() then
