@@ -3,6 +3,9 @@ local GetItemInfo = GetItemInfo
 local tonumber, tostring, type, ipairs = tonumber, tostring, type, ipairs
 local string_match, string_format = string.match, string.format
 
+local LINK_TO_ID_CACHE = {}
+local RESOLVED_SOURCE_CACHE = {}
+
 local eventFrame = CreateFrame("Frame", nil, UIParent)
 
 local CLASS_COLORS = {
@@ -56,12 +59,17 @@ local DEFAULT_BACKDROP = {
     insets = { left = 5, right = 5, top = 5, bottom = 5 }
 }
 
-local function ResolveSource(sourceRef)
+local function ResolveSource(sourceRef, targetId)
     if not sourceRef then return nil end
+    if targetId and RESOLVED_SOURCE_CACHE[targetId] then
+        return RESOLVED_SOURCE_CACHE[targetId]
+    end
+
     local strTable = BisTooltip_SourceStrings
+    local result = nil
 
     if type(sourceRef) == "number" then
-        return strTable and strTable[sourceRef] or nil
+        result = strTable and strTable[sourceRef] or nil
     elseif type(sourceRef) == "table" then
         local resolved = {}
         for i = 1, #sourceRef do
@@ -72,19 +80,32 @@ local function ResolveSource(sourceRef)
                 resolved[i] = ref
             end
         end
-        return resolved
+        result = resolved
     elseif type(sourceRef) == "string" then
-        return sourceRef
+        result = sourceRef
     end
-    return nil
+
+    if targetId and result then
+        RESOLVED_SOURCE_CACHE[targetId] = result
+    end
+    return result
 end
 
 local function GetItemSources(itemId, translatedId)
+    if not itemId then return nil end
+    if RESOLVED_SOURCE_CACHE[itemId] then
+        return RESOLVED_SOURCE_CACHE[itemId]
+    end
+
     local raw = BisTooltip_ItemSources and BisTooltip_ItemSources[itemId]
+    local targetId = itemId
+
     if not raw and translatedId and BisTooltip_ItemSources then
         raw = BisTooltip_ItemSources[translatedId]
+        targetId = translatedId
     end
-    return ResolveSource(raw)
+
+    return ResolveSource(raw, targetId)
 end
 
 local function StyleTooltip(tooltip, isForcedItem)
@@ -141,8 +162,15 @@ local function ProcessTooltip(tooltip, link)
     end
     if not link or not link:find("item:", 1, true) then return end
 
-    local itemId = tonumber(string_match(link, "item:(%d+)"))
-    if not itemId then return end
+    local itemId = LINK_TO_ID_CACHE[link]
+    if not itemId then
+        itemId = tonumber(string_match(link, "item:(%d+)"))
+        if itemId then
+            LINK_TO_ID_CACHE[link] = itemId
+        else
+            return
+        end
+    end
 
     if not GetItemInfo(itemId) then return end
 
@@ -493,14 +521,14 @@ function BisTooltipAddon:initBisTooltip()
                     return
                 end
 
-                UpdateTooltipOnModifier(GameTooltip)
-                UpdateTooltipOnModifier(AtlasLootTooltip)
-
-                if ItemRefTooltip:IsShown() then
-                    local focus = GetMouseFocus()
-                    if focus and (focus == ItemRefTooltip or focus:GetParent() == ItemRefTooltip) then
-                        UpdateTooltipOnModifier(ItemRefTooltip)
-                    end
+                if GameTooltip:IsShown() then
+                    UpdateTooltipOnModifier(GameTooltip)
+                end
+                if AtlasLootTooltip and AtlasLootTooltip:IsShown() then
+                    UpdateTooltipOnModifier(AtlasLootTooltip)
+                end
+                if ItemRefTooltip and ItemRefTooltip:IsShown() and ItemRefTooltip:IsMouseOver() then
+                    UpdateTooltipOnModifier(ItemRefTooltip)
                 end
             elseif key == "LSHIFT" or key == "RSHIFT" then
                 if GameTooltip:IsShown() then
@@ -509,11 +537,8 @@ function BisTooltipAddon:initBisTooltip()
                 if AtlasLootTooltip and AtlasLootTooltip:IsShown() then
                     UpdateComparison(AtlasLootTooltip)
                 end
-                if ItemRefTooltip and ItemRefTooltip:IsShown() then
-                    local focus = GetMouseFocus()
-                    if focus and (focus == ItemRefTooltip or focus:GetParent() == ItemRefTooltip) then
-                        UpdateComparison(ItemRefTooltip)
-                    end
+                if ItemRefTooltip and ItemRefTooltip:IsShown() and ItemRefTooltip:IsMouseOver() then
+                    UpdateComparison(ItemRefTooltip)
                 end
             end
         end
