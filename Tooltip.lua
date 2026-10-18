@@ -4,6 +4,7 @@ local tonumber, tostring, type, ipairs = tonumber, tostring, type, ipairs
 local string_match, string_format = string.match, string.format
 
 local RESOLVED_SOURCE_CACHE = {}
+local EMPTY_TABLE = {}
 
 local eventFrame = CreateFrame("Frame", nil, UIParent)
 
@@ -97,14 +98,15 @@ local function GetItemSources(itemId, translatedId)
     end
 
     local raw = BisTooltip_ItemSources and BisTooltip_ItemSources[itemId]
-    local targetId = itemId
-
     if not raw and translatedId and BisTooltip_ItemSources then
         raw = BisTooltip_ItemSources[translatedId]
-        targetId = translatedId
     end
 
-    return ResolveSource(raw, targetId)
+    local result = ResolveSource(raw, itemId)
+    if translatedId and result then
+        RESOLVED_SOURCE_CACHE[translatedId] = result
+    end
+    return result
 end
 
 local function StyleTooltip(tooltip, isForcedItem)
@@ -233,7 +235,9 @@ local function ProcessTooltip(tooltip, link)
 
         if type(sources) == "table" then
             for _, src in ipairs(sources) do
-                tt:AddLine(string.format("%s |cFF%s%s|r", icon, hexColor, src), 1, 1, 1, true)
+                if src then
+                    tt:AddLine(string.format("%s |cFF%s%s|r", icon, hexColor, src), 1, 1, 1, true)
+                end
             end
         elseif type(sources) == "string" then
             tt:AddLine(string.format("%s |cFF%s%s|r", icon, hexColor, sources), 1, 1, 1, true)
