@@ -276,7 +276,7 @@ local function ProcessMissingItems(self, elapsed)
         if itemName then
             resolvedAny = true
             for _, widget in ipairs(widgets) do
-                if widget and widget.frame and widget.frame:IsShown() then
+                if widget and widget.frame and widget.frame:IsShown() and widget.item_id == item_id then
                     widget:SetImage(itemIcon)
                     if bindType == 2 then widget.frame.bisBoeMark:Show() else widget.frame.bisBoeMark:Hide() end
                     ApplyItemStateVisuals(widget, item_id, false)
@@ -327,6 +327,7 @@ end)
 local function createItemFrame(item_id, size)
     if item_id < 0 then
         local empty_icon = AceGUI:Create("Icon")
+        empty_icon.item_id = item_id
         empty_icon:SetImageSize(size, size)
         empty_icon.frame:EnableMouse(false)
 
@@ -341,6 +342,8 @@ local function createItemFrame(item_id, size)
     end
 
     local item_frame = AceGUI:Create("Icon")
+    item_frame.item_id = item_id
+    item_frame:SetCallback("OnRelease", function(self) self.item_id = nil end)
     item_frame:SetImageSize(size, size)
 
     item_frame.frame:EnableMouse(true)
