@@ -87,6 +87,9 @@ StaticPopupDialogs["BISTOOLTIP_CONFIRM_CLEAR_FAVORITES"] = {
         if BisTooltipAddon.RefreshItemStateVisuals then
             BisTooltipAddon.RefreshItemStateVisuals()
         end
+        if BisTooltipAddon.ClearTooltipCache then
+            BisTooltipAddon:ClearTooltipCache()
+        end
     end,
     OnShow = function(self)
         self:SetFrameStrata("TOOLTIP")

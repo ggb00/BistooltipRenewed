@@ -129,6 +129,9 @@ function BisTooltipAddon:ToggleFavorite(itemID)
     if self.RefreshFavoritesWindow then
         self:RefreshFavoritesWindow()
     end
+    if self.ClearTooltipCache then
+        self:ClearTooltipCache()
+    end
 end
 
 function BisTooltipAddon:BuildFactionMaps()
