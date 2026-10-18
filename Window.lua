@@ -28,7 +28,6 @@ local favorites_scroll = nil
 local FAVORITES_WINDOW_FRAME_NAME = "BisTooltipRenewed_FavoritesWindow"
 local isSpecialFavFrameRegistered = false
 local displayed_fav_widgets = {}
-local fav_widget_pool = {}
 
 local function IsPlayerHorde()
     return BisTooltipAddon.IsHorde and BisTooltipAddon:IsHorde()
@@ -240,17 +239,17 @@ end
 local function RefreshItemStateVisuals()
     if main_frame and main_frame.frame:IsShown() then
         for i = 1, #displayed_item_widgets do
-            local entry = displayed_item_widgets[i]
-            if entry.widget and entry.widget.frame then
-                ApplyItemStateVisuals(entry.widget, entry.item_id, false)
+            local widget = displayed_item_widgets[i]
+            if widget and widget.frame and widget.item_id then
+                ApplyItemStateVisuals(widget, widget.item_id, false)
             end
         end
     end
     if favorites_frame and favorites_frame.frame:IsShown() then
         for i = 1, #displayed_fav_widgets do
-            local entry = displayed_fav_widgets[i]
-            if entry.widget and entry.widget.frame then
-                ApplyItemStateVisuals(entry.widget, entry.item_id, false)
+            local widget = displayed_fav_widgets[i]
+            if widget and widget.frame and widget.item_id then
+                ApplyItemStateVisuals(widget, widget.item_id, false)
             end
         end
     end
@@ -563,7 +562,7 @@ local function drawItemSlot(slot_name, item_list)
 
         local item_widget = createItemFrame(display_id, 40)
         if display_id > 0 then
-            table.insert(displayed_item_widgets, { widget = item_widget, item_id = display_id })
+            displayed_item_widgets[#displayed_item_widgets + 1] = item_widget
         end
         spec_frame:AddChild(item_widget)
         count = count + 1
@@ -803,9 +802,6 @@ end
 function BisTooltipAddon:RefreshFavoritesWindow()
     if not favorites_frame or not favorites_frame.frame:IsShown() or not favorites_scroll then return end
 
-    for i = 1, #displayed_fav_widgets do
-        fav_widget_pool[#fav_widget_pool + 1] = displayed_fav_widgets[i]
-    end
     wipe(displayed_fav_widgets)
 
     local targetScroll = 0
@@ -846,10 +842,7 @@ function BisTooltipAddon:RefreshFavoritesWindow()
             row:SetUserData("table", { columns = {42, 330, 26}, space = 4, align = "middle" })
 
             local itemWidget = createItemFrame(display_id, 36)
-            local entry = table.remove(fav_widget_pool) or {}
-            entry.widget = itemWidget
-            entry.item_id = display_id
-            displayed_fav_widgets[#displayed_fav_widgets + 1] = entry
+            displayed_fav_widgets[#displayed_fav_widgets + 1] = itemWidget
             row:AddChild(itemWidget)
 
             local itemName, _, itemRarity, _, _, _, itemSubType, _, equipSlot = GetItemInfo(display_id)
@@ -1063,9 +1056,6 @@ function BisTooltipAddon:CloseFavoritesFrame()
     StaticPopup_Hide("BISTOOLTIP_CONFIRM_CLEAR_FAVORITES")
     if favorites_frame and favorites_frame.frame:IsShown() then
         favorites_frame:Hide()
-    end
-    if fav_widget_pool and #fav_widget_pool > 0 then
-        wipe(fav_widget_pool)
     end
 end
 
