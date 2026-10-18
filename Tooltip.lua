@@ -177,8 +177,8 @@ local function ProcessTooltip(tooltip, link)
 
     if itemBisData then
         local isAltDown = IsAltKeyDown()
-        local highlightSpec = db.highlight_spec
-        local filterSpecs = db.filter_specs
+        local highlightSpec = db.highlight_spec or EMPTY_TABLE
+        local filterSpecs = db.filter_specs or EMPTY_TABLE
         local useClassColors = db.use_class_colors
         local filterClassNames = db.filter_class_names
         local selectedColor = db.highlight_color or "class"
@@ -403,25 +403,7 @@ end
 local function UpdateTooltipOnModifier(tt)
     if not tt or not tt:IsShown() then return end
     RefreshTooltip(tt)
-    if ShouldCompareItems() then
-        local compareVisible = false
-        if tt.shoppingTooltips and tt.shoppingTooltips[1] and tt.shoppingTooltips[1]:IsShown() then
-            compareVisible = true
-        elseif tt == AtlasLootTooltip and AtlasLootTooltip2 and AtlasLootTooltip2:IsShown() then
-            compareVisible = true
-        end
-
-        if not compareVisible then
-            if not tt.shoppingTooltips then
-                if tt == ItemRefTooltip then
-                    tt.shoppingTooltips = { ItemRefShoppingTooltip1, ItemRefShoppingTooltip2 }
-                else
-                    tt.shoppingTooltips = { ShoppingTooltip1, ShoppingTooltip2, ShoppingTooltip3 }
-                end
-            end
-            GameTooltip_ShowCompareItem(tt)
-        end
-    end
+    UpdateComparison(tt)
 end
 
 function BisTooltipAddon:ClearTooltipCache()
