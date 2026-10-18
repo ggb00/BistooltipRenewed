@@ -631,6 +631,8 @@ local function drawSpecData()
 
     wipe(displayed_item_widgets)
 
+    spec_frame:ReleaseChildren()
+
     if not (favorites_frame and favorites_frame.frame and favorites_frame.frame:IsShown()) then
         wipe(missing_widgets)
         wipe(fetch_attempts)
@@ -650,7 +652,6 @@ local function drawSpecData()
         end
     end
 
-    spec_frame:ReleaseChildren()
     drawTableHeader(spec_frame)
 
     local list_class = BisTooltip_ItemLists and (BisTooltip_ItemLists[class] or BisTooltip_ItemLists[GetCleanClassName(class)])
