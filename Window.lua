@@ -315,14 +315,6 @@ local function StartItemFetch()
     end
 end
 
-item_fetch_frame:RegisterEvent("GET_ITEM_INFO_RECEIVED")
-item_fetch_frame:SetScript("OnEvent", function()
-    if next(missing_widgets) then
-        fetch_timer = 0.25
-        item_fetch_frame:SetScript("OnUpdate", ProcessMissingItems)
-    end
-end)
-
 local function createItemFrame(item_id, size)
     if item_id < 0 then
         local empty_icon = AceGUI:Create("Icon")
