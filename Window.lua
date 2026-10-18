@@ -550,6 +550,8 @@ local SLOT_DISPLAY_ORDER = {
     "Trinket 1", "Trinket 2", "Weapon", "Off hand", "Ranged"
 }
 
+local HEADER_TEXTS = {"BIS", "Alt 1", "Alt 2", "Alt 3", "Alt 4", "Alt 5"}
+
 local function drawItemSlot(slot_name, item_list)
     local f = AceGUI:Create("Label")
     f:SetText(slot_name)
@@ -604,10 +606,9 @@ local function drawTableHeader(frame)
     eLabel.label:SetJustifyH("LEFT")
     frame:AddChild(eLabel)
 
-    local headerTexts = {"BIS", "Alt 1", "Alt 2", "Alt 3", "Alt 4", "Alt 5"}
     for i = 1, 6 do
         local topLabel = AceGUI:Create("Label")
-        topLabel:SetText(headerTexts[i])
+        topLabel:SetText(HEADER_TEXTS[i])
         topLabel:SetColor(color, color, color)
         topLabel:SetWidth(44)
         topLabel.label:SetJustifyH("CENTER")
