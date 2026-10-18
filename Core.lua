@@ -1,7 +1,7 @@
 -- Core.lua
 BisTooltipAddon = LibStub("AceAddon-3.0"):NewAddon("BiS-Tooltip Renewed", "AceConsole-3.0")
-BisTooltip_AliToHorde = {}
-BisTooltip_EquippedCache = {}
+local BisTooltip_AliToHorde = {}
+local BisTooltip_EquippedCache = {}
 
 BisTooltip_HexColors = {
     ["purple"]    = "CC4CFF",
