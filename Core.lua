@@ -58,7 +58,12 @@ end)
 local isHordeCache = nil
 function BisTooltipAddon:IsHorde()
     if isHordeCache == nil then
-        isHordeCache = (UnitFactionGroup("player") == "Horde")
+        local faction = UnitFactionGroup("player")
+        if faction then
+            isHordeCache = (faction == "Horde")
+        else
+            return false
+        end
     end
     return isHordeCache
 end
