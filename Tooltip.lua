@@ -139,9 +139,9 @@ local function ProcessTooltip(tooltip, link)
     if not link then
         _, link = tt:GetItem()
     end
-    if not link then return end
+    if not link or not link:find("item:", 1, true) then return end
 
-    local itemId = tonumber(string.match(link, "item:(%d+)"))
+    local itemId = tonumber(string_match(link, "item:(%d+)"))
     if not itemId then return end
 
     if not GetItemInfo(itemId) then return end
