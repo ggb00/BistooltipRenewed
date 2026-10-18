@@ -141,15 +141,24 @@ local function HandleItemTooltip(widget, item_id)
 end
 
 local function ApplyItemStateVisuals(widget, item_id, is_missing)
+    local size = widget.image and widget.image:GetWidth() or 40
+    if size < 30 then
+        widget.image:SetVertexColor(1, 1, 1, 1)
+        if widget.frame.bisCheckMark then widget.frame.bisCheckMark:Hide() end
+        if widget.frame.bisBorder then widget.frame.bisBorder:Hide() end
+        if widget.frame.bisStarMark then widget.frame.bisStarMark:Hide() end
+        if widget.frame.bisILvl then widget.frame.bisILvl:Hide() end
+        return
+    end
+
     local markIndex = (BisTooltipAddon.db and BisTooltipAddon.db.char and BisTooltipAddon.db.char.favorite_icon) or 1
     if markIndex < 1 or markIndex > 8 then markIndex = 1 end
 
     if widget.frame.bisILvl then
         local db = BisTooltipAddon.db and BisTooltipAddon.db.char
         local showILvl = db and (db.show_ilvl ~= false)
-        local size = widget.image and widget.image:GetWidth() or 40
 
-        if showILvl and not is_missing and size >= 30 and item_id and item_id > 0 then
+        if showILvl and not is_missing and item_id and item_id > 0 then
             local _, _, _, itemLevel = GetItemInfo(item_id)
             if itemLevel and itemLevel > 0 then
                 local colorKey = (db and db.ilvl_color) or "white"
@@ -164,22 +173,6 @@ local function ApplyItemStateVisuals(widget, item_id, is_missing)
         end
     end
 
-    if is_missing then
-        widget.image:SetVertexColor(1, 1, 1, 1)
-        widget.frame.bisCheckMark:Hide()
-        if widget.frame.bisBorder then widget.frame.bisBorder:Hide() end
-        if widget.frame.bisStarMark then
-            if BisTooltipAddon:IsFavorite(item_id) then
-                widget.frame.bisStarMark:SetTexture("Interface\\TargetingFrame\\UI-RaidTargetingIcons")
-                SetRaidTargetIconTexture(widget.frame.bisStarMark, markIndex)
-                widget.frame.bisStarMark:Show()
-            else
-                widget.frame.bisStarMark:Hide()
-            end
-        end
-        return
-    end
-
     if widget.frame.bisStarMark then
         if BisTooltipAddon:IsFavorite(item_id) then
             widget.frame.bisStarMark:SetTexture("Interface\\TargetingFrame\\UI-RaidTargetingIcons")
@@ -188,6 +181,13 @@ local function ApplyItemStateVisuals(widget, item_id, is_missing)
         else
             widget.frame.bisStarMark:Hide()
         end
+    end
+
+    if is_missing then
+        widget.image:SetVertexColor(1, 1, 1, 1)
+        widget.frame.bisCheckMark:Hide()
+        if widget.frame.bisBorder then widget.frame.bisBorder:Hide() end
+        return
     end
 
     local state = BisTooltipAddon:GetItemState(item_id)
