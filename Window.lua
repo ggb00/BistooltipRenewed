@@ -289,6 +289,7 @@ local function ProcessMissingItems(self, elapsed)
 
             if attempts >= MAX_FETCH_ATTEMPTS then
                 missing_widgets[item_id] = nil
+                fetch_attempts[item_id] = nil
             else
                 hasRemaining = true
                 scanner:SetOwner(UIParent, "ANCHOR_NONE")
