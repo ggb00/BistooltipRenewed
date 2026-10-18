@@ -373,12 +373,9 @@ local function UpdateComparison(tt)
     if not link then return end
 
     if not ShouldCompareItems() then
-        RefreshTooltip(tt)
         HideShoppingTooltips()
         return
     end
-
-    RefreshTooltip(tt)
 
     local compareVisible = false
     if tt.shoppingTooltips and tt.shoppingTooltips[1] and tt.shoppingTooltips[1]:IsShown() then
@@ -456,11 +453,6 @@ function BisTooltipAddon:initBisTooltip()
 
     hooksecurefunc(GameTooltip, "SetInventoryItem", HookSetInventoryItem)
     if ItemRefTooltip then hooksecurefunc(ItemRefTooltip, "SetInventoryItem", HookSetInventoryItem) end
-    if ShoppingTooltip1 then hooksecurefunc(ShoppingTooltip1, "SetInventoryItem", HookSetInventoryItem) end
-    if ShoppingTooltip2 then hooksecurefunc(ShoppingTooltip2, "SetInventoryItem", HookSetInventoryItem) end
-    if ShoppingTooltip3 then hooksecurefunc(ShoppingTooltip3, "SetInventoryItem", HookSetInventoryItem) end
-    if ItemRefShoppingTooltip1 then hooksecurefunc(ItemRefShoppingTooltip1, "SetInventoryItem", HookSetInventoryItem) end
-    if ItemRefShoppingTooltip2 then hooksecurefunc(ItemRefShoppingTooltip2, "SetInventoryItem", HookSetInventoryItem) end
 
     if ItemRefTooltip and not ItemRefTooltip.shoppingTooltips then
         ItemRefTooltip.shoppingTooltips = { ItemRefShoppingTooltip1, ItemRefShoppingTooltip2 }
