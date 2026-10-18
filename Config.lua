@@ -89,7 +89,7 @@ local configTable = {
                 if BisTooltipAddon.RefreshItemStateVisuals then BisTooltipAddon.RefreshItemStateVisuals() end
             end,
             get = function(info)
-                if BisTooltipAddon.db.char.show_ilvl == nil then return true end
+                if BisTooltipAddon.db.char.show_ilvl == nil then return false end
                 return BisTooltipAddon.db.char.show_ilvl
             end
         },
@@ -435,7 +435,7 @@ local function migrateAddonDB()
     if not BisTooltipAddon.db.char.source_color then BisTooltipAddon.db.char.source_color = "green" end
     if BisTooltipAddon.db.char.dark_tooltips == nil then BisTooltipAddon.db.char.dark_tooltips = false end
     if BisTooltipAddon.db.char.show_item_borders == nil then BisTooltipAddon.db.char.show_item_borders = true end
-    if BisTooltipAddon.db.char.show_ilvl == nil then BisTooltipAddon.db.char.show_ilvl = true end
+    if BisTooltipAddon.db.char.show_ilvl == nil then BisTooltipAddon.db.char.show_ilvl = false end
     if not BisTooltipAddon.db.char.ilvl_color then BisTooltipAddon.db.char.ilvl_color = "white" end
 
     if not BisTooltipAddon.db.char.favorites then BisTooltipAddon.db.char.favorites = {} end
