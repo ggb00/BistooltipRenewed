@@ -373,18 +373,12 @@ local function UpdateComparison(tt)
     if not link then return end
 
     if not ShouldCompareItems() then
-        local owner = tt:GetOwner()
-        if owner and owner:IsShown() and owner.GetScript and owner:GetScript("OnEnter") then
-            RefreshTooltip(tt)
-        end
+        RefreshTooltip(tt)
         HideShoppingTooltips()
         return
     end
 
-    local owner = tt:GetOwner()
-    if owner and owner:IsShown() and owner.GetScript and owner:GetScript("OnEnter") then
-        RefreshTooltip(tt)
-    end
+    RefreshTooltip(tt)
 
     local compareVisible = false
     if tt.shoppingTooltips and tt.shoppingTooltips[1] and tt.shoppingTooltips[1]:IsShown() then
