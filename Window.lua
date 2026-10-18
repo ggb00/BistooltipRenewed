@@ -335,7 +335,26 @@ local function createItemFrame(item_id, size)
 
     local item_frame = AceGUI:Create("Icon")
     item_frame.item_id = item_id
-    item_frame:SetCallback("OnRelease", function(self) self.item_id = nil end)
+    item_frame:SetCallback("OnRelease", function(self)
+        local id = self.item_id
+        if id and missing_widgets[id] then
+            local list = missing_widgets[id]
+            for i = #list, 1, -1 do
+                if list[i] == self then
+                    table.remove(list, i)
+                    break
+                end
+            end
+            if #list == 0 then
+                missing_widgets[id] = nil
+                fetch_attempts[id] = nil
+                if not next(missing_widgets) then
+                    item_fetch_frame:SetScript("OnUpdate", nil)
+                end
+            end
+        end
+        self.item_id = nil
+    end)
     item_frame:SetImageSize(size, size)
 
     item_frame.frame:EnableMouse(true)
