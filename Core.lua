@@ -140,6 +140,11 @@ function BisTooltipAddon:BuildFactionMaps()
     end
 end
 
+local function CompareReverseLookupEntries(a, b)
+    if a.class == b.class then return a.spec < b.spec end
+    return a.class < b.class
+end
+
 function BisTooltipAddon:BuildReverseLookup()
     self.FormattedNames = {}
     local canonicalClasses = {}
@@ -242,10 +247,7 @@ function BisTooltipAddon:BuildReverseLookup()
             end
         end
 
-        table.sort(flatList, function(a, b)
-            if a.class == b.class then return a.spec < b.spec end
-            return a.class < b.class
-        end)
+        table.sort(flatList, CompareReverseLookupEntries)
         self.ReverseLookup[itemId] = flatList
     end
 
@@ -253,7 +255,6 @@ function BisTooltipAddon:BuildReverseLookup()
     canonicalClasses = nil
     specKeys = nil
     labels = nil
-    collectgarbage("step", 100)
 end
 
 function BisTooltipAddon:HandleChatCommand(input)
@@ -285,5 +286,5 @@ function BisTooltipAddon:OnInitialize()
     self:RegisterChatCommand("bis", "HandleChatCommand")
     self:RegisterChatCommand("bistooltip", "HandleChatCommand")
 
-    collectgarbage("step", 200)
+    collectgarbage("collect")
 end
