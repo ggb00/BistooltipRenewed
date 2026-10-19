@@ -41,6 +41,31 @@ local item_fetch_frame = CreateFrame("Frame")
 local fetch_timer = 0
 local MAX_FETCH_ATTEMPTS = 10
 
+local boe_cache = {}
+local function IsItemBoe(itemId)
+    if not itemId or itemId <= 0 then return false end
+    if boe_cache[itemId] ~= nil then
+        return boe_cache[itemId]
+    end
+    scanner:SetOwner(UIParent, "ANCHOR_NONE")
+    scanner:ClearLines()
+    scanner:SetHyperlink("item:" .. itemId .. ":0:0:0:0:0:0:0")
+    local isBoe = false
+    local numLines = scanner:NumLines() or 0
+    local checkLines = (numLines < 5) and numLines or 5
+    for i = 2, checkLines do
+        local fontString = _G["BisTooltipScannerTextLeft" .. i]
+        local text = fontString and fontString:GetText()
+        if text and (text == ITEM_BIND_ON_EQUIP or text:find(ITEM_BIND_ON_EQUIP, 1, true)) then
+            isBoe = true
+            break
+        end
+    end
+    scanner:ClearLines()
+    boe_cache[itemId] = isBoe
+    return isBoe
+end
+
 local checkmark_path = "Interface\\AddOns\\" .. addonName .. "\\checkmark-16.tga"
 local MAIN_WINDOW_FRAME_NAME = "BisTooltipRenewed_MainWindow"
 local isSpecialFrameRegistered = false
@@ -279,14 +304,20 @@ local function ProcessMissingItems(self, elapsed)
     local resolvedAny = false
 
     for item_id, widgets in pairs(missing_widgets) do
-        local itemName, _, _, _, _, _, _, _, _, itemIcon, _, _, _, bindType = GetItemInfo(item_id)
+        local itemName, _, _, _, _, _, _, _, _, itemIcon = GetItemInfo(item_id)
 
         if itemName then
             resolvedAny = true
+            local isBoe = IsItemBoe(item_id)
             for _, widget in ipairs(widgets) do
                 if widget and widget.frame and widget.frame:IsShown() and widget.item_id == item_id then
                     widget:SetImage(itemIcon)
-                    if bindType == 2 then widget.frame.bisBoeMark:Show() else widget.frame.bisBoeMark:Hide() end
+                    local wSize = widget.image and widget.image:GetWidth() or 40
+                    if isBoe and wSize >= 30 then
+                        widget.frame.bisBoeMark:Show()
+                    else
+                        widget.frame.bisBoeMark:Hide()
+                    end
                     ApplyItemStateVisuals(widget, item_id, false)
                 end
             end
@@ -437,7 +468,7 @@ local function createItemFrame(item_id, size)
 
     item_frame:SetCallback("OnLeave", function() GameTooltip:Hide() end)
 
-    local itemName, _, _, _, _, _, _, _, _, itemIcon, _, _, _, bindType = GetItemInfo(item_id)
+    local itemName, _, _, _, _, _, _, _, _, itemIcon = GetItemInfo(item_id)
 
     if not itemName then
         item_frame:SetImage("Interface\\Icons\\INV_Misc_QuestionMark")
@@ -451,7 +482,11 @@ local function createItemFrame(item_id, size)
     end
 
     item_frame:SetImage(itemIcon)
-    if bindType == 2 then item_frame.frame.bisBoeMark:Show() else item_frame.frame.bisBoeMark:Hide() end
+    if size >= 30 and IsItemBoe(item_id) then
+        item_frame.frame.bisBoeMark:Show()
+    else
+        item_frame.frame.bisBoeMark:Hide()
+    end
     ApplyItemStateVisuals(item_frame, item_id, false)
 
     return item_frame
