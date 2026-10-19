@@ -96,8 +96,8 @@ end
 
 local function GetItemSources(itemId, translatedId)
     if not itemId then return nil end
-    if RESOLVED_SOURCE_CACHE[itemId] then
-        return RESOLVED_SOURCE_CACHE[itemId]
+    if RESOLVED_SOURCE_CACHE[itemId] ~= nil then
+        return RESOLVED_SOURCE_CACHE[itemId] or nil
     end
 
     local raw = BisTooltip_ItemSources and BisTooltip_ItemSources[itemId]
@@ -106,8 +106,9 @@ local function GetItemSources(itemId, translatedId)
     end
 
     local result = ResolveSource(raw, itemId)
-    if translatedId and result then
-        RESOLVED_SOURCE_CACHE[translatedId] = result
+    RESOLVED_SOURCE_CACHE[itemId] = result or false
+    if translatedId then
+        RESOLVED_SOURCE_CACHE[translatedId] = result or false
     end
     return result
 end
