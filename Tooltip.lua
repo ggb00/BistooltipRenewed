@@ -154,8 +154,6 @@ local function ProcessTooltip(tooltip, link)
     local tt = tooltip or (this ~= nil and this) or GameTooltip
     if not tt or not tt.GetItem then return end
 
-    StyleTooltip(tt, true)
-
     local db = BisTooltipAddon.db and BisTooltipAddon.db.char
     if not db then return end
 
@@ -170,6 +168,8 @@ local function ProcessTooltip(tooltip, link)
     if not itemId then return end
 
     if not GetItemInfo(itemId) then return end
+
+    StyleTooltip(tt, true)
 
     if tt.BisTooltipRendered == itemId then return end
     tt.BisTooltipRendered = itemId
