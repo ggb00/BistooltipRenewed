@@ -58,7 +58,9 @@ local function IsItemBoe(itemId)
         end
     end
     scanner:ClearLines()
-    boe_cache[itemId] = isBoe
+    if numLines > 0 then
+        boe_cache[itemId] = isBoe
+    end
     return isBoe
 end
 
@@ -1223,6 +1225,7 @@ function BisTooltipAddon:ToggleFavoritesFrame()
 end
 
 function BisTooltipAddon:reloadData()
+    wipe(boe_cache)
     buildClassDict()
     loadData()
 
