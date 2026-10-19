@@ -389,7 +389,9 @@ local function buildFilterSpecOptions()
     if BisTooltip_ClassData then
         for ci, class in ipairs(BisTooltip_ClassData) do
             for si, spec in ipairs(class.specs) do
-                local option_val = "|T" .. BisTooltip_SpecIcons[class.name][spec] .. ":16:16:0:0|t " .. class.name .. " " .. spec
+                local icon = BisTooltip_SpecIcons and BisTooltip_SpecIcons[class.name] and BisTooltip_SpecIcons[class.name][spec]
+                local iconStr = icon and ("|T" .. icon .. ":16:16:0:0|t ") or ""
+                local option_val = iconStr .. class.name .. " " .. spec
                 local option_key = ci .. ":" .. si
                 filter_specs_options[option_key] = option_val
                 highlight_specs_options[option_key] = option_val
