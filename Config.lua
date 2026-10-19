@@ -73,7 +73,7 @@ local configTable = {
             width = "full",
             set = function(info, val)
                 BisTooltipAddon.db.char.show_item_borders = val
-                if BisTooltipAddon.reloadData then BisTooltipAddon:reloadData() end
+                if BisTooltipAddon.RefreshItemStateVisuals then BisTooltipAddon.RefreshItemStateVisuals() end
             end,
             get = function(info) return BisTooltipAddon.db.char.show_item_borders end
         },
