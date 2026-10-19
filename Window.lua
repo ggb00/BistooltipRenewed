@@ -96,6 +96,23 @@ local ROW_BACKDROP = {
     insets = { left = 3, right = 3, top = 3, bottom = 3 }
 }
 
+local ENHANCEMENT_TABLE_LAYOUT = {
+    columns = {16, 16, 16, 16},
+    spaceV = 0, spaceH = 2, align = "MIDDLE"
+}
+
+local FAV_ROW_TABLE_LAYOUT = {
+    columns = {36, 336, 26},
+    space = 4, align = "middle"
+}
+
+local function CompareFavorites(a, b)
+    local favData = BisTooltipAddon.db and BisTooltipAddon.db.char and BisTooltipAddon.db.char.favorites
+    local orderA = (favData and type(favData[a]) == "number") and favData[a] or 0
+    local orderB = (favData and type(favData[b]) == "number") and favData[b] or 0
+    return orderA > orderB
+end
+
 StaticPopupDialogs["BISTOOLTIP_CONFIRM_CLEAR_FAVORITES"] = {
     text = "Are you sure you want to remove all items from your Favorites?",
     button1 = YES,
@@ -567,10 +584,7 @@ local function createEnhancementsFrame(enhancements)
     frame:SetWidth(75)
     frame:SetHeight(18)
 
-    frame:SetUserData("table", {
-        columns = {16, 16, 16, 16},
-        spaceV = 0, spaceH = 2, align = "MIDDLE"
-    })
+    frame:SetUserData("table", ENHANCEMENT_TABLE_LAYOUT)
 
     frame:SetFullWidth(false)
     frame:SetFullHeight(false)
@@ -898,11 +912,7 @@ function BisTooltipAddon:RefreshFavoritesWindow()
         end)
         favorites_scroll:AddChild(emptyLabel)
     else
-        table.sort(favList, function(a, b)
-            local orderA = (favData and type(favData[a]) == "number") and favData[a] or 0
-            local orderB = (favData and type(favData[b]) == "number") and favData[b] or 0
-            return orderA > orderB
-        end)
+        table.sort(favList, CompareFavorites)
 
         for _, itemID in ipairs(favList) do
             local display_id = (BisTooltipAddon.GetFactionItem and BisTooltipAddon:GetFactionItem(itemID)) or itemID
@@ -910,7 +920,7 @@ function BisTooltipAddon:RefreshFavoritesWindow()
             local row = AceGUI:Create("SimpleGroup")
             row:SetLayout("Table")
             row:SetFullWidth(true)
-            row:SetUserData("table", { columns = {36, 336, 26}, space = 4, align = "middle" })
+            row:SetUserData("table", FAV_ROW_TABLE_LAYOUT)
 
             local itemWidget = createItemFrame(display_id, 36)
             itemWidget:SetWidth(36)
