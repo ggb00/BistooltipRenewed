@@ -165,7 +165,14 @@ end
 
 local function HandleItemTooltip(widget, item_id)
     GameTooltip:SetOwner(widget.frame, "ANCHOR_NONE")
-    GameTooltip:SetPoint("TOPRIGHT", widget.frame, "TOPRIGHT", 220, -13)
+
+    local right = widget.frame:GetRight() or 0
+    local screenW = UIParent:GetRight() or 0
+    if (right + 250) > screenW then
+        GameTooltip:SetPoint("TOPRIGHT", widget.frame, "TOPLEFT", -10, 0)
+    else
+        GameTooltip:SetPoint("TOPRIGHT", widget.frame, "TOPRIGHT", 220, -13)
+    end
 
     local _, link = GetItemInfo(item_id)
     local validLink = link or ("item:" .. item_id .. ":0:0:0:0:0:0:0")
