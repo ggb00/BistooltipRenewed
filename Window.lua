@@ -667,6 +667,9 @@ local function drawTableHeader(frame)
         topLabel:SetColor(color, color, color)
         topLabel:SetWidth(44)
         topLabel.label:SetJustifyH("CENTER")
+        topLabel:SetCallback("OnRelease", function(self)
+            if self.label then self.label:SetJustifyH("LEFT") end
+        end)
         frame:AddChild(topLabel)
     end
 end
@@ -894,6 +897,9 @@ function BisTooltipAddon:RefreshFavoritesWindow()
         emptyLabel:SetFont("Fonts\\FRIZQT__.TTF", 14, "")
         emptyLabel:SetFullWidth(true)
         emptyLabel.label:SetJustifyH("CENTER")
+        emptyLabel:SetCallback("OnRelease", function(self)
+            if self.label then self.label:SetJustifyH("LEFT") end
+        end)
         favorites_scroll:AddChild(emptyLabel)
     else
         table.sort(favList, function(a, b)
