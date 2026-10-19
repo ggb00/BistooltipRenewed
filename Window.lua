@@ -596,7 +596,7 @@ end
 local SLOT_DISPLAY_ORDER = {
     "Head", "Neck", "Shoulder", "Back", "Chest", "Wrist",
     "Hands", "Waist", "Legs", "Feet", "Finger 1", "Finger 2",
-    "Trinket 1", "Trinket 2", "Weapon", "Off hand", "Ranged"
+    "Trinket 1", "Trinket 2", "Weapon", "Off hand", "Ranged", "Relic"
 }
 
 local HEADER_TEXTS = {"BIS", "Alt 1", "Alt 2", "Alt 3", "Alt 4", "Alt 5"}
