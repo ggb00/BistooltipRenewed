@@ -394,6 +394,10 @@ local function createItemFrame(item_id, size)
                 end
             end
         end
+        if self.image then
+            self.image:ClearAllPoints()
+            self.image:SetPoint("CENTER", self.frame, "CENTER", 0, 0)
+        end
         self.item_id = nil
     end)
     item_frame:SetImageSize(size, size)
@@ -994,6 +998,13 @@ function BisTooltipAddon:RefreshFavoritesWindow()
                 removeBtn.text:ClearAllPoints()
                 removeBtn.text:SetPoint("CENTER", 0, 0)
             end
+            removeBtn:SetCallback("OnRelease", function(self)
+                if self.text then
+                    self.text:ClearAllPoints()
+                    self.text:SetPoint("LEFT", self.frame, "LEFT", 10, 0)
+                    self.text:SetPoint("RIGHT", self.frame, "RIGHT", -10, 0)
+                end
+            end)
             removeBtn:SetCallback("OnClick", function()
                 BisTooltipAddon:ToggleFavorite(itemID)
                 GameTooltip:Hide()
