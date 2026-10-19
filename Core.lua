@@ -272,6 +272,7 @@ function BisTooltipAddon:HandleChatCommand(input)
 end
 
 function BisTooltipAddon:OnInitialize()
+    RebuildEquippedCache()
     self:BuildFactionMaps()
     self:BuildReverseLookup()
 
