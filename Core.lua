@@ -266,6 +266,10 @@ function BisTooltipAddon:HandleChatCommand(input)
         if self.ToggleFavoritesFrame then
             self:ToggleFavoritesFrame()
         end
+    elseif cmd == "config" or cmd == "options" or cmd == "opt" then
+        if self.openConfigDialog then
+            self:openConfigDialog()
+        end
     else
         self:createMainFrame()
     end
