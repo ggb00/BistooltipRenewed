@@ -21,6 +21,9 @@ local CLASS_COLORS = {
     ["Warrior"]      = {0.78, 0.61, 0.43},
 }
 
+local DEFAULT_CLASS_COLOR = {0.65, 0.65, 0.65}
+local DEFAULT_HIGHLIGHT_COLOR = {0.80, 0.80, 0.80}
+
 local highlight_colors = {
     ["purple"]    = {0.80, 0.30, 1.00}, ["green"] =     {0.10, 1.00, 0.10},
     ["red"]       = {1.00, 0.20, 0.20}, ["lightblue"] = {0.30, 0.80, 1.00},
@@ -207,14 +210,14 @@ local function ProcessTooltip(tooltip, link)
                     if hlRGB then
                         r1, g1, b1 = hlRGB[1], hlRGB[2], hlRGB[3]
                     else
-                        local cColor = CLASS_COLORS[dClass] or {0.8, 0.8, 0.8}
+                        local cColor = CLASS_COLORS[dClass] or DEFAULT_HIGHLIGHT_COLOR
                         r1, g1, b1 = cColor[1], cColor[2], cColor[3]
                     end
                     r2, g2, b2 = r1, g1, b1
                 else
                     r2, g2, b2 = 0.65, 0.65, 0.65
                     if useClassColors then
-                        local cColor = CLASS_COLORS[dClass] or {0.65, 0.65, 0.65}
+                        local cColor = CLASS_COLORS[dClass] or DEFAULT_CLASS_COLOR
                         r1, g1, b1 = cColor[1], cColor[2], cColor[3]
                     else
                         r1, g1, b1 = 0.65, 0.65, 0.65
