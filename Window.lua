@@ -29,10 +29,6 @@ local FAVORITES_WINDOW_FRAME_NAME = "BisTooltipRenewed_FavoritesWindow"
 local isSpecialFavFrameRegistered = false
 local displayed_fav_widgets = {}
 
-local function IsPlayerHorde()
-    return BisTooltipAddon.IsHorde and BisTooltipAddon:IsHorde()
-end
-
 local missing_widgets = {}
 local fetch_attempts = {}
 local displayed_item_widgets = {}
@@ -1376,9 +1372,4 @@ function BisTooltipAddon:closeMainFrame()
     if main_frame and main_frame.frame:IsShown() then
         main_frame:Hide()
     end
-end
-
-function BisTooltipAddon:initBislists()
-    buildClassDict()
-    loadData()
 end
