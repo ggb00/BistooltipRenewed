@@ -69,6 +69,12 @@ end
 
 local EMPTY_TABLE = {}
 
+local ROW_BACKDROP = {
+    edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
+    tile = false, tileSize = 16, edgeSize = 12,
+    insets = { left = 3, right = 3, top = 3, bottom = 3 }
+}
+
 StaticPopupDialogs["BISTOOLTIP_CONFIRM_CLEAR_FAVORITES"] = {
     text = "Are you sure you want to remove all items from your Favorites?",
     button1 = YES,
@@ -856,16 +862,44 @@ function BisTooltipAddon:RefreshFavoritesWindow()
             local row = AceGUI:Create("SimpleGroup")
             row:SetLayout("Table")
             row:SetFullWidth(true)
-            row:SetUserData("table", { columns = {42, 330, 26}, space = 4, align = "middle" })
+            row:SetUserData("table", { columns = {36, 336, 26}, space = 4, align = "middle" })
 
             local itemWidget = createItemFrame(display_id, 36)
+            itemWidget:SetWidth(36)
+            itemWidget:SetHeight(42)
+            itemWidget.image:ClearAllPoints()
+            itemWidget.image:SetPoint("CENTER", itemWidget.frame, "CENTER", 0, 2)
             displayed_fav_widgets[#displayed_fav_widgets + 1] = itemWidget
             row:AddChild(itemWidget)
+
+            local card = row.frame.favCard
+            if not card then
+                card = CreateFrame("Frame", nil, row.frame)
+                row.frame.favCard = card
+                card:SetBackdrop(ROW_BACKDROP)
+            end
+            card:SetFrameLevel(math.max(1, row.frame:GetFrameLevel()))
+            card:ClearAllPoints()
+            card:SetPoint("TOP", itemWidget.frame, "TOP", 0, 0)
+            card:SetPoint("BOTTOM", itemWidget.frame, "BOTTOM", 0, 0)
+            card:SetPoint("LEFT", row.frame, "LEFT", 40, 0)
+            card:SetPoint("RIGHT", row.frame, "RIGHT", 0, 0)
+            card:SetBackdropColor(0, 0, 0, 0)
+            card:SetBackdropBorderColor(0.65, 0.65, 0.65, 0.80)
+            card:Show()
+
+            row:SetCallback("OnRelease", function(self)
+                if self.frame.favCard then
+                    self.frame.favCard:Hide()
+                end
+            end)
+
+            itemWidget.frame:SetFrameLevel(card:GetFrameLevel() + 2)
 
             local itemName, _, itemRarity, _, _, _, itemSubType, _, equipSlot = GetItemInfo(display_id)
             local infoGroup = AceGUI:Create("SimpleGroup")
             infoGroup:SetLayout("List")
-            infoGroup:SetWidth(330)
+            infoGroup:SetWidth(320)
 
             local nameLabel = AceGUI:Create("InteractiveLabel")
             if itemName then
@@ -899,7 +933,7 @@ function BisTooltipAddon:RefreshFavoritesWindow()
             if slotText and slotText ~= "" then
                 local spacer = AceGUI:Create("Label")
                 spacer:SetText(" ")
-                spacer:SetHeight(6)
+                spacer:SetHeight(4)
                 spacer:SetFullWidth(true)
                 infoGroup:AddChild(spacer)
 
@@ -913,6 +947,9 @@ function BisTooltipAddon:RefreshFavoritesWindow()
             end
 
             row:AddChild(infoGroup)
+            infoGroup.frame:ClearAllPoints()
+            infoGroup.frame:SetPoint("LEFT", row.frame, "LEFT", 54, 0)
+            infoGroup.frame:SetFrameLevel(card:GetFrameLevel() + 2)
 
             local removeBtn = AceGUI:Create("Button")
             removeBtn:SetText("X")
@@ -928,10 +965,15 @@ function BisTooltipAddon:RefreshFavoritesWindow()
             removeBtn:SetCallback("OnEnter", function(widget)
                 GameTooltip:SetOwner(widget.frame, "ANCHOR_RIGHT")
                 GameTooltip:AddLine("Remove from Favorites", 1, 1, 1)
+                if itemName then
+                    local r, g, b = GetItemQualityColor(itemRarity or 1)
+                    GameTooltip:AddLine(itemName, r, g, b)
+                end
                 GameTooltip:Show()
             end)
             removeBtn:SetCallback("OnLeave", function() GameTooltip:Hide() end)
             row:AddChild(removeBtn)
+            removeBtn.frame:SetFrameLevel(card:GetFrameLevel() + 2)
 
             favorites_scroll:AddChild(row)
         end
