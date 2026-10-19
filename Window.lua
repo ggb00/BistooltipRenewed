@@ -420,7 +420,13 @@ local function createItemFrame(item_id, size)
         if self.image then
             self.image:ClearAllPoints()
             self.image:SetPoint("CENTER", self.frame, "CENTER", 0, 0)
+            self.image:SetVertexColor(1, 1, 1, 1)
         end
+        if self.frame.bisCheckMark then self.frame.bisCheckMark:Hide() end
+        if self.frame.bisBoeMark then self.frame.bisBoeMark:Hide() end
+        if self.frame.bisBorder then self.frame.bisBorder:Hide() end
+        if self.frame.bisStarMark then self.frame.bisStarMark:Hide() end
+        if self.frame.bisILvl then self.frame.bisILvl:Hide() end
         self.item_id = nil
     end)
     item_frame:SetImageSize(size, size)
