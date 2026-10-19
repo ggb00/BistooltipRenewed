@@ -163,10 +163,10 @@ function BisTooltipAddon:BuildReverseLookup()
             specKeys[class] = {}
             for _, spec in ipairs(classData.specs) do
                 local icon = BisTooltip_SpecIcons[class] and BisTooltip_SpecIcons[class][spec]
-                local iconStr = icon and string.format("|T%s:18|t", icon) or ""
+                local iconStr = icon and string.format("|T%s:18|t ", icon) or ""
                 self.FormattedNames[class][spec] = {
-                    withClass = string.format("%s %s - %s", iconStr, class, spec),
-                    withoutClass = string.format("%s %s", iconStr, spec),
+                    withClass = string.format("%s%s - %s", iconStr, class, spec),
+                    withoutClass = string.format("%s%s", iconStr, spec),
                     plain = class .. " " .. spec
                 }
                 specKeys[class][spec] = class .. ":" .. spec
