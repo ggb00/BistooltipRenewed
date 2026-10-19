@@ -6,7 +6,7 @@ local string_match, string_format = string.match, string.format
 local RESOLVED_SOURCE_CACHE = {}
 local EMPTY_TABLE = {}
 
-local eventFrame = CreateFrame("Frame", nil, UIParent)
+local eventFrame = CreateFrame("Frame")
 
 local CLASS_COLORS = {
     ["Death Knight"] = {0.77, 0.12, 0.23},
@@ -166,8 +166,6 @@ local function ProcessTooltip(tooltip, link)
 
     local itemId = tonumber(string_match(link, "item:(%d+)"))
     if not itemId then return end
-
-    if not GetItemInfo(itemId) then return end
 
     StyleTooltip(tt, true)
 
@@ -474,13 +472,33 @@ function BisTooltipAddon:initBisTooltip()
     eventFrame:RegisterEvent("PLAYER_LOGIN")
     eventFrame:RegisterEvent("ADDON_LOADED")
     eventFrame:RegisterEvent("MODIFIER_STATE_CHANGED")
-    eventFrame:SetScript("OnEvent", function(_, event, key)
+    eventFrame:RegisterEvent("GET_ITEM_INFO_RECEIVED")
+    eventFrame:SetScript("OnEvent", function(_, event, arg1, arg2)
         if event == "ADDON_LOADED" or event == "PLAYER_LOGIN" then
             HookAtlasLoot()
             return
         end
 
+        if event == "GET_ITEM_INFO_RECEIVED" then
+            local receivedId = tonumber(arg1)
+            if not receivedId or arg2 == false then return end
+
+            local function RefreshIfMatching(tt)
+                if not tt or not tt:IsShown() or not tt.GetItem then return end
+                local _, link = tt:GetItem()
+                if link and link:find("item:" .. receivedId, 1, true) then
+                    RefreshTooltip(tt)
+                end
+            end
+
+            RefreshIfMatching(GameTooltip)
+            RefreshIfMatching(ItemRefTooltip)
+            RefreshIfMatching(AtlasLootTooltip)
+            return
+        end
+
         if event == "MODIFIER_STATE_CHANGED" then
+            local key = arg1
             if key == "LALT" or key == "RALT" or key == "LCTRL" or key == "RCTRL" then
                 local db = BisTooltipAddon.db and BisTooltipAddon.db.char
                 local isCtrl = (key == "LCTRL" or key == "RCTRL")
