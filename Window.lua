@@ -616,7 +616,7 @@ local function drawItemSlot(slot_name, item_list)
     spec_frame:AddChild(f)
 
     local enhs = EMPTY_TABLE
-    local enh_class = BisTooltip_Enhancements and BisTooltip_Enhancements[class]
+    local enh_class = BisTooltip_Enhancements and (BisTooltip_Enhancements[class] or BisTooltip_Enhancements[GetCleanClassName(class)])
     if enh_class and enh_class[spec] and enh_class[spec][phase] then
         enhs = enh_class[spec][phase][slot_name] or EMPTY_TABLE
     end
