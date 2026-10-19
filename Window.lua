@@ -1035,6 +1035,23 @@ function BisTooltipAddon:RefreshFavoritesWindow()
     end
 end
 
+local function ClampPosition(pos, width, height)
+    if not pos or not pos.x or not pos.y then return nil end
+    local screenW = UIParent:GetRight() or 0
+    local screenH = UIParent:GetTop() or 0
+    local w = width or 400
+    local h = height or 400
+    local x = pos.x
+    local y = pos.y
+
+    if x < 0 then x = 0 end
+    if y > screenH then y = screenH end
+    if x + w > screenW then x = math.max(0, screenW - w) end
+    if y - h < 0 then y = math.min(screenH, h) end
+
+    return x, y
+end
+
 function BisTooltipAddon:OpenFavoritesFrame()
     if favorites_frame and favorites_frame.frame:IsShown() then return end
 
@@ -1046,9 +1063,10 @@ function BisTooltipAddon:OpenFavoritesFrame()
         favorites_frame:SetTitle("BiS-Tooltip Renewed - Favorites List")
 
         local pos = BisTooltipAddon.db.char.favorites_pos
-        if pos and pos.x and pos.y then
+        local posX, posY = ClampPosition(pos, 460, 570)
+        if posX and posY then
             favorites_frame.frame:ClearAllPoints()
-            favorites_frame.frame:SetPoint("TOPLEFT", UIParent, "BOTTOMLEFT", pos.x, pos.y)
+            favorites_frame.frame:SetPoint("TOPLEFT", UIParent, "BOTTOMLEFT", posX, posY)
         elseif main_frame and main_frame.frame:IsShown() then
             favorites_frame.frame:ClearAllPoints()
             favorites_frame.frame:SetPoint("TOPLEFT", main_frame.frame, "TOPRIGHT", 10, 0)
@@ -1210,9 +1228,10 @@ function BisTooltipAddon:createMainFrame()
     main_frame:EnableResize(false)
 
     local pos = BisTooltipAddon.db.char.frame_pos
-    if pos and pos.x and pos.y then
+    local posX, posY = ClampPosition(pos, 505, 570)
+    if posX and posY then
         main_frame.frame:ClearAllPoints()
-        main_frame.frame:SetPoint("TOPLEFT", UIParent, "BOTTOMLEFT", pos.x, pos.y)
+        main_frame.frame:SetPoint("TOPLEFT", UIParent, "BOTTOMLEFT", posX, posY)
     end
 
     _G[MAIN_WINDOW_FRAME_NAME] = main_frame.frame
