@@ -179,6 +179,7 @@ local function ApplyItemStateVisuals(widget, item_id, is_missing)
         if widget.frame.bisBorder then widget.frame.bisBorder:Hide() end
         if widget.frame.bisStarMark then widget.frame.bisStarMark:Hide() end
         if widget.frame.bisILvl then widget.frame.bisILvl:Hide() end
+        if widget.frame.bisBoeMark then widget.frame.bisBoeMark:Hide() end
         return
     end
 
