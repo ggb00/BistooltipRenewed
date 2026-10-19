@@ -426,6 +426,8 @@ local function migrateAddonDB()
 
     if BisTooltipAddon.db.char.show_sources == nil then BisTooltipAddon.db.char.show_sources = true end
     if BisTooltipAddon.db.char.show_item_states == nil then BisTooltipAddon.db.char.show_item_states = true end
+    if BisTooltipAddon.db.char.filter_class_names == nil then BisTooltipAddon.db.char.filter_class_names = false end
+    if BisTooltipAddon.db.char.tooltip_with_ctrl == nil then BisTooltipAddon.db.char.tooltip_with_ctrl = false end
 
     if BisTooltipAddon.db.char.minimap == nil then
         BisTooltipAddon.db.char.minimap = { hide = false }
