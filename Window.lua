@@ -325,6 +325,7 @@ local function ProcessMissingItems(self, elapsed)
 
     local hasRemaining = false
     local resolvedAny = false
+    local ownerSet = false
 
     for item_id, widgets in pairs(missing_widgets) do
         local itemName, _, _, _, _, _, _, _, _, itemIcon = GetItemInfo(item_id)
@@ -355,7 +356,10 @@ local function ProcessMissingItems(self, elapsed)
                 fetch_attempts[item_id] = nil
             else
                 hasRemaining = true
-                scanner:SetOwner(UIParent, "ANCHOR_NONE")
+                if not ownerSet then
+                    scanner:SetOwner(UIParent, "ANCHOR_NONE")
+                    ownerSet = true
+                end
                 scanner:SetHyperlink("item:" .. item_id .. ":0:0:0:0:0:0:0")
                 scanner:ClearLines()
             end
