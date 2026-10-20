@@ -1027,8 +1027,6 @@ function BisTooltipAddon:RefreshFavoritesWindow()
             end
 
             row:AddChild(infoGroup)
-            infoGroup.frame:ClearAllPoints()
-            infoGroup.frame:SetPoint("LEFT", row.frame, "LEFT", 54, 0)
             infoGroup.frame:SetFrameLevel(card:GetFrameLevel() + 2)
 
             local removeBtn = AceGUI:Create("Button")
