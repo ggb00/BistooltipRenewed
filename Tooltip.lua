@@ -158,8 +158,6 @@ local function ProcessTooltip(tooltip, link)
     local db = BisTooltipAddon.db and BisTooltipAddon.db.char
     if not db then return end
 
-    if db.tooltip_with_ctrl and not IsControlKeyDown() then return end
-
     if not link then
         _, link = tt:GetItem()
     end
@@ -169,6 +167,8 @@ local function ProcessTooltip(tooltip, link)
     if not itemId then return end
 
     StyleTooltip(tt, true)
+
+    if db.tooltip_with_ctrl and not IsControlKeyDown() then return end
 
     if tt.BisTooltipRendered == itemId then return end
     tt.BisTooltipRendered = itemId
