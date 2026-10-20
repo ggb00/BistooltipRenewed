@@ -5,7 +5,7 @@ local LDB = LibStub("LibDataBroker-1.1", true)
 local LDBIcon = LDB and LibStub("LibDBIcon-1.0", true)
 local icon_loaded = false
 local icon_name = "BisTooltipIcon"
-local CURRENT_DB_VERSION = 8.2
+local CURRENT_DB_VERSION = 8.3
 
 local keyToClassSpec = {}
 
