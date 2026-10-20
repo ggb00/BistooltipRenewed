@@ -8,7 +8,7 @@ All data is originally gathered from `wowtbc.gg` and is corrected to be compatib
 
 > [!NOTE]
 > While some items are objectively BiS, it's worth noting that every BiS list contains some degree of subjectivity.\
-> Use this addon and the lists within it only as suggestions for what to acquire next. They may contain errors or inaccuracies.
+> Use this addon and the lists within it only as **suggestions** for what to acquire next. They may contain errors or inaccuracies.
 
 <sup>Made with the help of AI.</sup>
 
@@ -23,4 +23,5 @@ All data is originally gathered from `wowtbc.gg` and is corrected to be compatib
 5. If you have WoW open - restart the game for the addon to load in properly.
 
 <br>
-<img width="50%" alt="Addon preview" src="https://github.com/user-attachments/assets/7eee5a80-146a-4afb-b09e-2f34ed3efb7b" />
+
+<img width="55%" alt="Addon preview" src="https://github.com/user-attachments/assets/d5ee2553-30ab-4a51-8b8c-c7016f11ce7b" />
