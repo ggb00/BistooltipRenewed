@@ -769,15 +769,18 @@ end
 
 local function buildSpecsDict(class_i)
     if not BisTooltip_ClassData or type(BisTooltip_ClassData) ~= "table" then return end
-    spec_options = {}
-    spec_options_to_spec = {}
     local class_data = BisTooltip_ClassData[class_i]
+    if not class_data or not class_data.specs then return end
+
+    wipe(spec_options)
+    wipe(spec_options_to_spec)
+
     for si, spec_name in ipairs(class_data.specs) do
-        local icon = BisTooltip_SpecIcons[class_data.name] and BisTooltip_SpecIcons[class_data.name][spec_name]
+        local icon = BisTooltip_SpecIcons and BisTooltip_SpecIcons[class_data.name] and BisTooltip_SpecIcons[class_data.name][spec_name]
         local iconStr = icon and ("|T" .. icon .. ":14:14:0:0|t ") or ""
         local option_name = iconStr .. spec_name
 
-        table.insert(spec_options, option_name)
+        tinsert(spec_options, option_name)
         spec_options_to_spec[option_name] = spec_name
     end
 end
