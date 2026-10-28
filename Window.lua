@@ -1085,8 +1085,11 @@ end
 
 local function ClampPosition(pos, width, height)
     if not pos or not pos.x or not pos.y then return nil end
-    local screenW = UIParent:GetRight() or 0
-    local screenH = UIParent:GetTop() or 0
+    local screenW = UIParent:GetRight()
+    local screenH = UIParent:GetTop()
+    if not screenW or screenW <= 0 or not screenH or screenH <= 0 then
+        return pos.x, pos.y
+    end
     local w = width or 400
     local h = height or 400
     local x = pos.x
