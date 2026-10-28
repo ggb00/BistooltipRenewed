@@ -191,7 +191,7 @@ local function ProcessTooltip(tooltip, link)
             local dClass = data.class
             local dSpec = data.spec
             local isHighlighted = (highlightSpec.spec_name == dSpec and highlightSpec.class_name == dClass)
-            local isFiltered = not isHighlighted and not isAltDown and filterSpecs[dClass] and filterSpecs[dClass][dSpec]
+            local isFiltered = not isHighlighted and not isAltDown and (type(filterSpecs[dClass]) == "table") and filterSpecs[dClass][dSpec]
 
             if not isFiltered then
                 local fData = BisTooltipAddon.FormattedNames[dClass]
