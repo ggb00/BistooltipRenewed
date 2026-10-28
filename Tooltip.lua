@@ -140,6 +140,10 @@ local function StyleTooltip(tooltip, isForcedItem)
             else
                 tooltip:SetBackdropColor(0.09, 0.09, 0.19, 1)
             end
+            local bc = TOOLTIP_DEFAULT_COLOR
+            if bc then
+                tooltip:SetBackdropBorderColor(bc.r, bc.g, bc.b)
+            end
         end
     end
 end
