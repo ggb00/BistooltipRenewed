@@ -542,6 +542,7 @@ local function createSpellFrame(spell_id, size)
         empty_spell.frame:EnableMouse(false)
         empty_spell:SetCallback("OnRelease", function(self)
             self.frame:EnableMouse(true)
+            self.item_id = nil
         end)
 
         if empty_spell.frame.bisCheckMark then empty_spell.frame.bisCheckMark:Hide() end
