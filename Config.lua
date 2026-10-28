@@ -220,7 +220,9 @@ local configTable = {
                 end
                 if BisTooltipAddon.ClearTooltipCache then BisTooltipAddon:ClearTooltipCache() end
             end,
-            get = function(info) return BisTooltipAddon.db.char.highlight_spec.key or "none" end
+            get = function(info)
+                return (BisTooltipAddon.db.char.highlight_spec and BisTooltipAddon.db.char.highlight_spec.key) or "none"
+            end
         },
 
         highlight_color = {
