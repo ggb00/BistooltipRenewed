@@ -377,8 +377,9 @@ local configTable = {
                 if not entry then return false end
                 local class_name = entry.class
                 local spec_name = entry.spec
-                if not BisTooltipAddon.db.char.filter_specs[class_name] then return false end
-                return BisTooltipAddon.db.char.filter_specs[class_name][spec_name] or false
+                local fs = BisTooltipAddon.db and BisTooltipAddon.db.char and BisTooltipAddon.db.char.filter_specs
+                if not fs or type(fs[class_name]) ~= "table" then return false end
+                return fs[class_name][spec_name] or false
             end
         }
     }
