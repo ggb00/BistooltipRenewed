@@ -483,7 +483,7 @@ function BisTooltipAddon:initBisTooltip()
     eventFrame:RegisterEvent("MODIFIER_STATE_CHANGED")
     eventFrame:RegisterEvent("GET_ITEM_INFO_RECEIVED")
     eventFrame:SetScript("OnEvent", function(_, event, arg1, arg2)
-        if event == "ADDON_LOADED" or event == "PLAYER_LOGIN" then
+        if event == "PLAYER_LOGIN" or (event == "ADDON_LOADED" and arg1 and arg1:find("AtlasLoot", 1, true)) then
             HookAtlasLoot()
             return
         end
