@@ -498,7 +498,7 @@ function BisTooltipAddon:initBisTooltip()
             local function RefreshIfMatching(tt)
                 if not tt or not tt:IsShown() or not tt.GetItem then return end
                 local _, link = tt:GetItem()
-                if link and link:find("item:" .. receivedId, 1, true) then
+                if link and link:find("item:" .. receivedId .. ":", 1, true) then
                     RefreshTooltip(tt)
                 end
             end
