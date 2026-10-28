@@ -190,7 +190,10 @@ local function HandleItemTooltip(widget, item_id)
 
     GameTooltip:Show()
     if IsShiftKeyDown() or IsModifiedClick("COMPAREITEMS") or (GetCVarBool and GetCVarBool("alwaysCompareItems")) then
-        GameTooltip_ShowCompareItem(GameTooltip)
+        local oldThis = this
+        this = GameTooltip
+        GameTooltip_ShowCompareItem()
+        this = oldThis
     end
 end
 
