@@ -332,11 +332,14 @@ local function HideShoppingTooltips()
     if AtlasLootTooltip2 then AtlasLootTooltip2:Hide() end
 end
 
+local isRefreshingTooltip = false
+
 local function RefreshTooltip(tt)
-    if not tt or not tt:IsShown() or not tt.GetItem then return end
+    if isRefreshingTooltip or not tt or not tt:IsShown() or not tt.GetItem then return end
     local _, link = tt:GetItem()
     if not link then return end
 
+    isRefreshingTooltip = true
     tt.BisTooltipRendered = nil
 
     local owner = tt:GetOwner()
@@ -353,6 +356,7 @@ local function RefreshTooltip(tt)
         tt:ClearLines()
         tt:SetHyperlink(link)
     end
+    isRefreshingTooltip = false
 end
 
 local function HookAtlasLoot()
