@@ -451,7 +451,7 @@ function BisTooltipAddon:initBisTooltip()
     end
 
     hooksecurefunc("GameTooltip_ShowCompareItem", function(tooltip)
-        local t = tooltip or GameTooltip
+        local t = (type(tooltip) == "table" and tooltip.GetItem and tooltip) or (this and type(this) == "table" and this.GetItem and this) or GameTooltip
         local s1, s2, s3
 
         if t.shoppingTooltips then
