@@ -412,8 +412,11 @@ local function migrateAddonDB()
         if not BisTooltipAddon.db.char.spec_index then BisTooltipAddon.db.char.spec_index = 1 end
         if not BisTooltipAddon.db.char.phase_index then BisTooltipAddon.db.char.phase_index = 1 end
 
-        if not BisTooltipAddon.db.char.favorite_icon or BisTooltipAddon.db.char.favorite_icon < 1 or BisTooltipAddon.db.char.favorite_icon > 8 then
+        local favIcon = tonumber(BisTooltipAddon.db.char.favorite_icon)
+        if not favIcon or favIcon < 1 or favIcon > 8 then
             BisTooltipAddon.db.char.favorite_icon = 1
+        else
+            BisTooltipAddon.db.char.favorite_icon = favIcon
         end
         if BisTooltipAddon.db.char.fav_scroll_status then
             BisTooltipAddon.db.char.fav_scroll_status.scrollvalue = 0
@@ -443,11 +446,16 @@ local function migrateAddonDB()
     if not BisTooltipAddon.db.char.ilvl_color then BisTooltipAddon.db.char.ilvl_color = "white" end
 
     if not BisTooltipAddon.db.char.favorites then BisTooltipAddon.db.char.favorites = {} end
-    if not BisTooltipAddon.db.char.favorite_icon or BisTooltipAddon.db.char.favorite_icon < 1 or BisTooltipAddon.db.char.favorite_icon > 8 then
+
+    local favIcon = tonumber(BisTooltipAddon.db.char.favorite_icon)
+    if not favIcon or favIcon < 1 or favIcon > 8 then
         BisTooltipAddon.db.char.favorite_icon = 1
+    else
+        BisTooltipAddon.db.char.favorite_icon = favIcon
     end
+
     if not BisTooltipAddon.db.char.favorite_color then BisTooltipAddon.db.char.favorite_color = "yellow" end
-    if not BisTooltipAddon.db.char.fav_counter then BisTooltipAddon.db.char.fav_counter = 0 end
+    BisTooltipAddon.db.char.fav_counter = tonumber(BisTooltipAddon.db.char.fav_counter) or 0
     if not BisTooltipAddon.db.char.fav_scroll_status then BisTooltipAddon.db.char.fav_scroll_status = {} end
 end
 
