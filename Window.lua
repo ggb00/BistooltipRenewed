@@ -652,7 +652,14 @@ local function drawItemSlot(slot_name, item_list)
         enhs = enh_class[spec][phase][slot_name] or EMPTY_TABLE
     end
 
-    spec_frame:AddChild(createEnhancementsFrame(enhs))
+    if #enhs > 0 then
+        spec_frame:AddChild(createEnhancementsFrame(enhs))
+    else
+        local enhSpacer = AceGUI:Create("Label")
+        enhSpacer:SetText(" ")
+        enhSpacer:SetWidth(75)
+        spec_frame:AddChild(enhSpacer)
+    end
 
     local count = 0
     for _, original_item_id in ipairs(item_list) do
