@@ -772,11 +772,12 @@ local function drawSpecData()
 end
 
 local function buildClassDict()
-    if #class_options > 0 or not BisTooltip_ClassData or type(BisTooltip_ClassData) ~= "table" then return end
-    class_options = {}
+    if not BisTooltip_ClassData or type(BisTooltip_ClassData) ~= "table" then return end
+    wipe(class_options)
+    wipe(class_options_to_class)
     for ci, class_data in ipairs(BisTooltip_ClassData) do
         local option_name = class_data.name
-        table.insert(class_options, option_name)
+        tinsert(class_options, option_name)
         class_options_to_class[option_name] = { name = class_data.name, i = ci }
     end
 end
