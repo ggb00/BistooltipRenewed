@@ -393,6 +393,7 @@ local function createItemFrame(item_id, size)
         empty_icon.frame:EnableMouse(false)
         empty_icon:SetCallback("OnRelease", function(self)
             self.frame:EnableMouse(true)
+            self.item_id = nil
         end)
 
         if empty_icon.frame.bisCheckMark then empty_icon.frame.bisCheckMark:Hide() end
