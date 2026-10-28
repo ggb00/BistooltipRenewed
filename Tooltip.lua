@@ -406,7 +406,10 @@ local function UpdateComparison(tt)
                 tt.shoppingTooltips = { ShoppingTooltip1, ShoppingTooltip2, ShoppingTooltip3 }
             end
         end
-        GameTooltip_ShowCompareItem(tt)
+        local oldThis = this
+        this = tt
+        GameTooltip_ShowCompareItem()
+        this = oldThis
     end
 end
 
