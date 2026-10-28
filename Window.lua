@@ -58,6 +58,7 @@ local function IsItemBoe(itemId)
         end
     end
     scanner:ClearLines()
+    scanner:Hide()
     if numLines > 0 then
         boe_cache[itemId] = isBoe
     end
@@ -362,6 +363,7 @@ local function ProcessMissingItems(self, elapsed)
                 end
                 scanner:SetHyperlink("item:" .. item_id .. ":0:0:0:0:0:0:0")
                 scanner:ClearLines()
+                scanner:Hide()
             end
         end
     end
