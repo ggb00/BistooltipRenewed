@@ -417,19 +417,14 @@ end
 local function UpdateTooltipOnModifier(tt)
     if not tt or not tt:IsShown() then return end
     RefreshTooltip(tt)
+    HideShoppingTooltips()
     UpdateComparison(tt)
 end
 
 function BisTooltipAddon:ClearTooltipCache()
     UpdateTooltipOnModifier(GameTooltip)
     UpdateTooltipOnModifier(AtlasLootTooltip)
-    UpdateTooltipOnModifier(AtlasLootTooltip2)
     UpdateTooltipOnModifier(ItemRefTooltip)
-    UpdateTooltipOnModifier(ShoppingTooltip1)
-    UpdateTooltipOnModifier(ShoppingTooltip2)
-    UpdateTooltipOnModifier(ShoppingTooltip3)
-    UpdateTooltipOnModifier(ItemRefShoppingTooltip1)
-    UpdateTooltipOnModifier(ItemRefShoppingTooltip2)
 end
 
 function BisTooltipAddon:initBisTooltip()
