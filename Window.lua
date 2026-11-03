@@ -1353,6 +1353,9 @@ function BisTooltipAddon:createMainFrame()
             BisTooltipAddon:closeMainFrame()
         else
             main_frame:Show()
+            for item_id in pairs(missing_widgets) do
+                fetch_next_request[item_id] = nil
+            end
             RefreshItemStateVisuals()
             StartItemFetch()
         end
