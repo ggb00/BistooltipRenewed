@@ -1,7 +1,6 @@
 -- Tooltip.lua
-local GetItemInfo = GetItemInfo
-local tonumber, tostring, type, ipairs = tonumber, tostring, type, ipairs
-local string_match, string_format = string.match, string.format
+local tonumber, type, ipairs = tonumber, type, ipairs
+local string_match = string.match
 
 local RESOLVED_SOURCE_CACHE = {}
 local EMPTY_TABLE = {}

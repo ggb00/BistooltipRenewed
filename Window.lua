@@ -1,5 +1,5 @@
 -- Window.lua
-local addonName, addonTable = ...
+local addonName = ...
 local AceGUI = LibStub("AceGUI-3.0")
 
 local GetItemInfo, GetSpellInfo, GetSpellLink = GetItemInfo, GetSpellInfo, GetSpellLink
