@@ -28,6 +28,7 @@ local favorites_scroll = nil
 local FAVORITES_WINDOW_FRAME_NAME = "BisTooltipRenewed_FavoritesWindow"
 local isSpecialFavFrameRegistered = false
 local displayed_fav_widgets = {}
+local favorites_refresh_pending = false
 
 local missing_widgets = {}
 local fetch_attempts = {}
@@ -302,6 +303,20 @@ local function ApplyItemStateVisuals(widget, item_id, is_missing)
     end
 end
 
+local function UpdateFavoriteLabel(item_id)
+    for i = 1, #displayed_fav_widgets do
+        local widget = displayed_fav_widgets[i]
+        if widget and widget.item_id == item_id and widget.favNameLabel then
+            local itemName, _, itemRarity = GetItemInfo(item_id)
+            if itemName then
+                local r, g, b = GetItemQualityColor(itemRarity or 1)
+                widget.favNameLabel:SetText(itemName)
+                widget.favNameLabel:SetColor(r, g, b)
+            end
+        end
+    end
+end
+
 local function RefreshItemStateVisuals()
     if main_frame and main_frame.frame:IsShown() then
         for i = 1, #displayed_item_widgets do
@@ -335,14 +350,12 @@ local function ProcessMissingItems(self, elapsed)
 
     local now = fetch_clock
     local hasRemaining = false
-    local resolvedAny = false
     local ownerSet = false
 
     for item_id, widgets in pairs(missing_widgets) do
         local itemName, _, _, _, _, _, _, _, _, itemIcon = GetItemInfo(item_id)
 
         if itemName then
-            resolvedAny = true
             local isBoe = IsItemBoe(item_id)
             for _, widget in ipairs(widgets) do
                 if widget and widget.frame and widget.item_id == item_id then
@@ -355,6 +368,10 @@ local function ProcessMissingItems(self, elapsed)
                     end
                     ApplyItemStateVisuals(widget, item_id, false)
                 end
+            end
+            if favorites_frame and favorites_frame.frame:IsShown() then
+                UpdateFavoriteLabel(item_id)
+                favorites_refresh_pending = true
             end
             missing_widgets[item_id] = nil
             fetch_attempts[item_id] = nil
@@ -387,8 +404,11 @@ local function ProcessMissingItems(self, elapsed)
         item_fetch_frame:SetScript("OnUpdate", nil)
     end
 
-    if resolvedAny and favorites_frame and favorites_frame.frame:IsShown() then
-        BisTooltipAddon:RefreshFavoritesWindow()
+    if favorites_refresh_pending and not hasRemaining then
+        favorites_refresh_pending = false
+        if favorites_frame and favorites_frame.frame:IsShown() then
+            BisTooltipAddon:RefreshFavoritesWindow()
+        end
     end
 end
 
@@ -1026,6 +1046,7 @@ function BisTooltipAddon:RefreshFavoritesWindow()
             nameLabel:SetCallback("OnEnter", function(widget) HandleItemTooltip(widget, display_id) end)
             nameLabel:SetCallback("OnLeave", function() GameTooltip:Hide() end)
             infoGroup:AddChild(nameLabel)
+            itemWidget.favNameLabel = nameLabel
 
             local slotText = (equipSlot and _G[equipSlot]) or itemSubType
             if slotText and slotText ~= "" then
