@@ -31,11 +31,16 @@ local displayed_fav_widgets = {}
 
 local missing_widgets = {}
 local fetch_attempts = {}
+local fetch_next_request = {}
 local displayed_item_widgets = {}
 local scanner = CreateFrame("GameTooltip", "BisTooltipScanner", UIParent, "GameTooltipTemplate")
 local item_fetch_frame = CreateFrame("Frame")
 local fetch_timer = 0
-local MAX_FETCH_ATTEMPTS = 10
+local fetch_clock = 0
+local FETCH_CHECK_INTERVAL = 0.1
+local FETCH_REQUEST_INTERVAL = 1
+local FETCH_SLOW_INTERVAL = 5
+local FETCH_FAST_REQUESTS = 10
 
 local boe_cache = {}
 local function IsItemBoe(itemId)
@@ -323,10 +328,12 @@ function BisTooltipAddon:IsWindowOpen()
 end
 
 local function ProcessMissingItems(self, elapsed)
+    fetch_clock = fetch_clock + elapsed
     fetch_timer = fetch_timer + elapsed
-    if fetch_timer <= 0.25 then return end
+    if fetch_timer < FETCH_CHECK_INTERVAL then return end
     fetch_timer = 0
 
+    local now = fetch_clock
     local hasRemaining = false
     local resolvedAny = false
     local ownerSet = false
@@ -351,15 +358,20 @@ local function ProcessMissingItems(self, elapsed)
             end
             missing_widgets[item_id] = nil
             fetch_attempts[item_id] = nil
+            fetch_next_request[item_id] = nil
         else
-            local attempts = (fetch_attempts[item_id] or 0) + 1
-            fetch_attempts[item_id] = attempts
+            hasRemaining = true
+            local nextRequest = fetch_next_request[item_id] or 0
+            if now >= nextRequest then
+                local attempts = (fetch_attempts[item_id] or 0) + 1
+                fetch_attempts[item_id] = attempts
 
-            if attempts >= MAX_FETCH_ATTEMPTS then
-                missing_widgets[item_id] = nil
-                fetch_attempts[item_id] = nil
-            else
-                hasRemaining = true
+                if attempts > FETCH_FAST_REQUESTS then
+                    fetch_next_request[item_id] = now + FETCH_SLOW_INTERVAL
+                else
+                    fetch_next_request[item_id] = now + FETCH_REQUEST_INTERVAL
+                end
+
                 if not ownerSet then
                     scanner:SetOwner(UIParent, "ANCHOR_NONE")
                     ownerSet = true
@@ -424,6 +436,7 @@ local function createItemFrame(item_id, size)
             if #list == 0 then
                 missing_widgets[id] = nil
                 fetch_attempts[id] = nil
+                fetch_next_request[id] = nil
                 if not next(missing_widgets) then
                     item_fetch_frame:SetScript("OnUpdate", nil)
                 end
@@ -734,6 +747,7 @@ local function drawSpecData()
     if not (favorites_frame and favorites_frame.frame and favorites_frame.frame:IsShown()) then
         wipe(missing_widgets)
         wipe(fetch_attempts)
+        wipe(fetch_next_request)
         item_fetch_frame:SetScript("OnUpdate", nil)
     else
         for itemID, widgets in pairs(missing_widgets) do
@@ -746,6 +760,7 @@ local function drawSpecData()
             if #widgets == 0 then
                 missing_widgets[itemID] = nil
                 fetch_attempts[itemID] = nil
+                fetch_next_request[itemID] = nil
             end
         end
     end
