@@ -345,7 +345,7 @@ local function ProcessMissingItems(self, elapsed)
             resolvedAny = true
             local isBoe = IsItemBoe(item_id)
             for _, widget in ipairs(widgets) do
-                if widget and widget.frame and widget.frame:IsShown() and widget.item_id == item_id then
+                if widget and widget.frame and widget.item_id == item_id then
                     widget:SetImage(itemIcon)
                     local wSize = widget.image and widget.image:GetWidth() or 40
                     if isBoe and wSize >= 30 then
@@ -749,20 +749,6 @@ local function drawSpecData()
         wipe(fetch_attempts)
         wipe(fetch_next_request)
         item_fetch_frame:SetScript("OnUpdate", nil)
-    else
-        for itemID, widgets in pairs(missing_widgets) do
-            for j = #widgets, 1, -1 do
-                local w = widgets[j]
-                if not (w and w.frame and w.frame:IsShown()) then
-                    table.remove(widgets, j)
-                end
-            end
-            if #widgets == 0 then
-                missing_widgets[itemID] = nil
-                fetch_attempts[itemID] = nil
-                fetch_next_request[itemID] = nil
-            end
-        end
     end
 
     drawTableHeader(spec_frame)
