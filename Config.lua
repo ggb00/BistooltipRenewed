@@ -368,7 +368,7 @@ local configTable = {
                 if not entry then return end
                 local class_name = entry.class
                 local spec_name = entry.spec
-                if not BisTooltipAddon.db.char.filter_specs[class_name] then BisTooltipAddon.db.char.filter_specs[class_name] = {} end
+                if type(BisTooltipAddon.db.char.filter_specs[class_name]) ~= "table" then BisTooltipAddon.db.char.filter_specs[class_name] = {} end
                 BisTooltipAddon.db.char.filter_specs[class_name][spec_name] = val
                 if BisTooltipAddon.ClearTooltipCache then BisTooltipAddon:ClearTooltipCache() end
             end,
@@ -407,15 +407,16 @@ local function buildFilterSpecOptions()
 end
 
 local function migrateAddonDB()
-    if not BisTooltipAddon.db.char.version or BisTooltipAddon.db.char.version < CURRENT_DB_VERSION then
+    local dbVersion = tonumber(BisTooltipAddon.db.char.version)
+    if not dbVersion or dbVersion < CURRENT_DB_VERSION then
         BisTooltipAddon.db.char.version = CURRENT_DB_VERSION
-        if not BisTooltipAddon.db.char.highlight_spec then BisTooltipAddon.db.char.highlight_spec = {} end
-        if not BisTooltipAddon.db.char.filter_specs then BisTooltipAddon.db.char.filter_specs = {} end
+        if type(BisTooltipAddon.db.char.highlight_spec) ~= "table" then BisTooltipAddon.db.char.highlight_spec = {} end
+        if type(BisTooltipAddon.db.char.filter_specs) ~= "table" then BisTooltipAddon.db.char.filter_specs = {} end
         if not BisTooltipAddon.db.char.class_index then BisTooltipAddon.db.char.class_index = GetPlayerClassIndex() end
         if not BisTooltipAddon.db.char.spec_index then BisTooltipAddon.db.char.spec_index = 1 end
         if not BisTooltipAddon.db.char.phase_index then BisTooltipAddon.db.char.phase_index = 1 end
 
-        if BisTooltipAddon.db.char.fav_scroll_status then
+        if type(BisTooltipAddon.db.char.fav_scroll_status) == "table" then
             BisTooltipAddon.db.char.fav_scroll_status.scrollvalue = 0
         end
     end
@@ -429,11 +430,11 @@ local function migrateAddonDB()
     if BisTooltipAddon.db.char.filter_class_names == nil then BisTooltipAddon.db.char.filter_class_names = false end
     if BisTooltipAddon.db.char.tooltip_with_ctrl == nil then BisTooltipAddon.db.char.tooltip_with_ctrl = false end
 
-    if BisTooltipAddon.db.char.minimap == nil then
+    if type(BisTooltipAddon.db.char.minimap) ~= "table" then
         BisTooltipAddon.db.char.minimap = { hide = false }
     end
 
-    if not BisTooltipAddon.db.char.scroll_status then BisTooltipAddon.db.char.scroll_status = {} end
+    if type(BisTooltipAddon.db.char.scroll_status) ~= "table" then BisTooltipAddon.db.char.scroll_status = {} end
     if not BisTooltipAddon.db.char.highlight_color then BisTooltipAddon.db.char.highlight_color = "purple" end
     if BisTooltipAddon.db.char.use_class_colors == nil then BisTooltipAddon.db.char.use_class_colors = true end
     if not BisTooltipAddon.db.char.source_color then BisTooltipAddon.db.char.source_color = "green" end
@@ -442,7 +443,7 @@ local function migrateAddonDB()
     if BisTooltipAddon.db.char.show_ilvl == nil then BisTooltipAddon.db.char.show_ilvl = false end
     if not BisTooltipAddon.db.char.ilvl_color then BisTooltipAddon.db.char.ilvl_color = "white" end
 
-    if not BisTooltipAddon.db.char.favorites then BisTooltipAddon.db.char.favorites = {} end
+    if type(BisTooltipAddon.db.char.favorites) ~= "table" then BisTooltipAddon.db.char.favorites = {} end
 
     local favIcon = tonumber(BisTooltipAddon.db.char.favorite_icon)
     if not favIcon or favIcon < 1 or favIcon > 8 then
@@ -453,7 +454,7 @@ local function migrateAddonDB()
 
     if not BisTooltipAddon.db.char.favorite_color then BisTooltipAddon.db.char.favorite_color = "yellow" end
     BisTooltipAddon.db.char.fav_counter = tonumber(BisTooltipAddon.db.char.fav_counter) or 0
-    if not BisTooltipAddon.db.char.fav_scroll_status then BisTooltipAddon.db.char.fav_scroll_status = {} end
+    if type(BisTooltipAddon.db.char.fav_scroll_status) ~= "table" then BisTooltipAddon.db.char.fav_scroll_status = {} end
 end
 
 function BisTooltipAddon:openConfigDialog()
