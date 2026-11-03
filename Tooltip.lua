@@ -304,7 +304,9 @@ local function ProcessTooltip(tooltip, link)
         end
     end
 
-    tt:Show()
+    if tt:IsShown() then
+        tt:Show()
+    end
 end
 
 local function OnTooltipSetItem(tooltip)
