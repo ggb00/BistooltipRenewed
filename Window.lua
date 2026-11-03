@@ -753,6 +753,8 @@ local function drawSpecData()
 
     drawTableHeader(spec_frame)
 
+    spec_frame:PauseLayout()
+
     local list_class = BisTooltip_ItemLists and (BisTooltip_ItemLists[class] or BisTooltip_ItemLists[GetCleanClassName(class)])
     local slots = list_class and spec and phase and list_class[spec] and list_class[spec][phase]
     if slots then
@@ -770,6 +772,8 @@ local function drawSpecData()
         end
     end
 
+    spec_frame:ResumeLayout()
+    spec_frame:DoLayout()
     spec_frame:SetScroll(targetScroll or 0)
 end
 
@@ -927,6 +931,7 @@ function BisTooltipAddon:RefreshFavoritesWindow()
     end
 
     favorites_scroll:ReleaseChildren()
+    favorites_scroll:PauseLayout()
 
     local favList = {}
     local favData = self.db and self.db.char and self.db.char.favorites
@@ -1077,6 +1082,8 @@ function BisTooltipAddon:RefreshFavoritesWindow()
         end
     end
 
+    favorites_scroll:ResumeLayout()
+    favorites_scroll:DoLayout()
     favorites_scroll:SetScroll(targetScroll or 0)
 
     if favorites_frame.clearBtn then
