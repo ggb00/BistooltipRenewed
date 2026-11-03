@@ -298,6 +298,4 @@ function BisTooltipAddon:OnInitialize()
     self:RegisterChatCommand("bt", "HandleChatCommand")
     self:RegisterChatCommand("bis", "HandleChatCommand")
     self:RegisterChatCommand("bistooltip", "HandleChatCommand")
-
-    collectgarbage("collect")
 end
