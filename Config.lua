@@ -415,12 +415,6 @@ local function migrateAddonDB()
         if not BisTooltipAddon.db.char.spec_index then BisTooltipAddon.db.char.spec_index = 1 end
         if not BisTooltipAddon.db.char.phase_index then BisTooltipAddon.db.char.phase_index = 1 end
 
-        local favIcon = tonumber(BisTooltipAddon.db.char.favorite_icon)
-        if not favIcon or favIcon < 1 or favIcon > 8 then
-            BisTooltipAddon.db.char.favorite_icon = 1
-        else
-            BisTooltipAddon.db.char.favorite_icon = favIcon
-        end
         if BisTooltipAddon.db.char.fav_scroll_status then
             BisTooltipAddon.db.char.fav_scroll_status.scrollvalue = 0
         end
