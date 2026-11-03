@@ -902,7 +902,9 @@ local function loadData()
         spec = spec_options_to_spec[spec_options[spec_index]]
     end
 
-    phase = BisTooltip_PhaseData[phase_index] or BisTooltip_PhaseData[1]
+    phase_index = tonumber(phase_index) or 1
+    if not BisTooltip_PhaseData[phase_index] then phase_index = 1 end
+    phase = BisTooltip_PhaseData[phase_index]
 end
 
 local function drawDropdowns()
