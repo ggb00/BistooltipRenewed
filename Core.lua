@@ -273,6 +273,7 @@ function BisTooltipAddon:HandleChatCommand(input)
     elseif cmd == "help" or cmd == "?" then
         DEFAULT_CHAT_FRAME:AddMessage("|cffffd100BiS-Tooltip Renewed commands:|r")
         DEFAULT_CHAT_FRAME:AddMessage("  |cffffff00/bis|r - Toggle main BiS list window")
+        DEFAULT_CHAT_FRAME:AddMessage("  |cffffff00/bt|r, |cffffff00/bistooltip|r - Same as /bis")
         DEFAULT_CHAT_FRAME:AddMessage("  |cffffff00/bis fav|r - Toggle Favorites list window")
         DEFAULT_CHAT_FRAME:AddMessage("  |cffffff00/bis config|r - Open configuration panel")
     else
