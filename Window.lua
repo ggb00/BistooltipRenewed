@@ -754,26 +754,23 @@ local function drawSpecData()
     drawTableHeader(spec_frame)
 
     local list_class = BisTooltip_ItemLists and (BisTooltip_ItemLists[class] or BisTooltip_ItemLists[GetCleanClassName(class)])
-    if not spec or not phase or not list_class or not list_class[spec] then return end
-    local slots = list_class[spec][phase]
-    if not slots then return end
-
-    if slots[1] then
-        for _, slot in ipairs(slots) do
-            drawItemSlot(slot.slot_name, slot)
-        end
-    else
-        for _, slot_name in ipairs(SLOT_DISPLAY_ORDER) do
-            local item_list = slots[slot_name]
-            if item_list then
-                drawItemSlot(slot_name, item_list)
+    local slots = list_class and spec and phase and list_class[spec] and list_class[spec][phase]
+    if slots then
+        if slots[1] then
+            for _, slot in ipairs(slots) do
+                drawItemSlot(slot.slot_name, slot)
+            end
+        else
+            for _, slot_name in ipairs(SLOT_DISPLAY_ORDER) do
+                local item_list = slots[slot_name]
+                if item_list then
+                    drawItemSlot(slot_name, item_list)
+                end
             end
         end
     end
 
-    if targetScroll > 0 then
-        spec_frame:SetScroll(targetScroll)
-    end
+    spec_frame:SetScroll(targetScroll or 0)
 end
 
 local function buildClassDict()
@@ -1080,9 +1077,7 @@ function BisTooltipAddon:RefreshFavoritesWindow()
         end
     end
 
-    if targetScroll > 0 then
-        favorites_scroll:SetScroll(targetScroll)
-    end
+    favorites_scroll:SetScroll(targetScroll or 0)
 
     if favorites_frame.clearBtn then
         favorites_frame.clearBtn:SetDisabled(#favList == 0)
