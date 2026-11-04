@@ -42,6 +42,7 @@ local FETCH_CHECK_INTERVAL = 0.1
 local FETCH_REQUEST_INTERVAL = 1
 local FETCH_SLOW_INTERVAL = 5
 local FETCH_FAST_REQUESTS = 10
+local FETCH_MAX_ATTEMPTS = 20
 
 local boe_cache = {}
 local boe_queue = {}
@@ -481,19 +482,25 @@ local function ProcessMissingItems(self, elapsed)
                 local attempts = (fetch_attempts[item_id] or 0) + 1
                 fetch_attempts[item_id] = attempts
 
-                if attempts > FETCH_FAST_REQUESTS then
-                    fetch_next_request[item_id] = now + FETCH_SLOW_INTERVAL
+                if attempts > FETCH_MAX_ATTEMPTS then
+                    missing_widgets[item_id] = nil
+                    fetch_attempts[item_id] = nil
+                    fetch_next_request[item_id] = nil
                 else
-                    fetch_next_request[item_id] = now + FETCH_REQUEST_INTERVAL
-                end
+                    if attempts > FETCH_FAST_REQUESTS then
+                        fetch_next_request[item_id] = now + FETCH_SLOW_INTERVAL
+                    else
+                        fetch_next_request[item_id] = now + FETCH_REQUEST_INTERVAL
+                    end
 
-                if not ownerSet then
-                    scanner:SetOwner(UIParent, "ANCHOR_NONE")
-                    ownerSet = true
+                    if not ownerSet then
+                        scanner:SetOwner(UIParent, "ANCHOR_NONE")
+                        ownerSet = true
+                    end
+                    scanner:SetHyperlink("item:" .. item_id .. ":0:0:0:0:0:0:0")
+                    scanner:ClearLines()
+                    scanner:Hide()
                 end
-                scanner:SetHyperlink("item:" .. item_id .. ":0:0:0:0:0:0:0")
-                scanner:ClearLines()
-                scanner:Hide()
             end
         end
     end
