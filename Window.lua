@@ -1050,8 +1050,25 @@ local function createSpecFrame()
     spec_frame = frame
 end
 
-function BisTooltipAddon:RefreshFavoritesWindow()
+local favUpdateFrame = CreateFrame("Frame")
+favUpdateFrame:Hide()
+favUpdateFrame:SetScript("OnUpdate", function(self)
+    self:Hide()
+    if BisTooltipAddon.RefreshFavoritesWindow then
+        BisTooltipAddon:RefreshFavoritesWindow(true)
+    end
+end)
+
+function BisTooltipAddon:RefreshFavoritesWindow(immediate)
     if not favorites_frame or not favorites_frame.frame:IsShown() or not favorites_scroll then return end
+
+    if not immediate then
+        if not favUpdateFrame:IsShown() then
+            favUpdateFrame:Show()
+        end
+        return
+    end
+    favUpdateFrame:Hide()
 
     wipe(displayed_fav_widgets)
 
@@ -1363,10 +1380,11 @@ function BisTooltipAddon:OpenFavoritesFrame()
     end
 
     favorites_frame:Show()
-    self:RefreshFavoritesWindow()
+    self:RefreshFavoritesWindow(true)
 end
 
 function BisTooltipAddon:CloseFavoritesFrame()
+    favUpdateFrame:Hide()
     StaticPopup_Hide("BISTOOLTIP_CONFIRM_CLEAR_FAVORITES")
     if favorites_frame and favorites_frame.frame:IsShown() then
         favorites_frame:Hide()
