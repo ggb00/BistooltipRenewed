@@ -412,7 +412,6 @@ end
 local function migrateAddonDB()
     local dbVersion = tonumber(BisTooltipAddon.db.char.version)
     if not dbVersion or dbVersion < CURRENT_DB_VERSION then
-        BisTooltipAddon.db.char.version = CURRENT_DB_VERSION
         if type(BisTooltipAddon.db.char.highlight_spec) ~= "table" then BisTooltipAddon.db.char.highlight_spec = {} end
         if type(BisTooltipAddon.db.char.filter_specs) ~= "table" then BisTooltipAddon.db.char.filter_specs = {} end
         if not BisTooltipAddon.db.char.class_index then BisTooltipAddon.db.char.class_index = GetPlayerClassIndex() end
@@ -422,6 +421,7 @@ local function migrateAddonDB()
         if type(BisTooltipAddon.db.char.fav_scroll_status) == "table" then
             BisTooltipAddon.db.char.fav_scroll_status.scrollvalue = 0
         end
+        BisTooltipAddon.db.char.version = CURRENT_DB_VERSION
     end
 
     if not BisTooltipAddon.db.char.class_index then
