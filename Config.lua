@@ -3,52 +3,18 @@ local AceConfigDialog = LibStub("AceConfigDialog-3.0")
 local LDB = LibStub("LibDataBroker-1.1", true)
 local LDBIcon = LDB and LibStub("LibDBIcon-1.0", true)
 local icon_loaded = false
-local icon_name = "BisTooltipIcon"
+local icon_name = "BisRenewedIcon"
 local CURRENT_DB_VERSION = 9
 
 local keyToClassSpec = {}
 
-local currentMapIconButton = nil
-
-local function findMapIconButton()
-    local button = currentMapIconButton
-    if button and button:IsShown() then return button end
-    local icon_lib = LibStub("LibDBIcon-1.0", true)
-    if not icon_lib then return nil end
-    local getter = icon_lib.GetMinimapButton
-    if getter then
-        button = icon_lib:GetMinimapButton(icon_name)
-    elseif icon_lib.objects then
-        button = icon_lib.objects[icon_name]
-    end
-    button = button or _G["LibDBIcon10_" .. icon_name]
-    if button then currentMapIconButton = button end
-    return button
-end
-
-local function showMapIconButton(button)
-    button:Show()
-    if button:IsShown() then return end
-    local button_name = button:GetName()
-    if button.oshow and button_name and type(MBB_RestoreButton) == "function"
-        and type(MBB_IsInArray) == "function" and type(MBB_Exclude) == "table"
-        and not MBB_IsInArray(MBB_Exclude, button_name) then
-        MBB_RestoreButton(button_name)
-    elseif button.oshow then
-        button.oshow(button)
-    end
-end
-
 local function updateMapIconButton()
-    local button = findMapIconButton()
-    if button then
-        if BisTooltipAddon.db.char.minimap.hide then
-            button:Hide()
-        else
-            showMapIconButton(button)
-        end
-    elseif not BisTooltipAddon.db.char.minimap.hide then
-        LibStub("LibDBIcon-1.0"):Show(icon_name)
+    local icon_lib = LibStub("LibDBIcon-1.0", true)
+    if not icon_lib or not icon_lib:IsRegistered(icon_name) then return end
+    if BisTooltipAddon.db.char.minimap.hide then
+        icon_lib:Hide(icon_name)
+    else
+        icon_lib:Show(icon_name)
     end
 end
 
