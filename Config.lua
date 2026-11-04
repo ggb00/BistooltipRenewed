@@ -8,6 +8,50 @@ local CURRENT_DB_VERSION = 9
 
 local keyToClassSpec = {}
 
+local currentMapIconButton = nil
+
+local function findMapIconButton()
+    local button = currentMapIconButton
+    if button and button:IsShown() then return button end
+    local icon_lib = LibStub("LibDBIcon-1.0", true)
+    if not icon_lib then return nil end
+    local getter = icon_lib.GetMinimapButton
+    if getter then
+        button = icon_lib:GetMinimapButton(icon_name)
+    elseif icon_lib.objects then
+        button = icon_lib.objects[icon_name]
+    end
+    button = button or _G["LibDBIcon10_" .. icon_name]
+    if button then currentMapIconButton = button end
+    return button
+end
+
+local function showMapIconButton(button)
+    button:Show()
+    if button:IsShown() then return end
+    local button_name = button:GetName()
+    if button.oshow and button_name and type(MBB_RestoreButton) == "function"
+        and type(MBB_IsInArray) == "function" and type(MBB_Exclude) == "table"
+        and not MBB_IsInArray(MBB_Exclude, button_name) then
+        MBB_RestoreButton(button_name)
+    elseif button.oshow then
+        button.oshow(button)
+    end
+end
+
+local function updateMapIconButton()
+    local button = findMapIconButton()
+    if button then
+        if BisTooltipAddon.db.char.minimap.hide then
+            button:Hide()
+        else
+            showMapIconButton(button)
+        end
+    elseif not BisTooltipAddon.db.char.minimap.hide then
+        LibStub("LibDBIcon-1.0"):Show(icon_name)
+    end
+end
+
 local function GetPlayerClassIndex()
     local playerClass = UnitClass("player")
     if BisTooltip_ClassData then
@@ -53,13 +97,7 @@ local configTable = {
             width = "full",
             set = function(info, val)
                 BisTooltipAddon.db.char.minimap.hide = not val
-                if LDBIcon then
-                    if val then
-                        LDBIcon:Show(icon_name)
-                    else
-                        LDBIcon:Hide(icon_name)
-                    end
-                end
+                updateMapIconButton()
             end,
             get = function(info) return not BisTooltipAddon.db.char.minimap.hide end
         },
@@ -466,37 +504,36 @@ function BisTooltipAddon:openConfigDialog()
 end
 
 function BisTooltipAddon:addMapIcon()
-    if not icon_loaded then
-        local LDB = LibStub("LibDataBroker-1.1", true)
-        local LDBIcon = LDB and LibStub("LibDBIcon-1.0", true)
-        if LDB then
-            icon_loaded = true
-            local PC_MinimapBtn = LDB:NewDataObject(icon_name, {
-                type = "launcher", text = "BiS-Tooltip Renewed", icon = "interface/icons/inv_weapon_glave_01.blp",
-                OnClick = function(_, button)
-                    if button == "LeftButton" then
-                        if IsShiftKeyDown() then
-                            BisTooltipAddon:ToggleFavoritesFrame()
-                        else
-                            BisTooltipAddon:createMainFrame()
-                        end
-                    elseif button == "RightButton" then
-                        BisTooltipAddon:openConfigDialog()
-                    end
-                end,
-                OnTooltipShow = function(tt)
-                    tt:AddLine(BisTooltipAddon.AddonNameAndVersion)
-                    tt:AddLine("|cffffff00Left click|r to open the BiS lists window")
-                    tt:AddLine("|cffffff00Shift + Left click|r to open Favorites list")
-                    tt:AddLine("|cffffff00Right click|r to open addon configuration window")
+    if icon_loaded then return end
+    local LDB = LibStub("LibDataBroker-1.1", true)
+    local LDBIcon = LDB and LibStub("LibDBIcon-1.0", true)
+    if not LDB then return end
+    local PC_MinimapBtn = LDB:NewDataObject(icon_name, {
+        type = "launcher", text = "BiS-Tooltip Renewed", icon = "interface/icons/inv_weapon_glave_01.blp",
+        OnClick = function(_, button)
+            if button == "LeftButton" then
+                if IsShiftKeyDown() then
+                    BisTooltipAddon:ToggleFavoritesFrame()
+                else
+                    BisTooltipAddon:createMainFrame()
                 end
-            })
-
-            if LDBIcon then
-                LDBIcon:Register(icon_name, PC_MinimapBtn, BisTooltipAddon.db.char.minimap)
+            elseif button == "RightButton" then
+                BisTooltipAddon:openConfigDialog()
             end
+        end,
+        OnTooltipShow = function(tt)
+            tt:AddLine(BisTooltipAddon.AddonNameAndVersion)
+            tt:AddLine("|cffffff00Left click|r to open the BiS lists window")
+            tt:AddLine("|cffffff00Shift + Left click|r to open Favorites list")
+            tt:AddLine("|cffffff00Right click|r to open addon configuration window")
         end
+    })
+
+    if LDBIcon then
+        LDBIcon:Register(icon_name, PC_MinimapBtn, BisTooltipAddon.db.char.minimap)
     end
+    icon_loaded = true
+    updateMapIconButton()
 end
 
 function BisTooltipAddon:initConfig()
