@@ -4,7 +4,7 @@ local AceGUI = LibStub("AceGUI-3.0")
 
 local GetItemInfo, GetSpellInfo, GetSpellLink = GetItemInfo, GetSpellInfo, GetSpellLink
 local tonumber, tostring, type, ipairs, pairs = tonumber, tostring, type, ipairs, pairs
-local wipe, tinsert, max = wipe, tinsert, math.max
+local wipe, tinsert, max, min = wipe, tinsert, math.max, math.min
 
 local class = nil
 local spec = nil
@@ -43,6 +43,36 @@ local FETCH_REQUEST_INTERVAL = 1
 local FETCH_SLOW_INTERVAL = 5
 local FETCH_FAST_REQUESTS = 10
 local FETCH_MAX_ATTEMPTS = 20
+
+local statusText = nil
+local statusTimer = 0
+local currentStatusState = "IDLE"
+local STATUS_FADE_DURATION = 1.0
+local fetch_has_failure = false
+
+local function UpdateStatusDisplay(state)
+    if not statusText then return end
+    if state == currentStatusState and state == "FETCHING" then
+        return
+    end
+    currentStatusState = state
+
+    if state == "FETCHING" then
+        statusTimer = 0
+        statusText:SetText("|cffffd100Loading items...|r")
+        statusText:SetAlpha(1)
+        statusText:Show()
+    elseif state == "SUCCESS" then
+        statusTimer = STATUS_FADE_DURATION * 2
+        statusText:SetText("|cff20ff20All items loaded|r")
+        statusText:SetAlpha(1)
+        statusText:Show()
+    else
+        statusTimer = 0
+        statusText:SetText("")
+        statusText:Hide()
+    end
+end
 
 local boe_cache = {}
 local boe_queue = {}
@@ -145,6 +175,7 @@ end
 local CLEAN_CLASS_NAMES = {
     ["Death Knight"] = "DeathKnight",
 }
+
 local function GetCleanClassName(cls)
     if not cls then return "" end
     if not CLEAN_CLASS_NAMES[cls] then
@@ -445,6 +476,17 @@ function BisTooltipAddon:IsWindowOpen()
 end
 
 local function ProcessMissingItems(self, elapsed)
+    if statusTimer > 0 then
+        statusTimer = statusTimer - elapsed
+        if statusTimer <= 0 then
+            UpdateStatusDisplay("IDLE")
+            item_fetch_frame:SetScript("OnUpdate", nil)
+        elseif statusTimer <= STATUS_FADE_DURATION and statusText then
+            statusText:SetAlpha(statusTimer / STATUS_FADE_DURATION)
+        end
+        return
+    end
+
     fetch_clock = fetch_clock + elapsed
     fetch_timer = fetch_timer + elapsed
     if fetch_timer < FETCH_CHECK_INTERVAL then return end
@@ -486,6 +528,7 @@ local function ProcessMissingItems(self, elapsed)
                     missing_widgets[item_id] = nil
                     fetch_attempts[item_id] = nil
                     fetch_next_request[item_id] = nil
+                    fetch_has_failure = true
                 else
                     if attempts > FETCH_FAST_REQUESTS then
                         fetch_next_request[item_id] = now + FETCH_SLOW_INTERVAL
@@ -507,21 +550,31 @@ local function ProcessMissingItems(self, elapsed)
 
     local hasRemaining = (next(missing_widgets) ~= nil)
     if not hasRemaining then
-        item_fetch_frame:SetScript("OnUpdate", nil)
-    end
+        if favorites_refresh_pending then
+            favorites_refresh_pending = false
+            if favorites_frame and favorites_frame.frame:IsShown() then
+                BisTooltipAddon:RefreshFavoritesWindow()
+            end
+        end
 
-    if favorites_refresh_pending and not hasRemaining then
-        favorites_refresh_pending = false
-        if favorites_frame and favorites_frame.frame:IsShown() then
-            BisTooltipAddon:RefreshFavoritesWindow()
+        if main_frame and main_frame.frame:IsShown() and statusText and statusText:IsShown() and not fetch_has_failure then
+            UpdateStatusDisplay("SUCCESS")
+        else
+            UpdateStatusDisplay("IDLE")
+            item_fetch_frame:SetScript("OnUpdate", nil)
         end
     end
 end
 
 local function StartItemFetch()
     if next(missing_widgets) then
+        fetch_has_failure = false
+        if main_frame and main_frame.frame:IsShown() then
+            UpdateStatusDisplay("FETCHING")
+        end
         item_fetch_frame:SetScript("OnUpdate", ProcessMissingItems)
     else
+        UpdateStatusDisplay("IDLE")
         item_fetch_frame:SetScript("OnUpdate", nil)
     end
 end
@@ -564,6 +617,7 @@ local function createItemFrame(item_id, size)
                 fetch_attempts[id] = nil
                 fetch_next_request[id] = nil
                 if not next(missing_widgets) then
+                    UpdateStatusDisplay("IDLE")
                     item_fetch_frame:SetScript("OnUpdate", nil)
                 end
             end
@@ -886,6 +940,7 @@ local function drawSpecData()
         wipe(missing_widgets)
         wipe(fetch_attempts)
         wipe(fetch_next_request)
+        UpdateStatusDisplay("IDLE")
         item_fetch_frame:SetScript("OnUpdate", nil)
     end
 
@@ -1133,7 +1188,7 @@ function BisTooltipAddon:RefreshFavoritesWindow(immediate)
                 row.frame.favCard = card
                 card:SetBackdrop(ROW_BACKDROP)
             end
-            card:SetFrameLevel(math.max(1, row.frame:GetFrameLevel()))
+            card:SetFrameLevel(max(1, row.frame:GetFrameLevel()))
             card:ClearAllPoints()
             card:SetPoint("TOP", itemWidget.frame, "TOP", 0, 0)
             card:SetPoint("BOTTOM", itemWidget.frame, "BOTTOM", 0, 0)
@@ -1168,7 +1223,7 @@ function BisTooltipAddon:RefreshFavoritesWindow(immediate)
             nameLabel:SetFont("Fonts\\FRIZQT__.TTF", 13, "")
             nameLabel:SetFullWidth(true)
 
-            local nameHeight = math.max(14, nameLabel.label:GetStringHeight() or 14)
+            local nameHeight = max(14, nameLabel.label:GetStringHeight() or 14)
             nameLabel:SetHeight(nameHeight)
 
             nameLabel:SetCallback("OnClick", function()
@@ -1263,8 +1318,8 @@ local function ClampPosition(pos, width, height)
 
     if x < 0 then x = 0 end
     if y > screenH then y = screenH end
-    if x + w > screenW then x = math.max(0, screenW - w) end
-    if y - h < 0 then y = math.min(screenH, h) end
+    if x + w > screenW then x = max(0, screenW - w) end
+    if y - h < 0 then y = min(screenH, h) end
 
     return x, y
 end
@@ -1462,6 +1517,7 @@ function BisTooltipAddon:createMainFrame()
     end
 
     main_frame.frame:HookScript("OnHide", function()
+        UpdateStatusDisplay("IDLE")
         if not (favorites_frame and favorites_frame.frame and favorites_frame.frame:IsShown()) then
             item_fetch_frame:SetScript("OnUpdate", nil)
             StaticPopup_Hide("BISTOOLTIP_CONFIRM_CLEAR_FAVORITES")
@@ -1507,6 +1563,16 @@ function BisTooltipAddon:createMainFrame()
     end)
     main_frame:SetLayout("List")
     main_frame:SetTitle(BisTooltipAddon.AddonNameAndVersion)
+
+    if not statusText then
+        statusText = main_frame.frame:CreateFontString(nil, "OVERLAY")
+        statusText:SetFont("Fonts\\FRIZQT__.TTF", 11, "")
+        statusText:SetShadowOffset(1, -1)
+        statusText:SetShadowColor(0, 0, 0, 0.8)
+        statusText:SetJustifyH("CENTER")
+        statusText:SetPoint("CENTER", main_frame.frame, "BOTTOM", 0, 48)
+        statusText:Hide()
+    end
 
     drawDropdowns()
     createSpecFrame()
@@ -1578,10 +1644,6 @@ function BisTooltipAddon:createMainFrame()
 end
 
 function BisTooltipAddon:closeMainFrame()
-    if not (favorites_frame and favorites_frame.frame and favorites_frame.frame:IsShown()) then
-        item_fetch_frame:SetScript("OnUpdate", nil)
-        StaticPopup_Hide("BISTOOLTIP_CONFIRM_CLEAR_FAVORITES")
-    end
     if main_frame and main_frame.frame:IsShown() then
         main_frame:Hide()
     end
