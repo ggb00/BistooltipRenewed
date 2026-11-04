@@ -258,6 +258,10 @@ local function HandleItemTooltip(widget, item_id)
     end
 end
 
+local memo_state = {}
+local memo_fav = {}
+local memo_ilvl = {}
+
 local function ApplyItemStateVisuals(widget, item_id, is_missing)
     local size = widget.image and widget.image:GetWidth() or 40
     if size < 30 then
@@ -276,41 +280,75 @@ local function ApplyItemStateVisuals(widget, item_id, is_missing)
     if widget.frame.bisILvl then
         local db = BisTooltipAddon.db and BisTooltipAddon.db.char
         local showILvl = db and (db.show_ilvl ~= false)
+        local colorKey = (db and db.ilvl_color) or "white"
 
         if showILvl and not is_missing and item_id and item_id > 0 then
-            local _, _, _, itemLevel = GetItemInfo(item_id)
-            if itemLevel and itemLevel > 0 then
-                local colorKey = (db and db.ilvl_color) or "white"
+            local itemLevel = memo_ilvl[item_id]
+            if itemLevel == nil then
+                local _, _, _, ilvl = GetItemInfo(item_id)
+                itemLevel = ilvl or 0
+                memo_ilvl[item_id] = itemLevel
+            end
+
+            if itemLevel > 0 then
                 local hex = (BisTooltip_HexColors and BisTooltip_HexColors[colorKey]) or "FFFFFF"
-                widget.frame.bisILvl:SetText("|cFF" .. hex .. itemLevel .. "|r")
+                local text = "|cFF" .. hex .. itemLevel .. "|r"
+                if widget._lastILvlText ~= text then
+                    widget._lastILvlText = text
+                    widget.frame.bisILvl:SetText(text)
+                end
                 widget.frame.bisILvl:Show()
             else
+                widget._lastILvlText = nil
                 widget.frame.bisILvl:Hide()
             end
         else
+            widget._lastILvlText = nil
             widget.frame.bisILvl:Hide()
         end
     end
 
     if widget.frame.bisStarMark then
-        if BisTooltipAddon:IsFavorite(item_id) then
-            widget.frame.bisStarMark:SetTexture("Interface\\TargetingFrame\\UI-RaidTargetingIcons")
-            SetRaidTargetIconTexture(widget.frame.bisStarMark, markIndex)
+        local isFav = memo_fav[item_id]
+        if isFav == nil then
+            isFav = BisTooltipAddon:IsFavorite(item_id)
+            memo_fav[item_id] = isFav
+        end
+
+        if isFav then
+            if widget._lastFav ~= true or widget._lastMarkIndex ~= markIndex then
+                widget._lastFav = true
+                widget._lastMarkIndex = markIndex
+                widget.frame.bisStarMark:SetTexture("Interface\\TargetingFrame\\UI-RaidTargetingIcons")
+                SetRaidTargetIconTexture(widget.frame.bisStarMark, markIndex)
+            end
             widget.frame.bisStarMark:Show()
         else
+            widget._lastFav = false
             widget.frame.bisStarMark:Hide()
         end
     end
 
     if is_missing then
+        widget._lastState = -1
         widget.image:SetVertexColor(1, 1, 1, 1)
         widget.frame.bisCheckMark:Hide()
         if widget.frame.bisBorder then widget.frame.bisBorder:Hide() end
         return
     end
 
-    local state = BisTooltipAddon:GetItemState(item_id)
+    local state = memo_state[item_id]
+    if state == nil then
+        state = BisTooltipAddon:GetItemState(item_id)
+        memo_state[item_id] = state
+    end
     local show_borders = BisTooltipAddon.db.char.show_item_borders
+
+    if widget._lastState == state and widget._lastShowBorders == show_borders then
+        return
+    end
+    widget._lastState = state
+    widget._lastShowBorders = show_borders
 
     if state == 2 then
         widget.image:SetVertexColor(0.35, 0.35, 0.35, 1)
@@ -373,6 +411,10 @@ local function UpdateFavoriteLabel(item_id)
 end
 
 local function RefreshItemStateVisuals()
+    wipe(memo_state)
+    wipe(memo_fav)
+    wipe(memo_ilvl)
+
     if main_frame and main_frame.frame:IsShown() then
         for i = 1, #displayed_item_widgets do
             local widget = displayed_item_widgets[i]
@@ -389,6 +431,10 @@ local function RefreshItemStateVisuals()
             end
         end
     end
+
+    wipe(memo_state)
+    wipe(memo_fav)
+    wipe(memo_ilvl)
 end
 BisTooltipAddon.RefreshItemStateVisuals = RefreshItemStateVisuals
 
@@ -525,6 +571,11 @@ local function createItemFrame(item_id, size)
         if self.frame.bisBorder then self.frame.bisBorder:Hide() end
         if self.frame.bisStarMark then self.frame.bisStarMark:Hide() end
         if self.frame.bisILvl then self.frame.bisILvl:Hide() end
+        self._lastState = nil
+        self._lastShowBorders = nil
+        self._lastFav = nil
+        self._lastMarkIndex = nil
+        self._lastILvlText = nil
         self.item_id = nil
     end)
     item_frame:SetImageSize(size, size)
