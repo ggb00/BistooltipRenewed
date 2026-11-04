@@ -404,36 +404,34 @@ local function ProcessMissingItems(self, elapsed)
     fetch_timer = 0
 
     local now = fetch_clock
-    local hasRemaining = false
     local ownerSet = false
 
     for item_id, widgets in pairs(missing_widgets) do
-        local itemName, _, _, _, _, _, _, _, _, itemIcon = GetItemInfo(item_id)
+        local nextRequest = fetch_next_request[item_id] or 0
+        if now >= nextRequest then
+            local itemName, _, _, _, _, _, _, _, _, itemIcon = GetItemInfo(item_id)
 
-        if itemName then
-            for _, widget in ipairs(widgets) do
-                if widget and widget.frame and widget.item_id == item_id then
-                    widget:SetImage(itemIcon)
-                    ApplyItemStateVisuals(widget, item_id, false)
+            if itemName then
+                for _, widget in ipairs(widgets) do
+                    if widget and widget.frame and widget.item_id == item_id then
+                        widget:SetImage(itemIcon)
+                        ApplyItemStateVisuals(widget, item_id, false)
+                    end
                 end
-            end
-            local cachedBoe = boe_cache[item_id]
-            if cachedBoe == true then
-                ApplyBoeToItem(item_id, true)
-            elseif cachedBoe == nil then
-                QueueBoeCheck(item_id)
-            end
-            if favorites_frame and favorites_frame.frame:IsShown() then
-                UpdateFavoriteLabel(item_id)
-                favorites_refresh_pending = true
-            end
-            missing_widgets[item_id] = nil
-            fetch_attempts[item_id] = nil
-            fetch_next_request[item_id] = nil
-        else
-            hasRemaining = true
-            local nextRequest = fetch_next_request[item_id] or 0
-            if now >= nextRequest then
+                local cachedBoe = boe_cache[item_id]
+                if cachedBoe == true then
+                    ApplyBoeToItem(item_id, true)
+                elseif cachedBoe == nil then
+                    QueueBoeCheck(item_id)
+                end
+                if favorites_frame and favorites_frame.frame:IsShown() then
+                    UpdateFavoriteLabel(item_id)
+                    favorites_refresh_pending = true
+                end
+                missing_widgets[item_id] = nil
+                fetch_attempts[item_id] = nil
+                fetch_next_request[item_id] = nil
+            else
                 local attempts = (fetch_attempts[item_id] or 0) + 1
                 fetch_attempts[item_id] = attempts
 
@@ -454,6 +452,7 @@ local function ProcessMissingItems(self, elapsed)
         end
     end
 
+    local hasRemaining = (next(missing_widgets) ~= nil)
     if not hasRemaining then
         item_fetch_frame:SetScript("OnUpdate", nil)
     end
