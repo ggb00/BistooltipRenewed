@@ -590,46 +590,47 @@ local function createItemFrame(item_id, size)
     item_frame.frame:EnableMouse(true)
     item_frame.frame:RegisterForClicks("LeftButtonUp", "RightButtonUp")
 
-    if not item_frame.frame.bisBorder then
-        item_frame.frame.bisBorder = item_frame.frame:CreateTexture(nil, "ARTWORK")
-        item_frame.frame.bisBorder:SetTexture("Interface\\Buttons\\CheckButtonHilight")
-        item_frame.frame.bisBorder:SetBlendMode("ADD")
-        item_frame.frame.bisBorder:SetAllPoints(item_frame.image)
-        item_frame.frame.bisBorder:Hide()
-    end
-    item_frame.frame.bisBorder:SetDrawLayer("ARTWORK", 1)
+    if size >= 30 then
+        if not item_frame.frame.bisBorder then
+            item_frame.frame.bisBorder = item_frame.frame:CreateTexture(nil, "ARTWORK")
+            item_frame.frame.bisBorder:SetTexture("Interface\\Buttons\\CheckButtonHilight")
+            item_frame.frame.bisBorder:SetBlendMode("ADD")
+            item_frame.frame.bisBorder:SetAllPoints(item_frame.image)
+            item_frame.frame.bisBorder:Hide()
+        end
+        item_frame.frame.bisBorder:SetDrawLayer("ARTWORK", 1)
 
-    if not item_frame.frame.bisCheckMark then
-        item_frame.frame.bisCheckMark = item_frame.frame:CreateTexture(nil, "OVERLAY")
-    end
-    item_frame.frame.bisCheckMark:SetDrawLayer("OVERLAY", 1)
+        if not item_frame.frame.bisCheckMark then
+            item_frame.frame.bisCheckMark = item_frame.frame:CreateTexture(nil, "OVERLAY")
+        end
+        item_frame.frame.bisCheckMark:SetDrawLayer("OVERLAY", 1)
 
-    if not item_frame.frame.bisBoeMark then
-        item_frame.frame.bisBoeMark = item_frame.frame:CreateTexture(nil, "OVERLAY")
-        item_frame.frame.bisBoeMark:SetWidth(12)
-        item_frame.frame.bisBoeMark:SetHeight(12)
-        item_frame.frame.bisBoeMark:SetPoint("TOPRIGHT", -2, -5)
-        item_frame.frame.bisBoeMark:SetTexture("Interface\\Icons\\INV_Misc_Coin_01")
-    end
-    item_frame.frame.bisBoeMark:SetDrawLayer("OVERLAY", 2)
+        if not item_frame.frame.bisBoeMark then
+            item_frame.frame.bisBoeMark = item_frame.frame:CreateTexture(nil, "OVERLAY")
+            item_frame.frame.bisBoeMark:SetWidth(12)
+            item_frame.frame.bisBoeMark:SetHeight(12)
+            item_frame.frame.bisBoeMark:SetPoint("TOPRIGHT", -2, -5)
+            item_frame.frame.bisBoeMark:SetTexture("Interface\\Icons\\INV_Misc_Coin_01")
+        end
+        item_frame.frame.bisBoeMark:SetDrawLayer("OVERLAY", 2)
 
-    if not item_frame.frame.bisStarMark then
-        item_frame.frame.bisStarMark = item_frame.frame:CreateTexture(nil, "OVERLAY")
-        item_frame.frame.bisStarMark:SetTexture("Interface\\TargetingFrame\\UI-RaidTargetingIcons")
-    end
-    item_frame.frame.bisStarMark:SetDrawLayer("OVERLAY", 3)
-    local starSize = (size < 30) and 10 or 14
-    item_frame.frame.bisStarMark:SetWidth(starSize)
-    item_frame.frame.bisStarMark:SetHeight(starSize)
-    item_frame.frame.bisStarMark:ClearAllPoints()
-    item_frame.frame.bisStarMark:SetPoint("TOPLEFT", item_frame.image, "TOPLEFT", -2, 2)
+        if not item_frame.frame.bisStarMark then
+            item_frame.frame.bisStarMark = item_frame.frame:CreateTexture(nil, "OVERLAY")
+            item_frame.frame.bisStarMark:SetTexture("Interface\\TargetingFrame\\UI-RaidTargetingIcons")
+        end
+        item_frame.frame.bisStarMark:SetDrawLayer("OVERLAY", 3)
+        item_frame.frame.bisStarMark:SetWidth(14)
+        item_frame.frame.bisStarMark:SetHeight(14)
+        item_frame.frame.bisStarMark:ClearAllPoints()
+        item_frame.frame.bisStarMark:SetPoint("TOPLEFT", item_frame.image, "TOPLEFT", -2, 2)
 
-    if not item_frame.frame.bisILvl then
-        item_frame.frame.bisILvl = item_frame.frame:CreateFontString(nil, "OVERLAY")
-        item_frame.frame.bisILvl:SetFont("Fonts\\ARIALN.TTF", 13, "OUTLINE")
-        item_frame.frame.bisILvl:SetShadowOffset(0, 0)
-        item_frame.frame.bisILvl:SetPoint("BOTTOMLEFT", item_frame.image, "BOTTOMLEFT", -4, -2)
-        item_frame.frame.bisILvl:SetJustifyH("LEFT")
+        if not item_frame.frame.bisILvl then
+            item_frame.frame.bisILvl = item_frame.frame:CreateFontString(nil, "OVERLAY")
+            item_frame.frame.bisILvl:SetFont("Fonts\\ARIALN.TTF", 13, "OUTLINE")
+            item_frame.frame.bisILvl:SetShadowOffset(0, 0)
+            item_frame.frame.bisILvl:SetPoint("BOTTOMLEFT", item_frame.image, "BOTTOMLEFT", -4, -2)
+            item_frame.frame.bisILvl:SetJustifyH("LEFT")
+        end
     end
 
     item_frame:SetCallback("OnClick", function(widget, _, button)
@@ -662,7 +663,7 @@ local function createItemFrame(item_id, size)
 
     if not itemName then
         item_frame:SetImage("Interface\\Icons\\INV_Misc_QuestionMark")
-        item_frame.frame.bisBoeMark:Hide()
+        if item_frame.frame.bisBoeMark then item_frame.frame.bisBoeMark:Hide() end
         ApplyItemStateVisuals(item_frame, item_id, true)
 
         if not missing_widgets[item_id] then missing_widgets[item_id] = {} end
@@ -673,10 +674,12 @@ local function createItemFrame(item_id, size)
 
     item_frame:SetImage(itemIcon)
     local cachedBoe = boe_cache[item_id]
-    if size >= 30 and cachedBoe == true then
-        item_frame.frame.bisBoeMark:Show()
-    else
-        item_frame.frame.bisBoeMark:Hide()
+    if item_frame.frame.bisBoeMark then
+        if size >= 30 and cachedBoe == true then
+            item_frame.frame.bisBoeMark:Show()
+        else
+            item_frame.frame.bisBoeMark:Hide()
+        end
     end
     if size >= 30 and cachedBoe == nil then
         QueueBoeCheck(item_id)
