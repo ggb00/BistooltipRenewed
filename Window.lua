@@ -957,11 +957,12 @@ local function drawSpecData()
 
     spec_frame:ReleaseChildren()
 
+    UpdateStatusDisplay("IDLE")
+
     if not (favorites_frame and favorites_frame.frame and favorites_frame.frame:IsShown()) then
         wipe(missing_widgets)
         wipe(fetch_attempts)
         wipe(fetch_next_request)
-        UpdateStatusDisplay("IDLE")
         item_fetch_frame:SetScript("OnUpdate", nil)
     end
 
