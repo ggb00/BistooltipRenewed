@@ -463,9 +463,14 @@ local function RefreshItemStateVisuals()
 end
 BisTooltipAddon.RefreshItemStateVisuals = RefreshItemStateVisuals
 
-local function RefreshFavoriteForItem(item_id)
+function BisTooltipAddon:RefreshFavoriteForItem(item_id)
+    if type(self) == "number" and not item_id then
+        item_id = self
+    end
     if not item_id then return end
-    local altID = BisTooltipAddon.GetAltItemID and BisTooltipAddon:GetAltItemID(item_id)
+    item_id = tonumber(item_id)
+    if not item_id then return end
+    local altID = self.GetAltItemID and self:GetAltItemID(item_id)
 
     wipe(memo_state)
     wipe(memo_fav)
@@ -493,7 +498,6 @@ local function RefreshFavoriteForItem(item_id)
     wipe(memo_fav)
     wipe(memo_ilvl)
 end
-BisTooltipAddon.RefreshFavoriteForItem = RefreshFavoriteForItem
 
 function BisTooltipAddon:IsWindowOpen()
     return (main_frame and main_frame.frame and main_frame.frame:IsShown())
