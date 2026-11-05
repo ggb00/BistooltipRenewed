@@ -470,6 +470,34 @@ local function RefreshItemStateVisuals()
 end
 BisTooltipAddon.RefreshItemStateVisuals = RefreshItemStateVisuals
 
+local function RefreshFavoriteForItem(item_id)
+    if not item_id then return end
+    local altID = BisTooltipAddon.GetAltItemID and BisTooltipAddon:GetAltItemID(item_id)
+
+    wipe(memo_fav)
+
+    if main_frame and main_frame.frame:IsShown() then
+        for i = 1, #displayed_item_widgets do
+            local widget = displayed_item_widgets[i]
+            if widget and widget.frame and (widget.item_id == item_id or (altID and widget.item_id == altID)) then
+                ApplyItemStateVisuals(widget, widget.item_id, false)
+            end
+        end
+    end
+
+    if favorites_frame and favorites_frame.frame:IsShown() then
+        for i = 1, #displayed_fav_widgets do
+            local widget = displayed_fav_widgets[i]
+            if widget and widget.frame and (widget.item_id == item_id or (altID and widget.item_id == altID)) then
+                ApplyItemStateVisuals(widget, widget.item_id, false)
+            end
+        end
+    end
+
+    wipe(memo_fav)
+end
+BisTooltipAddon.RefreshFavoriteForItem = RefreshFavoriteForItem
+
 function BisTooltipAddon:IsWindowOpen()
     return (main_frame and main_frame.frame and main_frame.frame:IsShown())
         or (favorites_frame and favorites_frame.frame and favorites_frame.frame:IsShown())
