@@ -362,10 +362,14 @@ local function ApplyItemStateVisuals(widget, item_id, is_missing)
         return
     end
 
+    local show_item_states = not (BisTooltipAddon.db and BisTooltipAddon.db.char and BisTooltipAddon.db.char.show_item_states == false)
     local state = memo_state[item_id]
     if state == nil then
         state = BisTooltipAddon:GetItemState(item_id)
         memo_state[item_id] = state
+    end
+    if not show_item_states and (state == 1 or state == 3) then
+        state = 0
     end
     local show_borders = BisTooltipAddon.db.char.show_item_borders
 
