@@ -467,7 +467,9 @@ local function RefreshFavoriteForItem(item_id)
     if not item_id then return end
     local altID = BisTooltipAddon.GetAltItemID and BisTooltipAddon:GetAltItemID(item_id)
 
+    wipe(memo_state)
     wipe(memo_fav)
+    wipe(memo_ilvl)
 
     if main_frame and main_frame.frame:IsShown() then
         for i = 1, #displayed_item_widgets do
@@ -487,7 +489,9 @@ local function RefreshFavoriteForItem(item_id)
         end
     end
 
+    wipe(memo_state)
     wipe(memo_fav)
+    wipe(memo_ilvl)
 end
 BisTooltipAddon.RefreshFavoriteForItem = RefreshFavoriteForItem
 
