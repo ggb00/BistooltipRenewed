@@ -19,10 +19,11 @@ local function updateMapIconButton()
 end
 
 local function GetPlayerClassIndex()
-    local playerClass = UnitClass("player")
-    if BisTooltip_ClassData then
+    local _, englishClass = UnitClass("player")
+    if BisTooltip_ClassData and englishClass then
         for i = 1, #BisTooltip_ClassData do
-            if BisTooltip_ClassData[i].name == playerClass then
+            local cleanName = BisTooltip_ClassData[i].name:gsub("%s+", ""):upper()
+            if cleanName == englishClass then
                 return i
             end
         end
