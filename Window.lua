@@ -310,9 +310,13 @@ local function ApplyItemStateVisuals(widget, item_id, is_missing)
         if showILvl and not is_missing and item_id and item_id > 0 then
             local itemLevel = memo_ilvl[item_id]
             if itemLevel == nil then
-                local _, _, _, ilvl = GetItemInfo(item_id)
-                itemLevel = ilvl or 0
-                memo_ilvl[item_id] = itemLevel
+                local name, _, _, ilvl = GetItemInfo(item_id)
+                if name and ilvl and ilvl > 0 then
+                    itemLevel = ilvl
+                    memo_ilvl[item_id] = itemLevel
+                else
+                    itemLevel = 0
+                end
             end
 
             if itemLevel > 0 then
@@ -448,7 +452,8 @@ local function RefreshItemStateVisuals()
         for i = 1, #displayed_item_widgets do
             local widget = displayed_item_widgets[i]
             if widget and widget.frame and widget.item_id then
-                ApplyItemStateVisuals(widget, widget.item_id, false)
+                local is_missing = not GetItemInfo(widget.item_id)
+                ApplyItemStateVisuals(widget, widget.item_id, is_missing)
             end
         end
     end
@@ -456,7 +461,8 @@ local function RefreshItemStateVisuals()
         for i = 1, #displayed_fav_widgets do
             local widget = displayed_fav_widgets[i]
             if widget and widget.frame and widget.item_id then
-                ApplyItemStateVisuals(widget, widget.item_id, false)
+                local is_missing = not GetItemInfo(widget.item_id)
+                ApplyItemStateVisuals(widget, widget.item_id, is_missing)
             end
         end
     end
@@ -484,7 +490,8 @@ function BisTooltipAddon:RefreshFavoriteForItem(item_id)
         for i = 1, #displayed_item_widgets do
             local widget = displayed_item_widgets[i]
             if widget and widget.frame and (widget.item_id == item_id or (altID and widget.item_id == altID)) then
-                ApplyItemStateVisuals(widget, widget.item_id, false)
+                local is_missing = not GetItemInfo(widget.item_id)
+                ApplyItemStateVisuals(widget, widget.item_id, is_missing)
             end
         end
     end
@@ -493,7 +500,8 @@ function BisTooltipAddon:RefreshFavoriteForItem(item_id)
         for i = 1, #displayed_fav_widgets do
             local widget = displayed_fav_widgets[i]
             if widget and widget.frame and (widget.item_id == item_id or (altID and widget.item_id == altID)) then
-                ApplyItemStateVisuals(widget, widget.item_id, false)
+                local is_missing = not GetItemInfo(widget.item_id)
+                ApplyItemStateVisuals(widget, widget.item_id, is_missing)
             end
         end
     end
