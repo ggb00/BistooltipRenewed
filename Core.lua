@@ -294,8 +294,10 @@ function BisTooltipAddon:HandleChatCommand(input)
         DEFAULT_CHAT_FRAME:AddMessage("  |cffffff00/bt|r, |cffffff00/bistooltip|r - Same as /bis")
         DEFAULT_CHAT_FRAME:AddMessage("  |cffffff00/bis fav|r - Toggle Favorites list window")
         DEFAULT_CHAT_FRAME:AddMessage("  |cffffff00/bis config|r - Open configuration panel")
-    else
+    elseif cmd == "" then
         self:createMainFrame()
+    else
+        DEFAULT_CHAT_FRAME:AddMessage("|cffff2020[BiS-Tooltip Renewed]|r Unknown command '|cffffff00" .. cmd .. "|r'. Type '|cffffff00/bis help|r' for options.")
     end
 end
 
