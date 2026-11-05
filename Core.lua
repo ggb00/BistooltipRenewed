@@ -302,7 +302,11 @@ end
 function BisTooltipAddon:OnInitialize()
     RebuildEquippedCache()
     self:BuildFactionMaps()
-    self:BuildReverseLookup()
+
+    local success, err = pcall(self.BuildReverseLookup, self)
+    if not success then
+        DEFAULT_CHAT_FRAME:AddMessage("|cffff2020[BiS-Tooltip Renewed]|r Error building item database: " .. tostring(err))
+    end
 
     self.BuildFactionMaps = nil
     self.BuildReverseLookup = nil
