@@ -146,11 +146,12 @@ local configTable = {
         show_item_states = {
             name = "Show Bags/Bank Item Status",
             order = 12,
-            desc = "Show a line that says whenever an item is already in your bags or bank",
+            desc = "Show icons on items and tooltip text when an item is in your bags or bank",
             type = "toggle",
             width = "full",
             set = function(info, val)
                 BisTooltipAddon.db.char.show_item_states = val
+                if BisTooltipAddon.RefreshItemStateVisuals then BisTooltipAddon.RefreshItemStateVisuals() end
                 if BisTooltipAddon.ClearTooltipCache then BisTooltipAddon:ClearTooltipCache() end
             end,
             get = function(info)
