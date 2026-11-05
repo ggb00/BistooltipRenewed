@@ -202,13 +202,6 @@ local FAV_ROW_TABLE_LAYOUT = {
     space = 4, align = "middle"
 }
 
-local function CompareFavorites(a, b)
-    local favData = BisTooltipAddon.db and BisTooltipAddon.db.char and BisTooltipAddon.db.char.favorites
-    local orderA = (favData and type(favData[a]) == "number") and favData[a] or 0
-    local orderB = (favData and type(favData[b]) == "number") and favData[b] or 0
-    return orderA > orderB
-end
-
 StaticPopupDialogs["BISTOOLTIP_CONFIRM_CLEAR_FAVORITES"] = {
     text = "Are you sure you want to remove all items from your Favorites?",
     button1 = YES,
@@ -1192,7 +1185,11 @@ function BisTooltipAddon:RefreshFavoritesWindow(immediate)
         end)
         favorites_scroll:AddChild(emptyLabel)
     else
-        table.sort(favList, CompareFavorites)
+        table.sort(favList, function(a, b)
+            local orderA = (favData and type(favData[a]) == "number") and favData[a] or 0
+            local orderB = (favData and type(favData[b]) == "number") and favData[b] or 0
+            return orderA > orderB
+        end)
 
         for _, itemID in ipairs(favList) do
             local display_id = (BisTooltipAddon.GetFactionItem and BisTooltipAddon:GetFactionItem(itemID)) or itemID
