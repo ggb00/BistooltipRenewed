@@ -539,6 +539,7 @@ function BisTooltipAddon:initConfig()
     BisTooltipAddon.db = LibStub("AceDB-3.0"):New("BisTooltipRenewedDB", db_defaults, "Default")
     migrateAddonDB()
     buildFilterSpecOptions()
+    configTable.name = BisTooltipAddon.AddonNameAndVersion or "BiS-Tooltip Renewed"
     LibStub("AceConfig-3.0"):RegisterOptionsTable(BisTooltipAddon.AceAddonName, configTable)
     AceConfigDialog:AddToBlizOptions(BisTooltipAddon.AceAddonName, BisTooltipAddon.AceAddonName)
 end
