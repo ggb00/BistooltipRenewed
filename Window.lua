@@ -116,6 +116,9 @@ local function ApplyBoeMark(widget, isBoe)
     if not widget or not widget.frame or not widget.frame.bisBoeMark then return end
     local size = widget.image and widget.image:GetWidth() or 40
     if isBoe and size >= 30 then
+        local scale = (BisTooltipAddon.db and BisTooltipAddon.db.char and BisTooltipAddon.db.char.indicator_scale) or 1.0
+        widget.frame.bisBoeMark:SetWidth(12 * scale)
+        widget.frame.bisBoeMark:SetHeight(12 * scale)
         widget.frame.bisBoeMark:Show()
     else
         widget.frame.bisBoeMark:Hide()
@@ -342,6 +345,8 @@ local function ApplyItemStateVisuals(widget, item_id, is_missing)
         end
     end
 
+    local scale = (BisTooltipAddon.db and BisTooltipAddon.db.char and BisTooltipAddon.db.char.indicator_scale) or 1.0
+
     if widget.frame.bisStarMark then
         local isFav = memo_fav[item_id]
         if isFav == nil then
@@ -350,9 +355,11 @@ local function ApplyItemStateVisuals(widget, item_id, is_missing)
         end
 
         if isFav then
-            if widget._lastFav ~= true or widget._lastMarkIndex ~= markIndex then
+            if widget._lastFav ~= true or widget._lastMarkIndex ~= markIndex or widget._lastIndicatorScale ~= scale then
                 widget._lastFav = true
                 widget._lastMarkIndex = markIndex
+                widget.frame.bisStarMark:SetWidth(14 * scale)
+                widget.frame.bisStarMark:SetHeight(14 * scale)
                 widget.frame.bisStarMark:SetTexture("Interface\\TargetingFrame\\UI-RaidTargetingIcons")
                 SetRaidTargetIconTexture(widget.frame.bisStarMark, markIndex)
             end
@@ -361,6 +368,11 @@ local function ApplyItemStateVisuals(widget, item_id, is_missing)
             widget._lastFav = false
             widget.frame.bisStarMark:Hide()
         end
+    end
+
+    if widget.frame.bisBoeMark then
+        widget.frame.bisBoeMark:SetWidth(12 * scale)
+        widget.frame.bisBoeMark:SetHeight(12 * scale)
     end
 
     if is_missing then
@@ -382,11 +394,12 @@ local function ApplyItemStateVisuals(widget, item_id, is_missing)
     end
     local show_borders = BisTooltipAddon.db.char.show_item_borders
 
-    if widget._lastState == state and widget._lastShowBorders == show_borders then
+    if widget._lastState == state and widget._lastShowBorders == show_borders and widget._lastIndicatorScale == scale then
         return
     end
     widget._lastState = state
     widget._lastShowBorders = show_borders
+    widget._lastIndicatorScale = scale
 
     if state == 2 then
         widget.image:SetVertexColor(0.35, 0.35, 0.35, 1)
@@ -412,8 +425,8 @@ local function ApplyItemStateVisuals(widget, item_id, is_missing)
         local iconTexture = (state == 3) and "Interface\\Icons\\inv_box_01" or "Interface\\Icons\\inv_misc_bag_08"
         widget.frame.bisCheckMark:SetTexture(iconTexture)
         widget.frame.bisCheckMark:SetTexCoord(0.08, 0.92, 0.08, 0.92)
-        widget.frame.bisCheckMark:SetWidth(16)
-        widget.frame.bisCheckMark:SetHeight(16)
+        widget.frame.bisCheckMark:SetWidth(16 * scale)
+        widget.frame.bisCheckMark:SetHeight(16 * scale)
         widget.frame.bisCheckMark:ClearAllPoints()
         widget.frame.bisCheckMark:SetPoint("BOTTOMRIGHT", -2, 6)
         widget.frame.bisCheckMark:Show()
@@ -687,6 +700,7 @@ local function createItemFrame(item_id, size)
         self._lastFav = nil
         self._lastMarkIndex = nil
         self._lastILvlText = nil
+        self._lastIndicatorScale = nil
         self.item_id = nil
     end)
     item_frame:SetImageSize(size, size)
@@ -709,22 +723,24 @@ local function createItemFrame(item_id, size)
         end
         item_frame.frame.bisCheckMark:SetDrawLayer("OVERLAY", 1)
 
+        local scale = (BisTooltipAddon.db and BisTooltipAddon.db.char and BisTooltipAddon.db.char.indicator_scale) or 1.0
+
         if not item_frame.frame.bisBoeMark then
             item_frame.frame.bisBoeMark = item_frame.frame:CreateTexture(nil, "OVERLAY")
-            item_frame.frame.bisBoeMark:SetWidth(12)
-            item_frame.frame.bisBoeMark:SetHeight(12)
             item_frame.frame.bisBoeMark:SetPoint("TOPRIGHT", -2, -5)
             item_frame.frame.bisBoeMark:SetTexture("Interface\\Icons\\INV_Misc_Coin_01")
         end
         item_frame.frame.bisBoeMark:SetDrawLayer("OVERLAY", 2)
+        item_frame.frame.bisBoeMark:SetWidth(12 * scale)
+        item_frame.frame.bisBoeMark:SetHeight(12 * scale)
 
         if not item_frame.frame.bisStarMark then
             item_frame.frame.bisStarMark = item_frame.frame:CreateTexture(nil, "OVERLAY")
             item_frame.frame.bisStarMark:SetTexture("Interface\\TargetingFrame\\UI-RaidTargetingIcons")
         end
         item_frame.frame.bisStarMark:SetDrawLayer("OVERLAY", 3)
-        item_frame.frame.bisStarMark:SetWidth(14)
-        item_frame.frame.bisStarMark:SetHeight(14)
+        item_frame.frame.bisStarMark:SetWidth(14 * scale)
+        item_frame.frame.bisStarMark:SetHeight(14 * scale)
         item_frame.frame.bisStarMark:ClearAllPoints()
         item_frame.frame.bisStarMark:SetPoint("TOPLEFT", item_frame.image, "TOPLEFT", -2, 2)
 
