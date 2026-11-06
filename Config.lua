@@ -538,10 +538,10 @@ function BisTooltipAddon:addMapIcon()
             local strMain = keyMain and (" (|cffffffff" .. keyMain .. "|r)") or ""
             local strFav = keyFav and (" (|cffffffff" .. keyFav .. "|r)") or ""
 
-            tt:AddLine(BisTooltipAddon.AddonNameAndVersion)
+            tt:AddLine("BiS-Tooltip Renewed")
             tt:AddLine("|cffffff00Left click|r" .. strMain .. " to open the BiS lists window")
             tt:AddLine("|cffffff00Shift + Left click|r" .. strFav .. " to open Favorites list")
-            tt:AddLine("|cffffff00Right click|r to open addon configuration window")
+            tt:AddLine("|cffffff00Right click|r to open addon config window")
         end
     })
 
