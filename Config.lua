@@ -83,7 +83,7 @@ local configTable = {
         },
 
         show_ilvl = {
-            name = "Show iLvL",
+            name = "Show Item Level",
             order = 4,
             desc = "Display item level on item icons in the addon window",
             type = "toggle",
@@ -99,7 +99,7 @@ local configTable = {
         },
 
         ilvl_color = {
-            name = "iLvL Color",
+            name = "Item Level Color",
             order = 5,
             desc = "Changes the text color of the item level on icons",
             type = "select",
@@ -132,9 +132,9 @@ local configTable = {
         },
 
         tooltip_with_ctrl = {
-            name = "Show Item Tooltips only with Ctrl",
+            name = "Only show BiS info with Ctrl held",
             order = 11,
-            desc = "Only show tooltips when holding down Ctrl key",
+            desc = "Only display BiS tooltip lines when holding down the Ctrl key",
             type = "toggle",
             width = "full",
             set = function(info, val)
