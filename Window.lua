@@ -211,7 +211,7 @@ local FAV_ROW_TABLE_LAYOUT = {
 }
 
 StaticPopupDialogs["BISTOOLTIP_CONFIRM_CLEAR_FAVORITES"] = {
-    text = "Are you sure you want to remove all items from your Favorites?",
+    text = "Are you sure you want to remove\n all items from your Favorites list?",
     button1 = YES,
     button2 = NO,
     OnAccept = function()
