@@ -79,6 +79,45 @@ local function UpdateStatusDisplay(state)
     end
 end
 
+local favStatusText = nil
+local favStatusTimer = 0
+local currentFavStatusState = "IDLE"
+
+local function UpdateFavStatusDisplay(state, count)
+    if not favStatusText then return end
+    if state == "FETCHING" then
+        if currentFavStatusState == "FETCHING" then return end
+        currentFavStatusState = "FETCHING"
+        favStatusTimer = 0
+        favStatusText:SetText("|cffffd100Loading items...|r")
+        favStatusText:SetAlpha(1)
+        favStatusText:Show()
+    elseif state == "SUCCESS" then
+        currentFavStatusState = "SUCCESS"
+        favStatusTimer = 1.5
+        favStatusText:SetText("|cff20ff20All items loaded|r")
+        favStatusText:SetAlpha(1)
+        favStatusText:Show()
+    elseif state == "WARNING" then
+        currentFavStatusState = "WARNING"
+        favStatusTimer = 2.0
+        favStatusText:SetText("|cffff2020Some items could not be loaded|r")
+        favStatusText:SetAlpha(1)
+        favStatusText:Show()
+    elseif state == "COUNT" then
+        if currentFavStatusState == "IDLE" or currentFavStatusState == "COUNT" then
+            currentFavStatusState = "COUNT"
+            favStatusTimer = 0
+            favStatusText:SetText("|cff999999Items: " .. (count or 0) .. "|r")
+            favStatusText:SetAlpha(1)
+            favStatusText:Show()
+        end
+    else
+        currentFavStatusState = "IDLE"
+        favStatusTimer = 0
+    end
+end
+
 local boe_cache = {}
 local boe_queue = {}
 local boe_frame = CreateFrame("Frame")
@@ -535,13 +574,34 @@ function BisTooltipAddon:IsWindowOpen()
 end
 
 local function ProcessMissingItems(self, elapsed)
+    local isTiming = false
     if statusTimer > 0 then
+        isTiming = true
         statusTimer = statusTimer - elapsed
         if statusTimer <= 0 then
             UpdateStatusDisplay("IDLE")
-            item_fetch_frame:SetScript("OnUpdate", nil)
         elseif statusTimer <= STATUS_FADE_DURATION and statusText then
             statusText:SetAlpha(statusTimer / STATUS_FADE_DURATION)
+        end
+    end
+
+    if favStatusTimer > 0 then
+        isTiming = true
+        favStatusTimer = favStatusTimer - elapsed
+        if favStatusTimer <= 0 then
+            currentFavStatusState = "IDLE"
+            local favCount = 0
+            local favData = BisTooltipAddon.db and BisTooltipAddon.db.char and BisTooltipAddon.db.char.favorites
+            if favData then
+                for _, v in pairs(favData) do if v then favCount = favCount + 1 end end
+            end
+            UpdateFavStatusDisplay("COUNT", favCount)
+        end
+    end
+
+    if not next(missing_widgets) then
+        if not isTiming or (statusTimer <= 0 and favStatusTimer <= 0) then
+            item_fetch_frame:SetScript("OnUpdate", nil)
         end
         return
     end
@@ -624,6 +684,18 @@ local function ProcessMissingItems(self, elapsed)
             end
         else
             UpdateStatusDisplay("IDLE")
+        end
+
+        if favorites_frame and favorites_frame.frame:IsShown() and favStatusText and currentFavStatusState == "FETCHING" then
+            if fetch_has_failure then
+                UpdateFavStatusDisplay("WARNING")
+            else
+                UpdateFavStatusDisplay("SUCCESS")
+            end
+        end
+
+        if not (main_frame and main_frame.frame:IsShown() and statusTimer > 0)
+           and not (favorites_frame and favorites_frame.frame:IsShown() and favStatusTimer > 0) then
             item_fetch_frame:SetScript("OnUpdate", nil)
         end
     end
@@ -635,10 +707,15 @@ local function StartItemFetch()
         if main_frame and main_frame.frame:IsShown() then
             UpdateStatusDisplay("FETCHING")
         end
+        if favorites_frame and favorites_frame.frame:IsShown() then
+            UpdateFavStatusDisplay("FETCHING")
+        end
         item_fetch_frame:SetScript("OnUpdate", ProcessMissingItems)
     else
         UpdateStatusDisplay("IDLE")
-        item_fetch_frame:SetScript("OnUpdate", nil)
+        if not (favorites_frame and favorites_frame.frame and favorites_frame.frame:IsShown() and favStatusTimer > 0) then
+            item_fetch_frame:SetScript("OnUpdate", nil)
+        end
     end
 end
 
@@ -1373,6 +1450,8 @@ function BisTooltipAddon:RefreshFavoritesWindow(immediate)
     if favorites_frame.clearBtn then
         favorites_frame.clearBtn:SetDisabled(#favList == 0)
     end
+
+    UpdateFavStatusDisplay("COUNT", #favList)
 end
 
 local function ClampPosition(pos, width, height)
@@ -1513,6 +1592,15 @@ function BisTooltipAddon:OpenFavoritesFrame()
         bottomGroup.frame:ClearAllPoints()
         bottomGroup.frame:SetPoint("BOTTOMLEFT", favorites_frame.frame, "BOTTOMLEFT", 17, 14)
         bottomGroup.frame:SetPoint("BOTTOMRIGHT", favorites_frame.frame, "BOTTOMRIGHT", -17, 14)
+
+        if not favStatusText then
+            favStatusText = favorites_frame.frame:CreateFontString(nil, "OVERLAY")
+            favStatusText:SetFont("Fonts\\FRIZQT__.TTF", 11, "")
+            favStatusText:SetShadowOffset(1, -1)
+            favStatusText:SetShadowColor(0, 0, 0, 0.8)
+            favStatusText:SetJustifyH("CENTER")
+            favStatusText:SetPoint("CENTER", favorites_frame.frame, "BOTTOM", 0, 48)
+        end
     end
 
     favorites_frame:Show()
@@ -1521,6 +1609,8 @@ end
 
 function BisTooltipAddon:CloseFavoritesFrame()
     favUpdateFrame:Hide()
+    favStatusTimer = 0
+    currentFavStatusState = "IDLE"
     StaticPopup_Hide("BISTOOLTIP_CONFIRM_CLEAR_FAVORITES")
     if favorites_frame and favorites_frame.frame:IsShown() then
         favorites_frame:Hide()
