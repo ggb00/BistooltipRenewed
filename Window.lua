@@ -944,7 +944,7 @@ local function drawTableHeader(frame)
 
     local eLabel = AceGUI:Create("Label")
     eLabel:SetText("Enchants")
-    eLabel:SetFont("Fonts\\FRIZQT__.TTF", 11, "")
+    eLabel:SetFont("Fonts\\FRIZQT__.TTF", 12, "")
     eLabel:SetColor(color, color, color)
     eLabel:SetWidth(75)
     eLabel.label:SetJustifyH("LEFT")
