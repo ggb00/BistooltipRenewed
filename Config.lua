@@ -410,6 +410,18 @@ local configTable = {
                 if not fs or type(fs[class_name]) ~= "table" then return false end
                 return fs[class_name][spec_name] or false
             end
+        },
+
+        header_keybindings = {
+            name = "Keybindings",
+            type = "header",
+            order = 40,
+        },
+
+        keybinding_info = {
+            name = "Keybindings can be configured in the game menu:\n|cffffd100Game Menu (Esc) -> Key Bindings -> BiS-Tooltip Renewed|r\n\nYou can set keybinds to toggle both the Main Window and the Favorites Window.",
+            type = "description",
+            order = 41,
         }
     }
 }
@@ -521,9 +533,14 @@ function BisTooltipAddon:addMapIcon()
             end
         end,
         OnTooltipShow = function(tt)
+            local keyMain = GetBindingKey("BISTOOLTIP_TOGGLE_MAIN")
+            local keyFav = GetBindingKey("BISTOOLTIP_TOGGLE_FAV")
+            local strMain = keyMain and (" (|cffffffff" .. keyMain .. "|r)") or ""
+            local strFav = keyFav and (" (|cffffffff" .. keyFav .. "|r)") or ""
+
             tt:AddLine(BisTooltipAddon.AddonNameAndVersion)
-            tt:AddLine("|cffffff00Left click|r to open the BiS lists window")
-            tt:AddLine("|cffffff00Shift + Left click|r to open Favorites list")
+            tt:AddLine("|cffffff00Left click|r" .. strMain .. " to open the BiS lists window")
+            tt:AddLine("|cffffff00Shift + Left click|r" .. strFav .. " to open Favorites list")
             tt:AddLine("|cffffff00Right click|r to open addon configuration window")
         end
     })

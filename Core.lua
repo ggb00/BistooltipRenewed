@@ -298,6 +298,7 @@ function BisTooltipAddon:HandleChatCommand(input)
         DEFAULT_CHAT_FRAME:AddMessage("  |cffffff00/bt|r, |cffffff00/bistooltip|r - Same as /bis")
         DEFAULT_CHAT_FRAME:AddMessage("  |cffffff00/bis fav|r - Toggle Favorites list window")
         DEFAULT_CHAT_FRAME:AddMessage("  |cffffff00/bis config|r - Open configuration panel")
+        DEFAULT_CHAT_FRAME:AddMessage("  |cff999999Keybindings can be set in Game Menu (Esc) -> Key Bindings|r")
     elseif cmd == "" then
         self:createMainFrame()
     else
