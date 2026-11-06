@@ -67,6 +67,11 @@ local function UpdateStatusDisplay(state)
         statusText:SetText("|cff20ff20All items loaded|r")
         statusText:SetAlpha(1)
         statusText:Show()
+    elseif state == "WARNING" then
+        statusTimer = STATUS_FADE_DURATION + 1.5
+        statusText:SetText("|cffff2020Some items could not be loaded|r")
+        statusText:SetAlpha(1)
+        statusText:Show()
     else
         statusTimer = 0
         statusText:SetText("")
@@ -598,8 +603,12 @@ local function ProcessMissingItems(self, elapsed)
             end
         end
 
-        if main_frame and main_frame.frame:IsShown() and statusText and statusText:IsShown() and not fetch_has_failure then
-            UpdateStatusDisplay("SUCCESS")
+        if main_frame and main_frame.frame:IsShown() and statusText and statusText:IsShown() then
+            if fetch_has_failure then
+                UpdateStatusDisplay("WARNING")
+            else
+                UpdateStatusDisplay("SUCCESS")
+            end
         else
             UpdateStatusDisplay("IDLE")
             item_fetch_frame:SetScript("OnUpdate", nil)
