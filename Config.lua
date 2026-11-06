@@ -50,6 +50,12 @@ local db_defaults = {
 local configTable = {
     type = "group",
     args = {
+        author_info = {
+            type = "description",
+            name = "|cff999999by ggb|r\n",
+            order = 0.5,
+        },
+
         header_general = {
             name = "General",
             type = "header",
