@@ -126,7 +126,7 @@ local configTable = {
         },
 
         indicator_scale = {
-            name = "Indicator Icon Scale",
+            name = "Overlay Icon Scale",
             order = 6,
             desc = "Adjust the size of the Favorite, BoE, and Bag/Bank status icons overlay on item",
             type = "range",
