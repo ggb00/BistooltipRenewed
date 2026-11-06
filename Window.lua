@@ -82,6 +82,9 @@ end
 local favStatusText = nil
 local favStatusTimer = 0
 local currentFavStatusState = "IDLE"
+local favSwitchedText = false
+local FAV_FADE_OUT = 0.5
+local FAV_FADE_IN = 0.5
 
 local function UpdateFavStatusDisplay(state, count)
     if not favStatusText then return end
@@ -89,18 +92,21 @@ local function UpdateFavStatusDisplay(state, count)
         if currentFavStatusState == "FETCHING" then return end
         currentFavStatusState = "FETCHING"
         favStatusTimer = 0
+        favSwitchedText = false
         favStatusText:SetText("|cffffd100Loading items...|r")
         favStatusText:SetAlpha(1)
         favStatusText:Show()
     elseif state == "SUCCESS" then
         currentFavStatusState = "SUCCESS"
-        favStatusTimer = 1.5
+        favStatusTimer = 1.0 + FAV_FADE_OUT + FAV_FADE_IN
+        favSwitchedText = false
         favStatusText:SetText("|cff20ff20All items loaded|r")
         favStatusText:SetAlpha(1)
         favStatusText:Show()
     elseif state == "WARNING" then
         currentFavStatusState = "WARNING"
-        favStatusTimer = 2.0
+        favStatusTimer = 1.5 + FAV_FADE_OUT + FAV_FADE_IN
+        favSwitchedText = false
         favStatusText:SetText("|cffff2020Some items could not be loaded|r")
         favStatusText:SetAlpha(1)
         favStatusText:Show()
@@ -108,13 +114,14 @@ local function UpdateFavStatusDisplay(state, count)
         if currentFavStatusState == "IDLE" or currentFavStatusState == "COUNT" then
             currentFavStatusState = "COUNT"
             favStatusTimer = 0
-            favStatusText:SetText("|cff999999Items: " .. (count or 0) .. "|r")
+            favStatusText:SetText("|cff888888Items: " .. (count or 0) .. "|r")
             favStatusText:SetAlpha(1)
             favStatusText:Show()
         end
     else
         currentFavStatusState = "IDLE"
         favStatusTimer = 0
+        favSwitchedText = false
     end
 end
 
@@ -588,14 +595,33 @@ local function ProcessMissingItems(self, elapsed)
     if favStatusTimer > 0 then
         isTiming = true
         favStatusTimer = favStatusTimer - elapsed
+        local fadeTotal = FAV_FADE_OUT + FAV_FADE_IN
+
         if favStatusTimer <= 0 then
-            currentFavStatusState = "IDLE"
-            local favCount = 0
-            local favData = BisTooltipAddon.db and BisTooltipAddon.db.char and BisTooltipAddon.db.char.favorites
-            if favData then
-                for _, v in pairs(favData) do if v then favCount = favCount + 1 end end
+            favStatusTimer = 0
+            currentFavStatusState = "COUNT"
+            if favStatusText then
+                favStatusText:SetAlpha(1)
             end
-            UpdateFavStatusDisplay("COUNT", favCount)
+        elseif favStatusTimer <= FAV_FADE_IN then
+            if not favSwitchedText then
+                favSwitchedText = true
+                local favCount = 0
+                local favData = BisTooltipAddon.db and BisTooltipAddon.db.char and BisTooltipAddon.db.char.favorites
+                if favData then
+                    for _, v in pairs(favData) do if v then favCount = favCount + 1 end end
+                end
+                if favStatusText then
+                    favStatusText:SetText("|cff888888Items: " .. favCount .. "|r")
+                end
+            end
+            if favStatusText then
+                favStatusText:SetAlpha((FAV_FADE_IN - favStatusTimer) / FAV_FADE_IN)
+            end
+        elseif favStatusTimer <= fadeTotal then
+            if favStatusText then
+                favStatusText:SetAlpha((favStatusTimer - FAV_FADE_IN) / FAV_FADE_OUT)
+            end
         end
     end
 
@@ -1611,6 +1637,7 @@ function BisTooltipAddon:CloseFavoritesFrame()
     favUpdateFrame:Hide()
     favStatusTimer = 0
     currentFavStatusState = "IDLE"
+    favSwitchedText = false
     StaticPopup_Hide("BISTOOLTIP_CONFIRM_CLEAR_FAVORITES")
     if favorites_frame and favorites_frame.frame:IsShown() then
         favorites_frame:Hide()
