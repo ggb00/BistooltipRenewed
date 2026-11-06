@@ -1,4 +1,8 @@
 -- Core.lua
+BINDING_HEADER_BISTOOLTIP = "BiS-Tooltip Renewed"
+BINDING_NAME_BISTOOLTIP_TOGGLE_MAIN = "Toggle Main Window"
+BINDING_NAME_BISTOOLTIP_TOGGLE_FAV = "Toggle Favorites Window"
+
 BisTooltipAddon = LibStub("AceAddon-3.0"):NewAddon("BiS-Tooltip Renewed", "AceConsole-3.0")
 local BisTooltip_AliToHorde = {}
 local BisTooltip_EquippedCache = {}
