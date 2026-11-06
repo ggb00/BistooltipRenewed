@@ -255,7 +255,7 @@ function BisTooltipAddon:BuildReverseLookup()
                 local phase = sortedPhases[p]
                 local rank = entry[phase]
                 if rank then
-                    labels[#labels + 1] = (rank == 1) and (phase .. " BIS") or (phase .. " alt " .. (rank - 1))
+                    labels[#labels + 1] = (rank == 1) and (phase .. " BiS") or (phase .. " Alt " .. (rank - 1))
                 end
             end
 
