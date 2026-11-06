@@ -41,7 +41,7 @@ local db_defaults = {
         show_sources = true, source_color = "green",
         show_item_states = true, dark_tooltips = false,
         show_item_borders = true, frame_pos = nil, scroll_status = {},
-        show_ilvl = false, ilvl_color = "white",
+        show_ilvl = false, ilvl_color = "white", indicator_scale = 1.0,
         favorites = {}, favorites_pos = nil, fav_counter = 0, favorite_icon = 1,
         favorite_color = "yellow", fav_scroll_status = {}
     }
@@ -122,6 +122,30 @@ local configTable = {
             end,
             get = function(info)
                 return BisTooltipAddon.db.char.ilvl_color or "white"
+            end
+        },
+
+        indicator_scale = {
+            name = "Indicator Icon Scale",
+            order = 6,
+            desc = "Adjust the size of the Favorite, BoE, and Bag/Bank status icons overlay on item",
+            type = "range",
+            min = 0.75,
+            max = 1.50,
+            step = 0.05,
+            isPercent = true,
+            width = "full",
+            set = function(info, val)
+                BisTooltipAddon.db.char.indicator_scale = val
+                if BisTooltipAddon.RefreshItemStateVisuals then
+                    BisTooltipAddon.RefreshItemStateVisuals()
+                end
+                if BisTooltipAddon.RefreshFavoritesWindow then
+                    BisTooltipAddon:RefreshFavoritesWindow()
+                end
+            end,
+            get = function(info)
+                return BisTooltipAddon.db.char.indicator_scale or 1.0
             end
         },
 
@@ -447,6 +471,13 @@ local function migrateAddonDB()
     if BisTooltipAddon.db.char.show_item_borders == nil then BisTooltipAddon.db.char.show_item_borders = true end
     if BisTooltipAddon.db.char.show_ilvl == nil then BisTooltipAddon.db.char.show_ilvl = false end
     if not BisTooltipAddon.db.char.ilvl_color then BisTooltipAddon.db.char.ilvl_color = "white" end
+
+    local indScale = tonumber(BisTooltipAddon.db.char.indicator_scale)
+    if not indScale or indScale < 0.75 or indScale > 1.50 then
+        BisTooltipAddon.db.char.indicator_scale = 1.0
+    else
+        BisTooltipAddon.db.char.indicator_scale = indScale
+    end
 
     if type(BisTooltipAddon.db.char.favorites) ~= "table" then BisTooltipAddon.db.char.favorites = {} end
 
