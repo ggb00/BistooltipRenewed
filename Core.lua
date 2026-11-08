@@ -1,4 +1,5 @@
 -- Core.lua
+local addonName = ...
 BisTooltipAddon = LibStub("AceAddon-3.0"):NewAddon("BiS-Tooltip Renewed", "AceConsole-3.0")
 local BisTooltip_AliToHorde = {}
 local BisTooltip_EquippedCache = {}
@@ -260,6 +261,10 @@ function BisTooltipAddon:BuildReverseLookup()
     labels = nil
 end
 
+function BisTooltipAddon:Print(msg)
+    DEFAULT_CHAT_FRAME:AddMessage("|cffffd100BiS-Tooltip Renewed|r: " .. tostring(msg))
+end
+
 function BisTooltipAddon:HandleChatCommand(input)
     local cmd = strtrim(input or ""):lower()
     if cmd == "fav" or cmd == "favorites" or cmd == "wishlist" then
@@ -271,12 +276,15 @@ function BisTooltipAddon:HandleChatCommand(input)
             self:openConfigDialog()
         end
     elseif cmd == "help" or cmd == "?" then
-        DEFAULT_CHAT_FRAME:AddMessage("|cffffd100BiS-Tooltip Renewed commands:|r")
+        self:Print("Available commands:")
         DEFAULT_CHAT_FRAME:AddMessage("  |cffffff00/bis|r - Toggle main BiS list window")
+        DEFAULT_CHAT_FRAME:AddMessage("  |cffffff00/bistooltip|r - Same as /bis")
         DEFAULT_CHAT_FRAME:AddMessage("  |cffffff00/bis fav|r - Toggle Favorites list window")
         DEFAULT_CHAT_FRAME:AddMessage("  |cffffff00/bis config|r - Open configuration panel")
-    else
+    elseif cmd == "" then
         self:createMainFrame()
+    else
+        self:Print("Unknown command '|cffffff00" .. cmd .. "|r'. Type '|cffffff00/bis help|r' for options.")
     end
 end
 
@@ -289,15 +297,12 @@ function BisTooltipAddon:OnInitialize()
     self.BuildReverseLookup = nil
 
     self.AceAddonName = "BiS-Tooltip Renewed"
-    local version = GetAddOnMetadata("BistooltipRenewed", "Version")
+    local version = GetAddOnMetadata(addonName, "Version")
     self.AddonNameAndVersion = version and ("BiS-Tooltip Renewed v" .. version) or "BiS-Tooltip Renewed"
     self:initConfig()
     self:addMapIcon()
     self:initBisTooltip()
 
-    self:RegisterChatCommand("bt", "HandleChatCommand")
     self:RegisterChatCommand("bis", "HandleChatCommand")
     self:RegisterChatCommand("bistooltip", "HandleChatCommand")
-
-    collectgarbage("collect")
 end
