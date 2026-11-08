@@ -133,6 +133,8 @@ function BisTooltipAddon:IsFavorite(itemID)
     return false
 end
 
+local MAX_FAVORITES = 256
+
 function BisTooltipAddon:ToggleFavorite(itemID)
     if not itemID or not self.db or not self.db.profile then return end
     itemID = tonumber(itemID)
@@ -144,6 +146,16 @@ function BisTooltipAddon:ToggleFavorite(itemID)
         self.db.profile.favorites[itemID] = nil
         if altID then self.db.profile.favorites[altID] = nil end
     else
+        local count = 0
+        for _ in pairs(self.db.profile.favorites) do count = count + 1 end
+        if count >= MAX_FAVORITES then
+            if UIErrorsFrame then
+                UIErrorsFrame:AddMessage("Favorites list is full (maximum " .. MAX_FAVORITES .. " items).", 1.0, 0.1, 0.1, 1.0, UIERRORS_HOLD_TIME or 3)
+            end
+            self:Print("|cffff2020Favorites list is full (maximum " .. MAX_FAVORITES .. " items).|r")
+            return
+        end
+
         self.db.profile.fav_counter = (self.db.profile.fav_counter or 0) + 1
         self.db.profile.favorites[itemID] = self.db.profile.fav_counter
     end
