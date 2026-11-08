@@ -1076,7 +1076,7 @@ local SLOT_DISPLAY_ORDER = {
     "Trinket 1", "Trinket 2", "Weapon", "Off hand", "Ranged", "Relic"
 }
 
-local HEADER_TEXTS = {"BIS", "Alt 1", "Alt 2", "Alt 3", "Alt 4", "Alt 5"}
+local HEADER_TEXTS = {"BiS", "Alt 1", "Alt 2", "Alt 3", "Alt 4", "Alt 5"}
 
 local function drawItemSlot(slot_name, item_list)
     local f = AceGUI:Create("Label")
