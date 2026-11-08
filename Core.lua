@@ -8,6 +8,7 @@ BINDING_NAME_BISTOOLTIP_TOGGLE_FAV = "Toggle Favorites Window"
 BisTooltipAddon = LibStub("AceAddon-3.0"):NewAddon("BiS-Tooltip Renewed", "AceConsole-3.0")
 local BisTooltip_AliToHorde = {}
 local BisTooltip_EquippedCache = {}
+local BisTooltip_ItemStateCache = {}
 
 BisTooltip_HexColors = {
     ["purple"]    = "CC4CFF",
@@ -46,12 +47,16 @@ equipWatcher:RegisterEvent("PLAYERBANKSLOTS_CHANGED")
 equipWatcher:RegisterEvent("BANKFRAME_OPENED")
 equipWatcher:RegisterEvent("BANKFRAME_CLOSED")
 equipWatcher:SetScript("OnEvent", function(_, event, arg1)
-    if event == "PLAYER_EQUIPMENT_CHANGED" or event == "PLAYER_ENTERING_WORLD" then
-        RebuildEquippedCache()
-    elseif event == "BAG_UPDATE" then
+    if event == "BAG_UPDATE" then
         if arg1 and (arg1 < -1 or arg1 > 11) then
             return
         end
+    end
+
+    wipe(BisTooltip_ItemStateCache)
+
+    if event == "PLAYER_EQUIPMENT_CHANGED" or event == "PLAYER_ENTERING_WORLD" then
+        RebuildEquippedCache()
     end
 
     if BisTooltipAddon.IsWindowOpen and BisTooltipAddon:IsWindowOpen() then
@@ -96,12 +101,26 @@ function BisTooltipAddon:GetItemState(itemID)
     if not itemID then return 0 end
     itemID = tonumber(itemID)
     if not itemID then return 0 end
-    if BisTooltip_EquippedCache[itemID] then return 2 end
-    local altID = self:GetAltItemID(itemID)
-    if altID and BisTooltip_EquippedCache[altID] then return 2 end
-    if GetItemCount(itemID, false) > 0 or (altID and GetItemCount(altID, false) > 0) then return 1 end
-    if GetItemCount(itemID, true) > 0 or (altID and GetItemCount(altID, true) > 0) then return 3 end
-    return 0
+    if BisTooltip_ItemStateCache[itemID] ~= nil then
+        return BisTooltip_ItemStateCache[itemID]
+    end
+
+    local state = 0
+    if BisTooltip_EquippedCache[itemID] then
+        state = 2
+    else
+        local altID = self:GetAltItemID(itemID)
+        if altID and BisTooltip_EquippedCache[altID] then
+            state = 2
+        elseif GetItemCount(itemID, false) > 0 or (altID and GetItemCount(altID, false) > 0) then
+            state = 1
+        elseif GetItemCount(itemID, true) > 0 or (altID and GetItemCount(altID, true) > 0) then
+            state = 3
+        end
+    end
+
+    BisTooltip_ItemStateCache[itemID] = state
+    return state
 end
 
 function BisTooltipAddon:IsFavorite(itemID)
