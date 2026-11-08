@@ -238,7 +238,7 @@ function BisTooltipAddon:BuildReverseLookup()
                 local phase = sortedPhases[p]
                 local rank = entry[phase]
                 if rank then
-                    labels[#labels + 1] = (rank == 1) and (phase .. " BIS") or (phase .. " alt " .. (rank - 1))
+                    labels[#labels + 1] = (rank == 1) and (phase .. " BiS") or (phase .. " Alt " .. (rank - 1))
                 end
             end
 
@@ -291,7 +291,11 @@ end
 function BisTooltipAddon:OnInitialize()
     RebuildEquippedCache()
     self:BuildFactionMaps()
-    self:BuildReverseLookup()
+
+    local success, err = pcall(self.BuildReverseLookup, self)
+    if not success then
+        self:Print("|cffff2020Error building item database: " .. tostring(err) .. "|r")
+    end
 
     self.BuildFactionMaps = nil
     self.BuildReverseLookup = nil
