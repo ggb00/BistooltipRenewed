@@ -589,6 +589,4 @@ function BisTooltipAddon:initConfig()
     BisTooltipAddon.db.RegisterCallback(BisTooltipAddon, "OnProfileChanged", OnProfileChanged)
     BisTooltipAddon.db.RegisterCallback(BisTooltipAddon, "OnProfileCopied", OnProfileChanged)
     BisTooltipAddon.db.RegisterCallback(BisTooltipAddon, "OnProfileReset", OnProfileChanged)
-
-    BisTooltipAddon.db.char = BisTooltipAddon.db.profile
 end

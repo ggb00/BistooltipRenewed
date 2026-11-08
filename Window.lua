@@ -110,7 +110,7 @@ local FAV_ROW_TABLE_LAYOUT = {
 }
 
 local function CompareFavorites(a, b)
-    local favData = BisTooltipAddon.db and BisTooltipAddon.db.char and BisTooltipAddon.db.char.favorites
+    local favData = BisTooltipAddon.db and BisTooltipAddon.db.profile and BisTooltipAddon.db.profile.favorites
     local orderA = (favData and type(favData[a]) == "number") and favData[a] or 0
     local orderB = (favData and type(favData[b]) == "number") and favData[b] or 0
     return orderA > orderB
@@ -121,11 +121,11 @@ StaticPopupDialogs["BISTOOLTIP_CONFIRM_CLEAR_FAVORITES"] = {
     button1 = YES,
     button2 = NO,
     OnAccept = function()
-        if BisTooltipAddon.db and BisTooltipAddon.db.char then
-            wipe(BisTooltipAddon.db.char.favorites)
-            BisTooltipAddon.db.char.fav_counter = 0
-            if BisTooltipAddon.db.char.fav_scroll_status then
-                BisTooltipAddon.db.char.fav_scroll_status.scrollvalue = 0
+        if BisTooltipAddon.db and BisTooltipAddon.db.profile then
+            wipe(BisTooltipAddon.db.profile.favorites)
+            BisTooltipAddon.db.profile.fav_counter = 0
+            if BisTooltipAddon.db.profile.fav_scroll_status then
+                BisTooltipAddon.db.profile.fav_scroll_status.scrollvalue = 0
             end
         end
         if BisTooltipAddon.RefreshFavoritesWindow then
@@ -209,11 +209,11 @@ local function ApplyItemStateVisuals(widget, item_id, is_missing)
         return
     end
 
-    local markIndex = (BisTooltipAddon.db and BisTooltipAddon.db.char and BisTooltipAddon.db.char.favorite_icon) or 1
+    local markIndex = (BisTooltipAddon.db and BisTooltipAddon.db.profile and BisTooltipAddon.db.profile.favorite_icon) or 1
     if markIndex < 1 or markIndex > 8 then markIndex = 1 end
 
     if widget.frame.bisILvl then
-        local db = BisTooltipAddon.db and BisTooltipAddon.db.char
+        local db = BisTooltipAddon.db and BisTooltipAddon.db.profile
         local showILvl = db and (db.show_ilvl ~= false)
 
         if showILvl and not is_missing and item_id and item_id > 0 then
@@ -249,7 +249,7 @@ local function ApplyItemStateVisuals(widget, item_id, is_missing)
     end
 
     local state = BisTooltipAddon:GetItemState(item_id)
-    local show_borders = BisTooltipAddon.db.char.show_item_borders
+    local show_borders = BisTooltipAddon.db.profile.show_item_borders
 
     if state == 2 then
         widget.image:SetVertexColor(0.35, 0.35, 0.35, 1)
@@ -718,13 +718,13 @@ local function drawTableHeader(frame)
 end
 
 local function drawSpecData()
-    BisTooltipAddon.db.char.class_index = class_index
-    BisTooltipAddon.db.char.spec_index = spec_index
-    BisTooltipAddon.db.char.phase_index = phase_index
+    BisTooltipAddon.db.profile.class_index = class_index
+    BisTooltipAddon.db.profile.spec_index = spec_index
+    BisTooltipAddon.db.profile.phase_index = phase_index
 
     local targetScroll = 0
-    if BisTooltipAddon.db.char.scroll_status and BisTooltipAddon.db.char.scroll_status.scrollvalue then
-        targetScroll = BisTooltipAddon.db.char.scroll_status.scrollvalue
+    if BisTooltipAddon.db.profile.scroll_status and BisTooltipAddon.db.profile.scroll_status.scrollvalue then
+        targetScroll = BisTooltipAddon.db.profile.scroll_status.scrollvalue
     end
 
     wipe(displayed_item_widgets)
@@ -805,9 +805,9 @@ local function buildSpecsDict(class_i)
 end
 
 local function loadData()
-    class_index = BisTooltipAddon.db.char.class_index or 1
-    spec_index = BisTooltipAddon.db.char.spec_index or 1
-    phase_index = BisTooltipAddon.db.char.phase_index or 1
+    class_index = BisTooltipAddon.db.profile.class_index or 1
+    spec_index = BisTooltipAddon.db.profile.spec_index or 1
+    phase_index = BisTooltipAddon.db.profile.phase_index or 1
 
     if not class_options[class_index] then class_index = 1 end
     if class_options[class_index] then
@@ -852,14 +852,14 @@ local function drawDropdowns()
     phaseDropDown:SetCallback("OnValueChanged", function(_, _, key)
         phase_index = key
         phase = BisTooltip_PhaseData[key]
-        if BisTooltipAddon.db.char.scroll_status then BisTooltipAddon.db.char.scroll_status.scrollvalue = 0 end
+        if BisTooltipAddon.db.profile.scroll_status then BisTooltipAddon.db.profile.scroll_status.scrollvalue = 0 end
         drawSpecData()
     end)
 
     specDropdown:SetCallback("OnValueChanged", function(_, _, key)
         spec_index = key
         spec = spec_options_to_spec[spec_options[key]]
-        if BisTooltipAddon.db.char.scroll_status then BisTooltipAddon.db.char.scroll_status.scrollvalue = 0 end
+        if BisTooltipAddon.db.profile.scroll_status then BisTooltipAddon.db.profile.scroll_status.scrollvalue = 0 end
         drawSpecData()
     end)
 
@@ -872,7 +872,7 @@ local function drawDropdowns()
         specDropdown:SetValue(1)
         spec_index = 1
         spec = spec_options_to_spec[spec_options[1]]
-        if BisTooltipAddon.db.char.scroll_status then BisTooltipAddon.db.char.scroll_status.scrollvalue = 0 end
+        if BisTooltipAddon.db.profile.scroll_status then BisTooltipAddon.db.profile.scroll_status.scrollvalue = 0 end
         drawSpecData()
     end)
 
@@ -911,8 +911,8 @@ local function createSpecFrame()
     frame:SetHeight(420)
     frame:SetAutoAdjustHeight(false)
 
-    BisTooltipAddon.db.char.scroll_status = BisTooltipAddon.db.char.scroll_status or {}
-    frame:SetStatusTable(BisTooltipAddon.db.char.scroll_status)
+    BisTooltipAddon.db.profile.scroll_status = BisTooltipAddon.db.profile.scroll_status or {}
+    frame:SetStatusTable(BisTooltipAddon.db.profile.scroll_status)
 
     main_frame:AddChild(frame)
     spec_frame = frame
@@ -924,14 +924,14 @@ function BisTooltipAddon:RefreshFavoritesWindow()
     wipe(displayed_fav_widgets)
 
     local targetScroll = 0
-    if BisTooltipAddon.db.char.fav_scroll_status and BisTooltipAddon.db.char.fav_scroll_status.scrollvalue then
-        targetScroll = BisTooltipAddon.db.char.fav_scroll_status.scrollvalue
+    if BisTooltipAddon.db.profile.fav_scroll_status and BisTooltipAddon.db.profile.fav_scroll_status.scrollvalue then
+        targetScroll = BisTooltipAddon.db.profile.fav_scroll_status.scrollvalue
     end
 
     favorites_scroll:ReleaseChildren()
 
     local favList = {}
-    local favData = self.db and self.db.char and self.db.char.favorites
+    local favData = self.db and self.db.profile and self.db.profile.favorites
     if favData then
         for itemID, orderVal in pairs(favData) do
             if orderVal then table.insert(favList, tonumber(itemID)) end
@@ -1118,7 +1118,7 @@ function BisTooltipAddon:OpenFavoritesFrame()
         favorites_frame:EnableResize(false)
         favorites_frame:SetTitle("BiS-Tooltip Renewed - Favorites List")
 
-        local pos = BisTooltipAddon.db.char.favorites_pos
+        local pos = BisTooltipAddon.db.profile.favorites_pos
         local posX, posY = ClampPosition(pos, 460, 570)
         if posX and posY then
             favorites_frame.frame:ClearAllPoints()
@@ -1157,7 +1157,7 @@ function BisTooltipAddon:OpenFavoritesFrame()
             if x + w > screenW then x = screenW - w; clamped = true end
             if y - h < 0 then y = h; clamped = true end
 
-            BisTooltipAddon.db.char.favorites_pos = { x = x, y = y }
+            BisTooltipAddon.db.profile.favorites_pos = { x = x, y = y }
 
             if clamped then
                 self:ClearAllPoints()
@@ -1184,8 +1184,8 @@ function BisTooltipAddon:OpenFavoritesFrame()
         favorites_scroll:SetHeight(457)
         favorites_scroll:SetAutoAdjustHeight(false)
 
-        BisTooltipAddon.db.char.fav_scroll_status = BisTooltipAddon.db.char.fav_scroll_status or {}
-        favorites_scroll:SetStatusTable(BisTooltipAddon.db.char.fav_scroll_status)
+        BisTooltipAddon.db.profile.fav_scroll_status = BisTooltipAddon.db.profile.fav_scroll_status or {}
+        favorites_scroll:SetStatusTable(BisTooltipAddon.db.profile.fav_scroll_status)
         favorites_frame:AddChild(favorites_scroll)
 
         local sep = AceGUI:Create("Heading")
@@ -1284,7 +1284,7 @@ function BisTooltipAddon:createMainFrame()
     main_frame:SetHeight(570)
     main_frame:EnableResize(false)
 
-    local pos = BisTooltipAddon.db.char.frame_pos
+    local pos = BisTooltipAddon.db.profile.frame_pos
     local posX, posY = ClampPosition(pos, 505, 570)
     if posX and posY then
         main_frame.frame:ClearAllPoints()
@@ -1320,7 +1320,7 @@ function BisTooltipAddon:createMainFrame()
         if x + w > screenW then x = screenW - w; clamped = true end
         if y - h < 0 then y = h; clamped = true end
 
-        BisTooltipAddon.db.char.frame_pos = { x = x, y = y }
+        BisTooltipAddon.db.profile.frame_pos = { x = x, y = y }
 
         if clamped then
             self:ClearAllPoints()

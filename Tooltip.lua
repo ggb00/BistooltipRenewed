@@ -116,7 +116,7 @@ end
 local function StyleTooltip(tooltip, isForcedItem)
     if not tooltip or not tooltip.GetItem then return end
 
-    local darkEnabled = BisTooltipAddon.db and BisTooltipAddon.db.char and BisTooltipAddon.db.char.dark_tooltips
+    local darkEnabled = BisTooltipAddon.db and BisTooltipAddon.db.profile and BisTooltipAddon.db.profile.dark_tooltips
 
     local isItem = isForcedItem
     if isItem == nil then
@@ -159,7 +159,7 @@ local function ProcessTooltip(tooltip, link)
     local tt = tooltip or (this ~= nil and this) or GameTooltip
     if not tt or not tt.GetItem then return end
 
-    local db = BisTooltipAddon.db and BisTooltipAddon.db.char
+    local db = BisTooltipAddon.db and BisTooltipAddon.db.profile
     if not db then return end
 
     if not link then
@@ -511,7 +511,7 @@ function BisTooltipAddon:initBisTooltip()
         if event == "MODIFIER_STATE_CHANGED" then
             local key = arg1
             if key == "LALT" or key == "RALT" or key == "LCTRL" or key == "RCTRL" then
-                local db = BisTooltipAddon.db and BisTooltipAddon.db.char
+                local db = BisTooltipAddon.db and BisTooltipAddon.db.profile
                 local isCtrl = (key == "LCTRL" or key == "RCTRL")
                 if isCtrl and not (db and db.tooltip_with_ctrl) then
                     return

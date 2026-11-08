@@ -100,28 +100,28 @@ function BisTooltipAddon:GetItemState(itemID)
 end
 
 function BisTooltipAddon:IsFavorite(itemID)
-    if not itemID or not self.db or not self.db.char or not self.db.char.favorites then return false end
+    if not itemID or not self.db or not self.db.profile or not self.db.profile.favorites then return false end
     itemID = tonumber(itemID)
     if not itemID then return false end
-    if self.db.char.favorites[itemID] then return true end
+    if self.db.profile.favorites[itemID] then return true end
     local altID = self:GetAltItemID(itemID)
-    if altID and self.db.char.favorites[altID] then return true end
+    if altID and self.db.profile.favorites[altID] then return true end
     return false
 end
 
 function BisTooltipAddon:ToggleFavorite(itemID)
-    if not itemID or not self.db or not self.db.char then return end
+    if not itemID or not self.db or not self.db.profile then return end
     itemID = tonumber(itemID)
     if not itemID then return end
-    self.db.char.favorites = self.db.char.favorites or {}
+    self.db.profile.favorites = self.db.profile.favorites or {}
     local altID = self:GetAltItemID(itemID)
 
     if self:IsFavorite(itemID) then
-        self.db.char.favorites[itemID] = nil
-        if altID then self.db.char.favorites[altID] = nil end
+        self.db.profile.favorites[itemID] = nil
+        if altID then self.db.profile.favorites[altID] = nil end
     else
-        self.db.char.fav_counter = (self.db.char.fav_counter or 0) + 1
-        self.db.char.favorites[itemID] = self.db.char.fav_counter
+        self.db.profile.fav_counter = (self.db.profile.fav_counter or 0) + 1
+        self.db.profile.favorites[itemID] = self.db.profile.fav_counter
     end
 
     if self.RefreshItemStateVisuals then
