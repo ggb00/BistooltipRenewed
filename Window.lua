@@ -4,7 +4,8 @@ local AceGUI = LibStub("AceGUI-3.0")
 
 local GetItemInfo, GetSpellInfo, GetSpellLink = GetItemInfo, GetSpellInfo, GetSpellLink
 local tonumber, tostring, type, ipairs, pairs = tonumber, tostring, type, ipairs, pairs
-local wipe, tinsert, max = wipe, tinsert, math.max
+local wipe, tinsert, max, min = wipe, tinsert, math.max, math.min
+local stringfind = string.find
 
 local class = nil
 local spec = nil
@@ -626,6 +627,25 @@ function BisTooltipAddon:IsWindowOpen()
         or (favorites_frame and favorites_frame.frame and favorites_frame.frame:IsShown())
 end
 
+local mainSearchQuery = ""
+local favSearchQuery = ""
+local ApplyMainSearchInstant
+local ApplyFavSearchInstant
+
+local itemNameLowerCache = {}
+local function GetItemNameLower(itemId)
+    if not itemId or itemId <= 0 then return nil end
+    local lower = itemNameLowerCache[itemId]
+    if not lower then
+        local name = GetItemInfo(itemId)
+        if name then
+            lower = string.lower(name)
+            itemNameLowerCache[itemId] = lower
+        end
+    end
+    return lower
+end
+
 local function ProcessMissingItems(self, elapsed)
     if statusTimer > 0 then
         statusTimer = statusTimer - elapsed
@@ -694,6 +714,8 @@ local function ProcessMissingItems(self, elapsed)
                     local itemName, _, _, _, _, _, _, _, _, itemIcon = GetItemInfo(item_id)
 
                     if itemName then
+                        resolvedAny = true
+                        itemNameLowerCache[item_id] = string.lower(itemName)
                         for _, widget in ipairs(widgets) do
                             if widget and widget.frame and widget.item_id == item_id then
                                 widget:SetImage(itemIcon)
@@ -737,6 +759,15 @@ local function ProcessMissingItems(self, elapsed)
                             scanner:Hide()
                         end
                     end
+                end
+            end
+
+            if resolvedAny then
+                if mainSearchQuery ~= "" and main_frame and main_frame.frame:IsShown() then
+                    ApplyMainSearchInstant()
+                end
+                if favSearchQuery ~= "" and favorites_frame and favorites_frame.frame:IsShown() then
+                    ApplyFavSearchInstant()
                 end
             end
         end
@@ -1102,7 +1133,7 @@ local function drawTableHeader(frame)
 
     local eLabel = AceGUI:Create("Label")
     eLabel:SetText("Enchants")
-    eLabel:SetFont("Fonts\\FRIZQT__.TTF", 11, "")
+    eLabel:SetFont("Fonts\\FRIZQT__.TTF", 12, "")
     eLabel:SetColor(color, color, color)
     eLabel:SetWidth(75)
     eLabel.label:SetJustifyH("LEFT")
@@ -1119,6 +1150,112 @@ local function drawTableHeader(frame)
         end)
         frame:AddChild(topLabel)
     end
+end
+
+local mainSearchBox = nil
+local mainSearchCount = nil
+local mainSearchFrame = CreateFrame("Frame")
+mainSearchFrame:Hide()
+
+local SEARCH_DIM_ALPHA = 0.10
+local SEARCH_MATCH_ALPHA = 1.0
+
+local function RestoreMainItemsAlpha()
+    for i = 1, #displayed_item_widgets do
+        local widget = displayed_item_widgets[i]
+        if widget and widget.frame then
+            widget._targetAlpha = SEARCH_MATCH_ALPHA
+            widget.frame:SetAlpha(SEARCH_MATCH_ALPHA)
+            if widget.image then widget.image:SetAlpha(SEARCH_MATCH_ALPHA) end
+        end
+    end
+end
+
+local function UpdateMainSearchTargets()
+    local query = mainSearchQuery
+    local matchCount = 0
+
+    for i = 1, #displayed_item_widgets do
+        local widget = displayed_item_widgets[i]
+        if widget and widget.frame and widget.item_id then
+            if query == "" then
+                widget._targetAlpha = SEARCH_MATCH_ALPHA
+            else
+                local lowerName = GetItemNameLower(widget.item_id)
+                local matches = lowerName and (stringfind(lowerName, query, 1, true) ~= nil)
+                if matches then
+                    matchCount = matchCount + 1
+                    widget._targetAlpha = SEARCH_MATCH_ALPHA
+                else
+                    widget._targetAlpha = SEARCH_DIM_ALPHA
+                end
+            end
+        end
+    end
+
+    if mainSearchCount then
+        if query == "" then
+            mainSearchCount:SetText("")
+            mainSearchCount:Hide()
+            if mainSearchBox and mainSearchBox.editbox then
+                mainSearchBox.editbox:SetTextInsets(0, 0, 3, 3)
+            end
+        else
+            if matchCount == 0 then
+                mainSearchCount:SetText("|cffff4444(0)|r")
+            else
+                mainSearchCount:SetText("|cff888888(" .. matchCount .. ")|r")
+            end
+            mainSearchCount:Show()
+            if mainSearchBox and mainSearchBox.editbox then
+                mainSearchBox.editbox:SetTextInsets(0, 28, 3, 3)
+            end
+        end
+    end
+end
+
+ApplyMainSearchInstant = function()
+    UpdateMainSearchTargets()
+    for i = 1, #displayed_item_widgets do
+        local widget = displayed_item_widgets[i]
+        if widget and widget.frame then
+            widget.frame:SetAlpha(widget._targetAlpha or SEARCH_MATCH_ALPHA)
+        end
+    end
+end
+
+mainSearchFrame:SetScript("OnUpdate", function(self, elapsed)
+    local stillAnimating = false
+    local step = min(1, elapsed * 16)
+
+    for i = 1, #displayed_item_widgets do
+        local widget = displayed_item_widgets[i]
+        if widget and widget.frame then
+            local current = widget.frame:GetAlpha() or 1
+            local target = widget._targetAlpha or SEARCH_MATCH_ALPHA
+            if current ~= target then
+                local diff = target - current
+                if diff > -0.01 and diff < 0.01 then
+                    widget.frame:SetAlpha(target)
+                else
+                    widget.frame:SetAlpha(current + diff * step)
+                    stillAnimating = true
+                end
+            end
+        end
+    end
+
+    if not stillAnimating then
+        self:Hide()
+    end
+end)
+
+local function QueueMainSearch(text)
+    local trimmed = strtrim(text or "")
+    if #trimmed > 128 then trimmed = trimmed:sub(1, 128) end
+    mainSearchQuery = trimmed:lower()
+    UpdateMainSearchTargets()
+    mainSearchFrame:Show()
 end
 
 local function drawSpecData()
@@ -1182,8 +1319,8 @@ local function drawSpecData()
     spec_frame:DoLayout()
     spec_frame:SetScroll(targetScroll or 0)
 
-    if targetScroll > 0 then
-        spec_frame:SetScroll(targetScroll)
+    if mainSearchQuery ~= "" then
+        ApplyMainSearchInstant()
     end
 end
 
@@ -1240,23 +1377,19 @@ end
 local function drawDropdowns()
     local dropDownGroup = AceGUI:Create("SimpleGroup")
     dropDownGroup:SetLayout("Table")
-    dropDownGroup:SetUserData("table", { columns = {42, 110, 180, 70}, space = 4, align = "BOTTOM" })
+    dropDownGroup:SetUserData("table", { columns = {105, 155, 65, 127}, space = 4, align = "BOTTOM" })
     main_frame:AddChild(dropDownGroup)
 
-    local spacerLeft = AceGUI:Create("Label")
-    spacerLeft:SetText(" ")
-    dropDownGroup:AddChild(spacerLeft)
-
     classDropdown = AceGUI:Create("Dropdown")
-    classDropdown:SetWidth(110)
+    classDropdown:SetWidth(105)
     classDropdown:SetPulloutWidth(113)
 
     specDropdown = AceGUI:Create("Dropdown")
-    specDropdown:SetWidth(180)
-    specDropdown:SetPulloutWidth(183)
+    specDropdown:SetWidth(155)
+    specDropdown:SetPulloutWidth(165)
 
     phaseDropDown = AceGUI:Create("Dropdown")
-    phaseDropDown:SetWidth(70)
+    phaseDropDown:SetWidth(65)
     phaseDropDown:SetPulloutWidth(73)
 
     specDropdown:SetDisabled(true)
@@ -1291,9 +1424,49 @@ local function drawDropdowns()
     classDropdown:SetList(class_options)
     phaseDropDown:SetList(GetPhaseDropdownOptions())
 
+    mainSearchBox = AceGUI:Create("EditBox")
+    mainSearchBox:SetWidth(127)
+    mainSearchBox:DisableButton(true)
+    mainSearchBox:SetLabel("")
+    mainSearchBox:SetText(mainSearchQuery)
+    if mainSearchBox.editbox and mainSearchBox.editbox.SetMaxLetters then
+        mainSearchBox.editbox:SetMaxLetters(128)
+    end
+
+    if not mainSearchCount and mainSearchBox.editbox then
+        mainSearchCount = mainSearchBox.editbox:CreateFontString(nil, "OVERLAY")
+        mainSearchCount:SetFont("Fonts\\FRIZQT__.TTF", 10, "")
+        mainSearchCount:SetShadowOffset(1, -1)
+        mainSearchCount:SetShadowColor(0, 0, 0, 0.8)
+        mainSearchCount:SetJustifyH("RIGHT")
+        mainSearchCount:SetPoint("RIGHT", mainSearchBox.editbox, "RIGHT", -6, 0)
+        mainSearchCount:Hide()
+    end
+
+    mainSearchBox:SetCallback("OnTextChanged", function(_, _, text)
+        QueueMainSearch(text)
+    end)
+    mainSearchBox:SetCallback("OnEnterPressed", function(widget)
+        widget:ClearFocus()
+    end)
+    if mainSearchBox.editbox then
+        mainSearchBox.editbox:HookScript("OnEscapePressed", function()
+            mainSearchBox:SetText("")
+            QueueMainSearch("")
+        end)
+    end
+    mainSearchBox:SetCallback("OnEnter", function(widget)
+        GameTooltip:SetOwner(widget.frame, "ANCHOR_TOP")
+        GameTooltip:AddLine("Item search", 1, 1, 1)
+        GameTooltip:AddLine("Start typing to search for items in the current list.", 1, 0.82, 0, 1)
+        GameTooltip:Show()
+    end)
+    mainSearchBox:SetCallback("OnLeave", function() GameTooltip:Hide() end)
+
     dropDownGroup:AddChild(classDropdown)
     dropDownGroup:AddChild(specDropdown)
     dropDownGroup:AddChild(phaseDropDown)
+    dropDownGroup:AddChild(mainSearchBox)
 
     local fillerFrame = AceGUI:Create("Label")
     fillerFrame:SetText(" ")
@@ -1330,6 +1503,115 @@ local function createSpecFrame()
     spec_frame = frame
 end
 
+local favSearchBox = nil
+local favSearchCount = nil
+local favSearchFrame = CreateFrame("Frame")
+favSearchFrame:Hide()
+local displayed_fav_rows = {}
+
+local function RestoreFavRowsAlpha()
+    for i = 1, #displayed_fav_rows do
+        local row = displayed_fav_rows[i]
+        if row and row.frame then
+            row._targetAlpha = SEARCH_MATCH_ALPHA
+            row.frame:SetAlpha(SEARCH_MATCH_ALPHA)
+        end
+    end
+end
+
+local function UpdateFavSearchTargets()
+    local query = favSearchQuery
+    local matchCount = 0
+    local totalCount = #displayed_fav_rows
+
+    for i = 1, totalCount do
+        local row = displayed_fav_rows[i]
+        if row and row.frame and row.item_id then
+            if query == "" then
+                row._targetAlpha = SEARCH_MATCH_ALPHA
+                matchCount = matchCount + 1
+            else
+                local lowerName = GetItemNameLower(row.item_id)
+                local matches = lowerName and (stringfind(lowerName, query, 1, true) ~= nil)
+                if matches then
+                    matchCount = matchCount + 1
+                    row._targetAlpha = SEARCH_MATCH_ALPHA
+                else
+                    row._targetAlpha = SEARCH_DIM_ALPHA
+                end
+            end
+        end
+    end
+
+    if favSearchCount then
+        if query == "" then
+            favSearchCount:SetText("")
+            favSearchCount:Hide()
+            if favSearchBox and favSearchBox.editbox then
+                favSearchBox.editbox:SetTextInsets(0, 0, 3, 3)
+            end
+        else
+            if matchCount == 0 then
+                favSearchCount:SetText("|cffff4444(0)|r")
+            else
+                favSearchCount:SetText("|cff888888(" .. matchCount .. ")|r")
+            end
+            favSearchCount:Show()
+            if favSearchBox and favSearchBox.editbox then
+                favSearchBox.editbox:SetTextInsets(0, 28, 3, 3)
+            end
+        end
+    end
+
+    if favStatusText and currentFavStatusState == "COUNT" then
+        favStatusText:SetText("|cff888888Items: " .. totalCount .. "|r")
+    end
+end
+
+ApplyFavSearchInstant = function()
+    UpdateFavSearchTargets()
+    for i = 1, #displayed_fav_rows do
+        local row = displayed_fav_rows[i]
+        if row and row.frame then
+            row.frame:SetAlpha(row._targetAlpha or SEARCH_MATCH_ALPHA)
+        end
+    end
+end
+
+favSearchFrame:SetScript("OnUpdate", function(self, elapsed)
+    local stillAnimating = false
+    local step = min(1, elapsed * 16)
+
+    for i = 1, #displayed_fav_rows do
+        local row = displayed_fav_rows[i]
+        if row and row.frame then
+            local current = row.frame:GetAlpha() or 1
+            local target = row._targetAlpha or SEARCH_MATCH_ALPHA
+            if current ~= target then
+                local diff = target - current
+                if diff > -0.01 and diff < 0.01 then
+                    row.frame:SetAlpha(target)
+                else
+                    row.frame:SetAlpha(current + diff * step)
+                    stillAnimating = true
+                end
+            end
+        end
+    end
+
+    if not stillAnimating then
+        self:Hide()
+    end
+end)
+
+local function QueueFavSearch(text)
+    local trimmed = strtrim(text or "")
+    if #trimmed > 128 then trimmed = trimmed:sub(1, 128) end
+    favSearchQuery = trimmed:lower()
+    UpdateFavSearchTargets()
+    favSearchFrame:Show()
+end
+
 local favUpdateFrame = CreateFrame("Frame")
 favUpdateFrame:Hide()
 favUpdateFrame:SetScript("OnUpdate", function(self)
@@ -1351,6 +1633,7 @@ function BisTooltipAddon:RefreshFavoritesWindow(immediate)
     favUpdateFrame:Hide()
 
     wipe(displayed_fav_widgets)
+    wipe(displayed_fav_rows)
 
     local targetScroll = 0
     if BisTooltipAddon.db.profile.fav_scroll_status and BisTooltipAddon.db.profile.fav_scroll_status.scrollvalue then
@@ -1388,6 +1671,8 @@ function BisTooltipAddon:RefreshFavoritesWindow(immediate)
             row:SetLayout("Table")
             row:SetFullWidth(true)
             row:SetUserData("table", FAV_ROW_TABLE_LAYOUT)
+            row.item_id = display_id
+            displayed_fav_rows[#displayed_fav_rows + 1] = row
 
             local itemWidget = createItemFrame(display_id, 36)
             itemWidget:SetWidth(36)
@@ -1519,6 +1804,10 @@ function BisTooltipAddon:RefreshFavoritesWindow(immediate)
     end
 
     UpdateFavStatusDisplay("COUNT", #favList)
+
+    if favSearchQuery ~= "" then
+        ApplyFavSearchInstant()
+    end
 end
 
 local function ClampPosition(pos, width, height)
@@ -1569,6 +1858,17 @@ function BisTooltipAddon:OpenFavoritesFrame()
 
         favorites_frame.frame:HookScript("OnHide", function()
             StaticPopup_Hide("BISTOOLTIP_CONFIRM_CLEAR_FAVORITES")
+            favSearchFrame:Hide()
+            favSearchQuery = ""
+            if favSearchBox then
+                favSearchBox:SetText("")
+                if favSearchBox.editbox then favSearchBox.editbox:SetTextInsets(0, 0, 3, 3) end
+            end
+            if favSearchCount then
+                favSearchCount:SetText("")
+                favSearchCount:Hide()
+            end
+            RestoreFavRowsAlpha()
             favStatusTimer = 0
             currentFavStatusState = "IDLE"
             favSwitchedText = false
@@ -1614,10 +1914,61 @@ function BisTooltipAddon:OpenFavoritesFrame()
         end)
         favorites_frame:SetLayout("List")
 
+        local searchGroup = AceGUI:Create("SimpleGroup")
+        searchGroup:SetLayout("Table")
+        searchGroup:SetFullWidth(true)
+        searchGroup:SetUserData("table", { columns = {40, 346, 40}, space = 0, align = "middle" })
+
+        local sSpacerL = AceGUI:Create("Label"); sSpacerL:SetText(" "); searchGroup:AddChild(sSpacerL)
+
+        favSearchBox = AceGUI:Create("EditBox")
+        favSearchBox:SetWidth(346)
+        favSearchBox:DisableButton(true)
+        favSearchBox:SetLabel("")
+        favSearchBox:SetText(favSearchQuery)
+        if favSearchBox.editbox and favSearchBox.editbox.SetMaxLetters then
+            favSearchBox.editbox:SetMaxLetters(128)
+        end
+
+        if not favSearchCount and favSearchBox.editbox then
+            favSearchCount = favSearchBox.editbox:CreateFontString(nil, "OVERLAY")
+            favSearchCount:SetFont("Fonts\\FRIZQT__.TTF", 10, "")
+            favSearchCount:SetShadowOffset(1, -1)
+            favSearchCount:SetShadowColor(0, 0, 0, 0.8)
+            favSearchCount:SetJustifyH("RIGHT")
+            favSearchCount:SetPoint("RIGHT", favSearchBox.editbox, "RIGHT", -6, 0)
+            favSearchCount:Hide()
+        end
+
+        favSearchBox:SetCallback("OnTextChanged", function(_, _, text)
+            QueueFavSearch(text)
+        end)
+        favSearchBox:SetCallback("OnEnterPressed", function(widget)
+            widget:ClearFocus()
+        end)
+        if favSearchBox.editbox then
+            favSearchBox.editbox:HookScript("OnEscapePressed", function()
+                favSearchBox:SetText("")
+                QueueFavSearch("")
+            end)
+        end
+        favSearchBox:SetCallback("OnEnter", function(widget)
+            GameTooltip:SetOwner(widget.frame, "ANCHOR_TOP")
+            GameTooltip:AddLine("Item search", 1, 1, 1)
+            GameTooltip:AddLine("Start typing to search for items in your favorites list.", 1, 0.82, 0, 1)
+            GameTooltip:Show()
+        end)
+        favSearchBox:SetCallback("OnLeave", function() GameTooltip:Hide() end)
+        searchGroup:AddChild(favSearchBox)
+
+        local sSpacerR = AceGUI:Create("Label"); sSpacerR:SetText(" "); searchGroup:AddChild(sSpacerR)
+
+        favorites_frame:AddChild(searchGroup)
+
         favorites_scroll = AceGUI:Create("ScrollFrame")
         favorites_scroll:SetLayout("Flow")
         favorites_scroll:SetFullWidth(true)
-        favorites_scroll:SetHeight(457)
+        favorites_scroll:SetHeight(430)
         favorites_scroll:SetAutoAdjustHeight(false)
 
         BisTooltipAddon.db.profile.fav_scroll_status = BisTooltipAddon.db.profile.fav_scroll_status or {}
@@ -1679,6 +2030,17 @@ end
 
 function BisTooltipAddon:CloseFavoritesFrame()
     favUpdateFrame:Hide()
+    favSearchFrame:Hide()
+    favSearchQuery = ""
+    if favSearchBox then
+        favSearchBox:SetText("")
+        if favSearchBox.editbox then favSearchBox.editbox:SetTextInsets(0, 0, 3, 3) end
+    end
+    if favSearchCount then
+        favSearchCount:SetText("")
+        favSearchCount:Hide()
+    end
+    RestoreFavRowsAlpha()
     favStatusTimer = 0
     currentFavStatusState = "IDLE"
     favSwitchedText = false
@@ -1754,6 +2116,17 @@ function BisTooltipAddon:createMainFrame()
 
     main_frame.frame:HookScript("OnHide", function()
         UpdateStatusDisplay("IDLE")
+        mainSearchFrame:Hide()
+        mainSearchQuery = ""
+        if mainSearchBox then
+            mainSearchBox:SetText("")
+            if mainSearchBox.editbox then mainSearchBox.editbox:SetTextInsets(0, 0, 3, 3) end
+        end
+        if mainSearchCount then
+            mainSearchCount:SetText("")
+            mainSearchCount:Hide()
+        end
+        RestoreMainItemsAlpha()
         if not (favorites_frame and favorites_frame.frame and favorites_frame.frame:IsShown()) then
             item_fetch_frame:SetScript("OnUpdate", nil)
             StaticPopup_Hide("BISTOOLTIP_CONFIRM_CLEAR_FAVORITES")
