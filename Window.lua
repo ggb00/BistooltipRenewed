@@ -2050,7 +2050,7 @@ function BisTooltipAddon:OpenFavoritesFrame()
         favorites_scroll = AceGUI:Create("ScrollFrame")
         favorites_scroll:SetLayout("List")
         favorites_scroll:SetFullWidth(true)
-        favorites_scroll:SetHeight(428)
+        favorites_scroll:SetHeight(430)
         favorites_scroll:SetAutoAdjustHeight(false)
 
         BisTooltipAddon.db.profile.fav_scroll_status = BisTooltipAddon.db.profile.fav_scroll_status or {}
