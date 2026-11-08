@@ -169,12 +169,12 @@ local function ProcessTooltip(tooltip, link)
 
     local itemId = tonumber(string_match(link, "item:(%d+)"))
     if not itemId then return end
+    if tt.BisTooltipRendered == itemId then return end
 
     StyleTooltip(tt, true)
 
     if db.tooltip_with_ctrl and not IsControlKeyDown() then return end
 
-    if tt.BisTooltipRendered == itemId then return end
     tt.BisTooltipRendered = itemId
 
     local translated_id = BisTooltipAddon.GetAltItemID and BisTooltipAddon:GetAltItemID(itemId)
@@ -283,9 +283,9 @@ local function ProcessTooltip(tooltip, link)
                     end
                 end
 
-                if ownerName:find("bank") then
+                if ownerName:find("bank", 1, true) then
                     inBankUI = true
-                elseif not inBankUI and (ownerName:find("inventory") or ownerName:find("bagnon") or ownerName:find("bag")) then
+                elseif not inBankUI and (ownerName:find("inventory", 1, true) or ownerName:find("bagnon", 1, true) or ownerName:find("bag", 1, true)) then
                     inBagUI = true
                 end
             end
@@ -304,7 +304,9 @@ local function ProcessTooltip(tooltip, link)
         end
     end
 
-    tt:Show()
+    if tt:IsShown() then
+        tt:Show()
+    end
 end
 
 local function OnTooltipSetItem(tooltip)
@@ -406,16 +408,14 @@ local function UpdateComparison(tt)
                 tt.shoppingTooltips = { ShoppingTooltip1, ShoppingTooltip2, ShoppingTooltip3 }
             end
         end
-        local oldThis = this
-        this = tt
-        GameTooltip_ShowCompareItem()
-        this = oldThis
+        GameTooltip_ShowCompareItem(tt)
     end
 end
 
 local function UpdateTooltipOnModifier(tt)
     if not tt or not tt:IsShown() then return end
     RefreshTooltip(tt)
+    HideShoppingTooltips()
     UpdateComparison(tt)
 end
 
@@ -451,7 +451,6 @@ function BisTooltipAddon:initBisTooltip()
     if ItemRefShoppingTooltip2 then ItemRefShoppingTooltip2:HookScript("OnTooltipCleared", OnTooltipCleared) end
 
     hooksecurefunc(GameTooltip, "SetInventoryItem", HookSetInventoryItem)
-    if ItemRefTooltip then hooksecurefunc(ItemRefTooltip, "SetInventoryItem", HookSetInventoryItem) end
 
     if ItemRefTooltip and not ItemRefTooltip.shoppingTooltips then
         ItemRefTooltip.shoppingTooltips = { ItemRefShoppingTooltip1, ItemRefShoppingTooltip2 }
