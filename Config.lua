@@ -42,7 +42,7 @@ local db_defaults = {
         show_sources = true, source_color = "green",
         show_item_states = true, dark_tooltips = false,
         show_item_borders = true, frame_pos = nil, scroll_status = {},
-        show_ilvl = false, ilvl_color = "white",
+        show_ilvl = false, ilvl_color = "white", indicator_scale = 1.0,
         favorites = {}, favorites_pos = nil, fav_counter = 0, favorite_icon = 1,
         favorite_color = "yellow", fav_scroll_status = {}
     }
@@ -51,6 +51,12 @@ local db_defaults = {
 local configTable = {
     type = "group",
     args = {
+        author_info = {
+            type = "description",
+            name = "|cff888888by ggb|r\n",
+            order = 0.5,
+        },
+
         header_general = {
             name = "General",
             type = "header",
@@ -84,7 +90,7 @@ local configTable = {
         },
 
         show_ilvl = {
-            name = "Show iLvL",
+            name = "Show Item Level",
             order = 4,
             desc = "Display item level on item icons in the addon window",
             type = "toggle",
@@ -100,7 +106,7 @@ local configTable = {
         },
 
         ilvl_color = {
-            name = "iLvL Color",
+            name = "Item Level Color",
             order = 5,
             desc = "Changes the text color of the item level on icons",
             type = "select",
@@ -126,6 +132,30 @@ local configTable = {
             end
         },
 
+        indicator_scale = {
+            name = "Overlay Icon Scale",
+            order = 6,
+            desc = "Adjust the size of the Favorite, BoE, and Bag/Bank status icons overlay on item",
+            type = "range",
+            min = 0.75,
+            max = 1.50,
+            step = 0.05,
+            isPercent = true,
+            width = "full",
+            set = function(info, val)
+                BisTooltipAddon.db.profile.indicator_scale = val
+                if BisTooltipAddon.RefreshItemStateVisuals then
+                    BisTooltipAddon.RefreshItemStateVisuals()
+                end
+                if BisTooltipAddon.RefreshFavoritesWindow then
+                    BisTooltipAddon:RefreshFavoritesWindow()
+                end
+            end,
+            get = function(info)
+                return BisTooltipAddon.db.profile.indicator_scale or 1.0
+            end
+        },
+
         header_tooltips = {
             name = "Tooltips",
             type = "header",
@@ -133,9 +163,9 @@ local configTable = {
         },
 
         tooltip_with_ctrl = {
-            name = "Show Item Tooltips only with Ctrl",
+            name = "Only show BiS info with Ctrl held",
             order = 11,
-            desc = "Only show tooltips when holding down Ctrl key",
+            desc = "Only display BiS tooltip lines when holding down the Ctrl key",
             type = "toggle",
             width = "full",
             set = function(info, val)
@@ -148,7 +178,7 @@ local configTable = {
         show_item_states = {
             name = "Show Bags/Bank Item Status",
             order = 12,
-            desc = "Show a line that says whenever an item is already in your bags or bank",
+            desc = "Show icons on items and tooltip text when an item is in your bags or bank",
             type = "toggle",
             width = "full",
             set = function(info, val)
@@ -504,6 +534,13 @@ local function migrateAddonDB()
     if BisTooltipAddon.db.profile.show_item_borders == nil then BisTooltipAddon.db.profile.show_item_borders = true end
     if BisTooltipAddon.db.profile.show_ilvl == nil then BisTooltipAddon.db.profile.show_ilvl = false end
     if not BisTooltipAddon.db.profile.ilvl_color then BisTooltipAddon.db.profile.ilvl_color = "white" end
+
+    local indScale = tonumber(BisTooltipAddon.db.profile.indicator_scale)
+    if not indScale or indScale < 0.75 or indScale > 1.50 then
+        BisTooltipAddon.db.profile.indicator_scale = 1.0
+    else
+        BisTooltipAddon.db.profile.indicator_scale = indScale
+    end
 
     if type(BisTooltipAddon.db.profile.favorites) ~= "table" then BisTooltipAddon.db.profile.favorites = {} end
 
