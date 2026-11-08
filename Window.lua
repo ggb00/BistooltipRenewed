@@ -370,7 +370,7 @@ local function HandleItemTooltip(widget, item_id)
     GameTooltip:SetHyperlink(validLink)
 
     if BisTooltipAddon:IsFavorite(item_id) then
-        GameTooltip:AddLine("|cff888888(Right-click to remove from Favorites)|r")
+        GameTooltip:AddLine("|cff888888<Right-click to remove from Favorites>|r")
     else
         GameTooltip:AddLine("|cff888888<Right-click to add to Favorites>|r")
     end
