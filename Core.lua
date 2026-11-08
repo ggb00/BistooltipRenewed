@@ -148,7 +148,9 @@ function BisTooltipAddon:ToggleFavorite(itemID)
         self.db.profile.favorites[itemID] = self.db.profile.fav_counter
     end
 
-    if self.RefreshItemStateVisuals then
+    if self.RefreshFavoriteForItem then
+        self:RefreshFavoriteForItem(itemID)
+    elseif self.RefreshItemStateVisuals then
         self.RefreshItemStateVisuals()
     end
     if self.RefreshFavoritesWindow then

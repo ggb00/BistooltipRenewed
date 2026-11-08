@@ -216,30 +216,61 @@ local function ApplyItemStateVisuals(widget, item_id, is_missing)
     if widget.frame.bisILvl then
         local db = BisTooltipAddon.db and BisTooltipAddon.db.profile
         local showILvl = db and (db.show_ilvl ~= false)
+        local colorKey = (db and db.ilvl_color) or "white"
 
         if showILvl and not is_missing and item_id and item_id > 0 then
-            local _, _, _, itemLevel = GetItemInfo(item_id)
+            local itemLevel = memo_ilvl and memo_ilvl[item_id]
+            if itemLevel == nil then
+                local name, _, _, ilvl = GetItemInfo(item_id)
+                if name and ilvl and ilvl > 0 then
+                    itemLevel = ilvl
+                else
+                    itemLevel = 0
+                end
+                if memo_ilvl then memo_ilvl[item_id] = itemLevel end
+            end
+
             if itemLevel and itemLevel > 0 then
-                local colorKey = (db and db.ilvl_color) or "white"
                 local hex = (BisTooltip_HexColors and BisTooltip_HexColors[colorKey]) or "FFFFFF"
-                widget.frame.bisILvl:SetText("|cFF" .. hex .. itemLevel .. "|r")
+                local text = "|cFF" .. hex .. itemLevel .. "|r"
+                if widget._lastILvlText ~= text then
+                    widget._lastILvlText = text
+                    widget.frame.bisILvl:SetText(text)
+                end
                 widget.frame.bisILvl:Show()
             else
+                widget._lastILvlText = nil
                 widget.frame.bisILvl:Hide()
             end
         else
+            widget._lastILvlText = nil
             widget.frame.bisILvl:Hide()
         end
     end
 
     if widget.frame.bisStarMark then
-        if BisTooltipAddon:IsFavorite(item_id) then
+        local isFav = memo_fav and memo_fav[item_id]
+        if isFav == nil then
+            isFav = BisTooltipAddon:IsFavorite(item_id)
+            if memo_fav then memo_fav[item_id] = isFav end
+        end
+
+        if isFav then
+            if widget._lastFav ~= true or widget._lastMarkIndex ~= markIndex or widget._lastIndicatorScale ~= scale then
+                widget._lastFav = true
+                widget._lastMarkIndex = markIndex
+                widget.frame.bisStarMark:SetWidth(14 * scale)
+                widget.frame.bisStarMark:SetHeight(14 * scale)
+                widget.frame.bisStarMark:SetTexture("Interface\\TargetingFrame\\UI-RaidTargetingIcons")
+                SetRaidTargetIconTexture(widget.frame.bisStarMark, markIndex)
+            end
             widget.frame.bisStarMark:SetTexture("Interface\\TargetingFrame\\UI-RaidTargetingIcons")
             widget.frame.bisStarMark:SetWidth(14 * scale)
             widget.frame.bisStarMark:SetHeight(14 * scale)
             SetRaidTargetIconTexture(widget.frame.bisStarMark, markIndex)
             widget.frame.bisStarMark:Show()
         else
+            widget._lastFav = false
             widget.frame.bisStarMark:Hide()
         end
     end
@@ -250,14 +281,30 @@ local function ApplyItemStateVisuals(widget, item_id, is_missing)
     end
 
     if is_missing then
+        widget._lastState = -1
         widget.image:SetVertexColor(1, 1, 1, 1)
         widget.frame.bisCheckMark:Hide()
         if widget.frame.bisBorder then widget.frame.bisBorder:Hide() end
         return
     end
 
-    local state = BisTooltipAddon:GetItemState(item_id)
+    local show_item_states = not (BisTooltipAddon.db and BisTooltipAddon.db.profile and BisTooltipAddon.db.profile.show_item_states == false)
+    local state = memo_state and memo_state[item_id]
+    if state == nil then
+        state = BisTooltipAddon:GetItemState(item_id)
+        if memo_state then memo_state[item_id] = state end
+    end
+    if not show_item_states and (state == 1 or state == 3) then
+        state = 0
+    end
     local show_borders = BisTooltipAddon.db.profile.show_item_borders
+
+    if widget._lastState == state and widget._lastShowBorders == show_borders and widget._lastIndicatorScale == scale then
+        return
+    end
+    widget._lastState = state
+    widget._lastShowBorders = show_borders
+    widget._lastIndicatorScale = scale
 
     if state == 2 then
         widget.image:SetVertexColor(0.35, 0.35, 0.35, 1)
@@ -305,12 +352,21 @@ local function ApplyItemStateVisuals(widget, item_id, is_missing)
     end
 end
 
+local memo_state = {}
+local memo_fav = {}
+local memo_ilvl = {}
+
 local function RefreshItemStateVisuals()
+    wipe(memo_state)
+    wipe(memo_fav)
+    wipe(memo_ilvl)
+
     if main_frame and main_frame.frame:IsShown() then
         for i = 1, #displayed_item_widgets do
             local widget = displayed_item_widgets[i]
             if widget and widget.frame and widget.item_id then
-                ApplyItemStateVisuals(widget, widget.item_id, false)
+                local is_missing = not GetItemInfo(widget.item_id)
+                ApplyItemStateVisuals(widget, widget.item_id, is_missing)
             end
         end
     end
@@ -318,12 +374,52 @@ local function RefreshItemStateVisuals()
         for i = 1, #displayed_fav_widgets do
             local widget = displayed_fav_widgets[i]
             if widget and widget.frame and widget.item_id then
-                ApplyItemStateVisuals(widget, widget.item_id, false)
+                local is_missing = not GetItemInfo(widget.item_id)
+                ApplyItemStateVisuals(widget, widget.item_id, is_missing)
             end
         end
     end
+
+    wipe(memo_state)
+    wipe(memo_fav)
+    wipe(memo_ilvl)
 end
 BisTooltipAddon.RefreshItemStateVisuals = RefreshItemStateVisuals
+
+function BisTooltipAddon:RefreshFavoriteForItem(item_id)
+    if not item_id then return end
+    item_id = tonumber(item_id)
+    if not item_id then return end
+    local altID = self.GetAltItemID and self:GetAltItemID(item_id)
+
+    wipe(memo_state)
+    wipe(memo_fav)
+    wipe(memo_ilvl)
+
+    if main_frame and main_frame.frame:IsShown() then
+        for i = 1, #displayed_item_widgets do
+            local widget = displayed_item_widgets[i]
+            if widget and widget.frame and (widget.item_id == item_id or (altID and widget.item_id == altID)) then
+                local is_missing = not GetItemInfo(widget.item_id)
+                ApplyItemStateVisuals(widget, widget.item_id, is_missing)
+            end
+        end
+    end
+
+    if favorites_frame and favorites_frame.frame:IsShown() then
+        for i = 1, #displayed_fav_widgets do
+            local widget = displayed_fav_widgets[i]
+            if widget and widget.frame and (widget.item_id == item_id or (altID and widget.item_id == altID)) then
+                local is_missing = not GetItemInfo(widget.item_id)
+                ApplyItemStateVisuals(widget, widget.item_id, is_missing)
+            end
+        end
+    end
+
+    wipe(memo_state)
+    wipe(memo_fav)
+    wipe(memo_ilvl)
+end
 
 function BisTooltipAddon:IsWindowOpen()
     return (main_frame and main_frame.frame and main_frame.frame:IsShown())
@@ -447,6 +543,13 @@ local function createItemFrame(item_id, size)
         if self.frame.bisBorder then self.frame.bisBorder:Hide() end
         if self.frame.bisStarMark then self.frame.bisStarMark:Hide() end
         if self.frame.bisILvl then self.frame.bisILvl:Hide() end
+        self.frame:SetAlpha(1.0)
+        self._lastState = nil
+        self._lastShowBorders = nil
+        self._lastFav = nil
+        self._lastMarkIndex = nil
+        self._lastILvlText = nil
+        self._lastIndicatorScale = nil
         self.item_id = nil
     end)
     item_frame:SetImageSize(size, size)
@@ -762,23 +865,28 @@ local function drawSpecData()
 
     drawTableHeader(spec_frame)
 
-    local list_class = BisTooltip_ItemLists and (BisTooltip_ItemLists[class] or BisTooltip_ItemLists[GetCleanClassName(class)])
-    if not spec or not phase or not list_class or not list_class[spec] then return end
-    local slots = list_class[spec][phase]
-    if not slots then return end
+    spec_frame:PauseLayout()
 
-    if slots[1] then
-        for _, slot in ipairs(slots) do
-            drawItemSlot(slot.slot_name, slot)
-        end
-    else
-        for _, slot_name in ipairs(SLOT_DISPLAY_ORDER) do
-            local item_list = slots[slot_name]
-            if item_list then
-                drawItemSlot(slot_name, item_list)
+    local list_class = BisTooltip_ItemLists and (BisTooltip_ItemLists[class] or BisTooltip_ItemLists[GetCleanClassName(class)])
+    local slots = list_class and spec and phase and list_class[spec] and list_class[spec][phase]
+    if slots then
+        if slots[1] then
+            for _, slot in ipairs(slots) do
+                drawItemSlot(slot.slot_name, slot)
+            end
+        else
+            for _, slot_name in ipairs(SLOT_DISPLAY_ORDER) do
+                local item_list = slots[slot_name]
+                if item_list then
+                    drawItemSlot(slot_name, item_list)
+                end
             end
         end
     end
+
+    spec_frame:ResumeLayout()
+    spec_frame:DoLayout()
+    spec_frame:SetScroll(targetScroll or 0)
 
     if targetScroll > 0 then
         spec_frame:SetScroll(targetScroll)
@@ -928,8 +1036,25 @@ local function createSpecFrame()
     spec_frame = frame
 end
 
-function BisTooltipAddon:RefreshFavoritesWindow()
+local favUpdateFrame = CreateFrame("Frame")
+favUpdateFrame:Hide()
+favUpdateFrame:SetScript("OnUpdate", function(self)
+    self:Hide()
+    if BisTooltipAddon.RefreshFavoritesWindow then
+        BisTooltipAddon:RefreshFavoritesWindow(true)
+    end
+end)
+
+function BisTooltipAddon:RefreshFavoritesWindow(immediate)
     if not favorites_frame or not favorites_frame.frame:IsShown() or not favorites_scroll then return end
+
+    if not immediate then
+        if not favUpdateFrame:IsShown() then
+            favUpdateFrame:Show()
+        end
+        return
+    end
+    favUpdateFrame:Hide()
 
     wipe(displayed_fav_widgets)
 
@@ -939,6 +1064,7 @@ function BisTooltipAddon:RefreshFavoritesWindow()
     end
 
     favorites_scroll:ReleaseChildren()
+    favorites_scroll:PauseLayout()
 
     local favList = {}
     local favData = self.db and self.db.profile and self.db.profile.favorites
@@ -1089,9 +1215,9 @@ function BisTooltipAddon:RefreshFavoritesWindow()
         end
     end
 
-    if targetScroll > 0 then
-        favorites_scroll:SetScroll(targetScroll)
-    end
+    favorites_scroll:ResumeLayout()
+    favorites_scroll:DoLayout()
+    favorites_scroll:SetScroll(targetScroll or 0)
 
     if favorites_frame.clearBtn then
         favorites_frame.clearBtn:SetDisabled(#favList == 0)
@@ -1239,10 +1365,11 @@ function BisTooltipAddon:OpenFavoritesFrame()
     end
 
     favorites_frame:Show()
-    self:RefreshFavoritesWindow()
+    self:RefreshFavoritesWindow(true)
 end
 
 function BisTooltipAddon:CloseFavoritesFrame()
+    favUpdateFrame:Hide()
     StaticPopup_Hide("BISTOOLTIP_CONFIRM_CLEAR_FAVORITES")
     if favorites_frame and favorites_frame.frame:IsShown() then
         favorites_frame:Hide()
