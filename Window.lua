@@ -38,10 +38,21 @@ local fetch_timer = 0
 local MAX_FETCH_ATTEMPTS = 10
 
 local boe_cache = {}
-local function IsItemBoe(itemId)
-    if not itemId or itemId <= 0 then return false end
+local boe_queue = {}
+local boe_retry = {}
+local boe_next_retry = {}
+local boe_frame = CreateFrame("Frame")
+local boe_clock = 0
+local boe_timer = 0
+local BOE_SCAN_BATCH = 32
+local BOE_THROTTLE = 0.05
+local BOE_MAX_RETRIES = 5
+local BOE_RETRY_DELAY = 0.5
+
+local function ScanItemBoe(itemId)
+    if not itemId or itemId <= 0 then return false, true end
     if boe_cache[itemId] ~= nil then
-        return boe_cache[itemId]
+        return boe_cache[itemId], true
     end
     scanner:SetOwner(UIParent, "ANCHOR_NONE")
     scanner:ClearLines()
@@ -59,10 +70,92 @@ local function IsItemBoe(itemId)
     end
     scanner:ClearLines()
     scanner:Hide()
-    if numLines > 0 then
-        boe_cache[itemId] = isBoe
+
+    if isBoe then
+        boe_cache[itemId] = true
+        return true, true
+    elseif numLines >= 2 and GetItemInfo(itemId) then
+        boe_cache[itemId] = false
+        return false, true
     end
-    return isBoe
+
+    return false, false
+end
+
+local function ApplyBoeMark(widget, isBoe)
+    if not widget or not widget.frame or not widget.frame.bisBoeMark then return end
+    local size = widget.image and widget.image:GetWidth() or 40
+    if isBoe and size >= 30 then
+        local scale = (BisTooltipAddon.db and BisTooltipAddon.db.profile and BisTooltipAddon.db.profile.indicator_scale) or 1.0
+        widget.frame.bisBoeMark:SetWidth(12 * scale)
+        widget.frame.bisBoeMark:SetHeight(12 * scale)
+        widget.frame.bisBoeMark:Show()
+    else
+        widget.frame.bisBoeMark:Hide()
+    end
+end
+
+local function ApplyBoeToItem(itemId, isBoe)
+    for i = 1, #displayed_item_widgets do
+        local widget = displayed_item_widgets[i]
+        if widget and widget.item_id == itemId then
+            ApplyBoeMark(widget, isBoe)
+        end
+    end
+    for i = 1, #displayed_fav_widgets do
+        local widget = displayed_fav_widgets[i]
+        if widget and widget.item_id == itemId then
+            ApplyBoeMark(widget, isBoe)
+        end
+    end
+end
+
+local function ProcessBoeQueue(self, elapsed)
+    boe_clock = boe_clock + (elapsed or 0)
+    boe_timer = boe_timer + (elapsed or 0)
+    if boe_timer < BOE_THROTTLE then return end
+    boe_timer = 0
+
+    local now = boe_clock
+    local budget = BOE_SCAN_BATCH
+    for itemId in pairs(boe_queue) do
+        if budget <= 0 then break end
+        local nextRetry = boe_next_retry[itemId] or 0
+        if now >= nextRetry then
+            local isBoe, known = ScanItemBoe(itemId)
+            if known then
+                boe_queue[itemId] = nil
+                boe_retry[itemId] = nil
+                boe_next_retry[itemId] = nil
+                ApplyBoeToItem(itemId, isBoe)
+            else
+                local retries = (boe_retry[itemId] or 0) + 1
+                if retries >= BOE_MAX_RETRIES then
+                    boe_queue[itemId] = nil
+                    boe_retry[itemId] = nil
+                    boe_next_retry[itemId] = nil
+                else
+                    boe_retry[itemId] = retries
+                    boe_next_retry[itemId] = now + BOE_RETRY_DELAY
+                end
+            end
+            budget = budget - 1
+        end
+    end
+    if not next(boe_queue) then
+        boe_frame:SetScript("OnUpdate", nil)
+        boe_timer = 0
+        boe_clock = 0
+    end
+end
+
+local function QueueBoeCheck(itemId)
+    if not itemId or itemId <= 0 or boe_cache[itemId] ~= nil then return end
+    if boe_queue[itemId] then return end
+    boe_queue[itemId] = true
+    if not boe_frame:GetScript("OnUpdate") then
+        boe_frame:SetScript("OnUpdate", ProcessBoeQueue)
+    end
 end
 
 local checkmark_path = "Interface\\AddOns\\" .. addonName .. "\\checkmark-16.tga"
@@ -641,10 +734,16 @@ local function createItemFrame(item_id, size)
     end
 
     item_frame:SetImage(itemIcon)
-    if size >= 30 and IsItemBoe(item_id) then
-        item_frame.frame.bisBoeMark:Show()
-    else
-        item_frame.frame.bisBoeMark:Hide()
+    local cachedBoe = boe_cache[item_id]
+    if item_frame.frame.bisBoeMark then
+        if size >= 30 and cachedBoe == true then
+            item_frame.frame.bisBoeMark:Show()
+        else
+            item_frame.frame.bisBoeMark:Hide()
+        end
+    end
+    if size >= 30 and cachedBoe == nil then
+        QueueBoeCheck(item_id)
     end
     ApplyItemStateVisuals(item_frame, item_id, false)
 
@@ -1385,7 +1484,6 @@ function BisTooltipAddon:ToggleFavoritesFrame()
 end
 
 function BisTooltipAddon:reloadData()
-    wipe(boe_cache)
     buildClassDict()
     loadData()
 
