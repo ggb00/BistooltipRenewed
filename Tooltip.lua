@@ -483,28 +483,9 @@ function BisTooltipAddon:initBisTooltip()
     eventFrame:RegisterEvent("PLAYER_LOGIN")
     eventFrame:RegisterEvent("ADDON_LOADED")
     eventFrame:RegisterEvent("MODIFIER_STATE_CHANGED")
-    eventFrame:RegisterEvent("GET_ITEM_INFO_RECEIVED")
-    eventFrame:SetScript("OnEvent", function(_, event, arg1, arg2)
+    eventFrame:SetScript("OnEvent", function(_, event, arg1)
         if event == "PLAYER_LOGIN" or (event == "ADDON_LOADED" and arg1 and arg1:find("AtlasLoot", 1, true)) then
             HookAtlasLoot()
-            return
-        end
-
-        if event == "GET_ITEM_INFO_RECEIVED" then
-            local receivedId = tonumber(arg1)
-            if not receivedId or arg2 == false then return end
-
-            local function RefreshIfMatching(tt)
-                if not tt or not tt:IsShown() or not tt.GetItem then return end
-                local _, link = tt:GetItem()
-                if link and link:find("item:" .. receivedId .. ":", 1, true) then
-                    RefreshTooltip(tt)
-                end
-            end
-
-            RefreshIfMatching(GameTooltip)
-            RefreshIfMatching(ItemRefTooltip)
-            RefreshIfMatching(AtlasLootTooltip)
             return
         end
 
