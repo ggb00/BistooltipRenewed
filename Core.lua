@@ -1,5 +1,10 @@
 -- Core.lua
 local addonName = ...
+
+BINDING_HEADER_BISTOOLTIP = "BiS-Tooltip Renewed"
+BINDING_NAME_BISTOOLTIP_TOGGLE_MAIN = "Toggle Main Window"
+BINDING_NAME_BISTOOLTIP_TOGGLE_FAV = "Toggle Favorites Window"
+
 BisTooltipAddon = LibStub("AceAddon-3.0"):NewAddon("BiS-Tooltip Renewed", "AceConsole-3.0")
 local BisTooltip_AliToHorde = {}
 local BisTooltip_EquippedCache = {}
@@ -281,6 +286,7 @@ function BisTooltipAddon:HandleChatCommand(input)
         DEFAULT_CHAT_FRAME:AddMessage("  |cffffff00/bistooltip|r - Same as /bis")
         DEFAULT_CHAT_FRAME:AddMessage("  |cffffff00/bis fav|r - Toggle Favorites list window")
         DEFAULT_CHAT_FRAME:AddMessage("  |cffffff00/bis config|r - Open configuration panel")
+        DEFAULT_CHAT_FRAME:AddMessage("  |cff888888Keybindings can be set in Game Menu (Esc) -> Key Bindings|r")
     elseif cmd == "" then
         self:createMainFrame()
     else
