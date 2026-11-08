@@ -82,6 +82,14 @@ local function ScanItemBoe(itemId)
     return false, false
 end
 
+local function QueueBoeCheck(itemId) end
+
+local function IsItemBoe(itemId)
+    local isBoe, known = ScanItemBoe(itemId)
+    if not known then QueueBoeCheck(itemId) end
+    return isBoe
+end
+
 local function ApplyBoeMark(widget, isBoe)
     if not widget or not widget.frame or not widget.frame.bisBoeMark then return end
     local size = widget.image and widget.image:GetWidth() or 40
@@ -149,7 +157,7 @@ local function ProcessBoeQueue(self, elapsed)
     end
 end
 
-local function QueueBoeCheck(itemId)
+QueueBoeCheck = function(itemId)
     if not itemId or itemId <= 0 or boe_cache[itemId] ~= nil then return end
     if boe_queue[itemId] then return end
     boe_queue[itemId] = true
@@ -533,18 +541,17 @@ local function ProcessMissingItems(self, elapsed)
 
         if itemName then
             resolvedAny = true
-            local isBoe = IsItemBoe(item_id)
             for _, widget in ipairs(widgets) do
                 if widget and widget.frame and widget.frame:IsShown() and widget.item_id == item_id then
                     widget:SetImage(itemIcon)
-                    local wSize = widget.image and widget.image:GetWidth() or 40
-                    if isBoe and wSize >= 30 then
-                        widget.frame.bisBoeMark:Show()
-                    else
-                        widget.frame.bisBoeMark:Hide()
-                    end
                     ApplyItemStateVisuals(widget, item_id, false)
                 end
+            end
+            local cachedBoe = boe_cache[item_id]
+            if cachedBoe == true then
+                ApplyBoeToItem(item_id, true)
+            elseif cachedBoe == nil then
+                QueueBoeCheck(item_id)
             end
             missing_widgets[item_id] = nil
             fetch_attempts[item_id] = nil
