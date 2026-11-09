@@ -1,5 +1,4 @@
 -- Tooltip.lua
-local GetItemInfo = GetItemInfo
 local tonumber, tostring, type, ipairs = tonumber, tostring, type, ipairs
 local string_match, string_format = string.match, string.format
 
@@ -198,7 +197,7 @@ local function ProcessTooltip(tooltip, link)
             local isFiltered = not isHighlighted and not isAltDown and (type(filterSpecs[dClass]) == "table") and filterSpecs[dClass][dSpec]
 
             if not isFiltered then
-                local fData = BisTooltipAddon.FormattedNames[dClass]
+                local fData = BisTooltipAddon.FormattedNames and BisTooltipAddon.FormattedNames[dClass]
                 local fSpec = fData and fData[dSpec]
                 local lineText
 
@@ -250,7 +249,7 @@ local function ProcessTooltip(tooltip, link)
         end
     end
 
-    if BisTooltipAddon.IsFavorite and (BisTooltipAddon:IsFavorite(itemId) or (translated_id and BisTooltipAddon:IsFavorite(translated_id))) then
+    if BisTooltipAddon.IsFavorite and BisTooltipAddon:IsFavorite(itemId) then
         local markIndex = (db and db.favorite_icon) or 1
         if markIndex < 1 or markIndex > 8 then markIndex = 1 end
         local iconStr = RAID_ICON_STRINGS[markIndex] or RAID_ICON_STRINGS[1]
@@ -415,7 +414,6 @@ end
 local function UpdateTooltipOnModifier(tt)
     if not tt or not tt:IsShown() then return end
     RefreshTooltip(tt)
-    HideShoppingTooltips()
     UpdateComparison(tt)
 end
 
