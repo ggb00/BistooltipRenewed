@@ -304,6 +304,9 @@ local function CompareFavorites(a, b)
     local orderB = currentFavSortData and (currentFavSortData[b] or currentFavSortData[tostring(b)]) or 0
     orderA = (type(orderA) == "number") and orderA or 0
     orderB = (type(orderB) == "number") and orderB or 0
+    if orderA == orderB then
+        return a > b
+    end
     return orderA > orderB
 end
 
@@ -386,6 +389,10 @@ local function HandleItemTooltip(widget, item_id)
     end
 end
 
+local memo_state = {}
+local memo_fav = {}
+local memo_ilvl = {}
+
 local function ApplyItemStateVisuals(widget, item_id, is_missing)
     local size = widget.image and widget.image:GetWidth() or 40
     if size < 30 then
@@ -448,15 +455,12 @@ local function ApplyItemStateVisuals(widget, item_id, is_missing)
             if widget._lastFav ~= true or widget._lastMarkIndex ~= markIndex or widget._lastIndicatorScale ~= scale then
                 widget._lastFav = true
                 widget._lastMarkIndex = markIndex
+                widget._lastIndicatorScale = scale
                 widget.frame.bisStarMark:SetWidth(14 * scale)
                 widget.frame.bisStarMark:SetHeight(14 * scale)
                 widget.frame.bisStarMark:SetTexture("Interface\\TargetingFrame\\UI-RaidTargetingIcons")
                 SetRaidTargetIconTexture(widget.frame.bisStarMark, markIndex)
             end
-            widget.frame.bisStarMark:SetTexture("Interface\\TargetingFrame\\UI-RaidTargetingIcons")
-            widget.frame.bisStarMark:SetWidth(14 * scale)
-            widget.frame.bisStarMark:SetHeight(14 * scale)
-            SetRaidTargetIconTexture(widget.frame.bisStarMark, markIndex)
             widget.frame.bisStarMark:Show()
         else
             widget._lastFav = false
@@ -583,10 +587,6 @@ local function UpdateFavoriteLabel(item_id)
         end
     end
 end
-
-local memo_state = {}
-local memo_fav = {}
-local memo_ilvl = {}
 
 local function RefreshItemStateVisuals()
     wipe(memo_state)
@@ -1601,6 +1601,7 @@ local function drawDropdowns()
     end)
     if mainSearchBox.editbox then
         mainSearchBox.editbox:HookScript("OnEscapePressed", function()
+            mainSearchBox.editbox:ClearFocus()
             mainSearchBox:SetText("")
             QueueMainSearch("")
         end)
@@ -1655,8 +1656,6 @@ end
 
 local favSearchBox = nil
 local favSearchCount = nil
-local favSearchFrame = CreateFrame("Frame")
-favSearchFrame:Hide()
 
 local favScrollbarAnimFrame = CreateFrame("Frame")
 favScrollbarAnimFrame:Hide()
@@ -1928,7 +1927,8 @@ function BisTooltipAddon:RefreshFavoritesWindow(immediate)
                     if favSearchQuery == "" then
                         table.insert(favList, numID)
                     else
-                        local lowerName = GetItemNameLower(numID)
+                        local display_id = (BisTooltipAddon.GetFactionItem and BisTooltipAddon:GetFactionItem(numID)) or numID
+                        local lowerName = GetItemNameLower(display_id) or GetItemNameLower(numID)
                         if lowerName and stringfind(lowerName, favSearchQuery, 1, true) then
                             table.insert(favList, numID)
                         end
@@ -2240,7 +2240,6 @@ function BisTooltipAddon:OpenFavoritesFrame()
 
         favorites_frame.frame:HookScript("OnHide", function()
             StaticPopup_Hide("BISTOOLTIP_CONFIRM_CLEAR_FAVORITES")
-            if favSearchFrame then favSearchFrame:Hide() end
             if favScrollbarAnimFrame then favScrollbarAnimFrame:Hide() end
             favSearchQuery = ""
             if favSearchBox then
@@ -2429,7 +2428,6 @@ end
 
 function BisTooltipAddon:CloseFavoritesFrame()
     if favUpdateFrame then favUpdateFrame:Hide() end
-    if favSearchFrame then favSearchFrame:Hide() end
     if favScrollbarAnimFrame then favScrollbarAnimFrame:Hide() end
     favSearchQuery = ""
     if favSearchBox then
