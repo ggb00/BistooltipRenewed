@@ -993,18 +993,21 @@ local function createItemFrame(item_id, size)
     end
 
     item_frame:SetCallback("OnClick", function(widget, _, button)
+        local currentID = widget.item_id or item_id
+        if not currentID or currentID <= 0 then return end
+
         if button == "RightButton" then
-            BisTooltipAddon:ToggleFavorite(item_id)
+            BisTooltipAddon:ToggleFavorite(currentID)
             if widget.frame and widget.frame:IsShown() and GameTooltip:IsOwned(widget.frame) then
-                HandleItemTooltip(widget, item_id)
+                HandleItemTooltip(widget, currentID)
             else
                 GameTooltip:Hide()
             end
             return
         end
 
-        local _, link = GetItemInfo(item_id)
-        local validLink = link or ("item:" .. item_id .. ":0:0:0:0:0:0:0")
+        local _, link = GetItemInfo(currentID)
+        local validLink = link or ("item:" .. currentID .. ":0:0:0:0:0:0:0")
         if IsModifiedClick() then
             HandleModifiedItemClick(validLink)
         else
@@ -1013,7 +1016,10 @@ local function createItemFrame(item_id, size)
     end)
 
     item_frame:SetCallback("OnEnter", function(widget)
-        HandleItemTooltip(widget, item_id)
+        local currentID = widget.item_id or item_id
+        if currentID and currentID > 0 then
+            HandleItemTooltip(widget, currentID)
+        end
     end)
 
     item_frame:SetCallback("OnLeave", function() GameTooltip:Hide() end)
@@ -2037,6 +2043,17 @@ function BisTooltipAddon:RefreshFavoritesWindow(immediate)
                 row.nameButton = nameButton
                 row.removeBtn = removeBtn
                 itemWidget.favNameButton = nameButton
+
+                row:SetCallback("OnRelease", function(self)
+                    if self.nameButton then
+                        self.nameButton:Hide()
+                        self.nameButton:ClearAllPoints()
+                    end
+                    if self.removeBtn then
+                        self.removeBtn:Hide()
+                        self.removeBtn:ClearAllPoints()
+                    end
+                end)
 
                 favorites_scroll:AddChild(row)
             end
