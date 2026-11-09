@@ -1673,6 +1673,7 @@ local favRowPool = {}
 
 local favAnimElapsed = 0
 local FAV_ANIM_DURATION = 0.16
+local preSearchScrollValue = nil
 
 local function RestoreFavRowsAlpha()
     favSearchQuery = ""
@@ -1686,6 +1687,10 @@ local function RestoreFavRowsAlpha()
     end
     if BisTooltipAddon.RefreshFavoritesWindow then
         BisTooltipAddon:RefreshFavoritesWindow(true)
+    end
+    if favorites_scroll and preSearchScrollValue then
+        favorites_scroll:SetScroll(preSearchScrollValue)
+        preSearchScrollValue = nil
     end
 end
 
@@ -1712,21 +1717,42 @@ end)
 local function QueueFavSearch(text)
     local trimmed = strtrim(text or "")
     if #trimmed > 128 then trimmed = trimmed:sub(1, 128) end
-    favSearchQuery = trimmed:lower()
+    local newQuery = trimmed:lower()
+
+    local isStartingSearch = (favSearchQuery == "" and newQuery ~= "")
+    local isClearingSearch = (favSearchQuery ~= "" and newQuery == "")
+
+    if isStartingSearch then
+        if favorites_scroll and favorites_scroll.scrollvalue then
+            preSearchScrollValue = favorites_scroll.scrollvalue
+        elseif BisTooltipAddon.db and BisTooltipAddon.db.profile and BisTooltipAddon.db.profile.fav_scroll_status then
+            preSearchScrollValue = BisTooltipAddon.db.profile.fav_scroll_status.scrollvalue or 0
+        else
+            preSearchScrollValue = 0
+        end
+    end
+
+    favSearchQuery = newQuery
 
     if BisTooltipAddon.RefreshFavoritesWindow then
         BisTooltipAddon:RefreshFavoritesWindow(true)
     end
 
-    if favorites_scroll then
-        favorites_scroll:SetScroll(0)
-        if favorites_scroll.content then
-            favorites_scroll.content:SetAlpha(0)
+    if isStartingSearch then
+        if favorites_scroll then
+            favorites_scroll:SetScroll(0)
+        end
+    elseif isClearingSearch then
+        if favorites_scroll and preSearchScrollValue then
+            favorites_scroll:SetScroll(preSearchScrollValue)
+            preSearchScrollValue = nil
+        end
+        if favorites_scroll and favorites_scroll.content then
+            favorites_scroll.content:SetAlpha(0.3)
+            favAnimElapsed = 0
+            favSearchFrame:Show()
         end
     end
-
-    favAnimElapsed = 0
-    favSearchFrame:Show()
 end
 
 local function PopulateFavRow(row, itemID, display_id)
