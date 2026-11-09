@@ -131,7 +131,7 @@ local boe_next_retry = {}
 local boe_frame = CreateFrame("Frame")
 local boe_clock = 0
 local boe_timer = 0
-local BOE_SCAN_BATCH = 32
+local BOE_SCAN_BATCH = 8
 local BOE_THROTTLE = 0.05
 local BOE_MAX_RETRIES = 5
 local BOE_RETRY_DELAY = 0.5
@@ -297,10 +297,10 @@ local FAV_ROW_TABLE_LAYOUT = {
     space = 4, align = "middle"
 }
 
+local currentFavSortData = nil
 local function CompareFavorites(a, b)
-    local favData = BisTooltipAddon.db and BisTooltipAddon.db.profile and BisTooltipAddon.db.profile.favorites
-    local orderA = (favData and type(favData[a]) == "number") and favData[a] or 0
-    local orderB = (favData and type(favData[b]) == "number") and favData[b] or 0
+    local orderA = (currentFavSortData and type(currentFavSortData[a]) == "number") and currentFavSortData[a] or 0
+    local orderB = (currentFavSortData and type(currentFavSortData[b]) == "number") and currentFavSortData[b] or 0
     return orderA > orderB
 end
 
@@ -549,9 +549,9 @@ local function UpdateFavoriteLabel(item_id)
                     label.frame.titleText:SetText(itemName)
                     label.frame.titleText:SetTextColor(r, g, b, 1)
 
-                    local slotText = (equipSlot and _G[equipSlot]) or itemSubType
+                    local slotText = (equipSlot and equipSlot ~= "" and _G[equipSlot]) or itemSubType
+                    label.frame.titleText:ClearAllPoints()
                     if slotText and slotText ~= "" and label.frame.subText then
-                        label.frame.titleText:ClearAllPoints()
                         label.frame.titleText:SetPoint("TOPLEFT", label.frame, "TOPLEFT", 6, -6)
                         label.frame.titleText:SetPoint("RIGHT", label.frame, "RIGHT", -6, 0)
                         label.frame.titleText:SetHeight(14)
@@ -563,7 +563,17 @@ local function UpdateFavoriteLabel(item_id)
                         label.frame.subText:SetHeight(12)
                         label.frame.subText:SetText(slotText)
                         label.frame.subText:Show()
+                    else
+                        label.frame.titleText:SetPoint("LEFT", label.frame, "LEFT", 6, 0)
+                        label.frame.titleText:SetPoint("RIGHT", label.frame, "RIGHT", -6, 0)
+                        label.frame.titleText:SetHeight(14)
+                        label.frame.titleText:SetJustifyV("MIDDLE")
+                        if label.frame.subText then
+                            label.frame.subText:SetText("")
+                            label.frame.subText:Hide()
+                        end
                     end
+                    label.frame.titleText:Show()
                 else
                     label:SetText(itemName)
                     label:SetColor(r, g, b)
@@ -607,7 +617,10 @@ local function RefreshItemStateVisuals()
 end
 BisTooltipAddon.RefreshItemStateVisuals = RefreshItemStateVisuals
 
+local favs_dirty = true
+
 function BisTooltipAddon:RefreshFavoriteForItem(item_id)
+    favs_dirty = true
     if not item_id then return end
     item_id = tonumber(item_id)
     if not item_id then return end
@@ -727,6 +740,7 @@ local function ProcessMissingItems(self, elapsed)
 
             local now = fetch_clock
             local ownerSet = false
+            local resolvedAny = false
 
             for item_id, widgets in pairs(missing_widgets) do
                 local nextRequest = fetch_next_request[item_id] or 0
@@ -1748,15 +1762,24 @@ favUpdateFrame:SetScript("OnUpdate", function(self)
 end)
 
 function BisTooltipAddon:RefreshFavoritesWindow(immediate)
-    if not favorites_frame or not favorites_frame.frame:IsShown() or not favorites_scroll then return end
+    if not favorites_frame or not favorites_frame.frame:IsShown() or not favorites_scroll then
+        favs_dirty = true
+        return
+    end
 
     if not immediate then
+        favs_dirty = true
         if not favUpdateFrame:IsShown() then
             favUpdateFrame:Show()
         end
         return
     end
     favUpdateFrame:Hide()
+    favs_dirty = false
+
+    wipe(memo_state)
+    wipe(memo_fav)
+    wipe(memo_ilvl)
 
     wipe(displayed_fav_widgets)
     wipe(displayed_fav_rows)
@@ -1788,7 +1811,9 @@ function BisTooltipAddon:RefreshFavoritesWindow(immediate)
         end)
         favorites_scroll:AddChild(emptyLabel)
     else
+        currentFavSortData = favData
         table.sort(favList, CompareFavorites)
+        currentFavSortData = nil
 
         for _, itemID in ipairs(favList) do
             local display_id = (BisTooltipAddon.GetFactionItem and BisTooltipAddon:GetFactionItem(itemID)) or itemID
@@ -1812,7 +1837,6 @@ function BisTooltipAddon:RefreshFavoritesWindow(immediate)
             itemWidget.image:ClearAllPoints()
             itemWidget.image:SetPoint("CENTER", itemWidget.frame, "CENTER", 0, 0)
             displayed_fav_widgets[#displayed_fav_widgets + 1] = itemWidget
-            row:AddChild(itemWidget)
 
             local card = row.frame.favCard
             if not card then
@@ -1836,7 +1860,7 @@ function BisTooltipAddon:RefreshFavoritesWindow(immediate)
             end)
 
             local itemName, _, itemRarity, _, _, _, itemSubType, _, equipSlot = GetItemInfo(display_id)
-            local slotText = (equipSlot and _G[equipSlot]) or itemSubType
+            local slotText = (equipSlot and equipSlot ~= "" and _G[equipSlot]) or itemSubType
 
             local nameLabel = AceGUI:Create("InteractiveLabel")
             nameLabel:SetWidth(314)
@@ -1844,7 +1868,12 @@ function BisTooltipAddon:RefreshFavoritesWindow(immediate)
 
             nameLabel.label:SetText("")
             nameLabel.label:Hide()
-            nameLabel.UpdateImagePosition = function(self) self.label:Hide() end
+
+            local origSetHeight = nameLabel.frame.SetHeight
+            nameLabel.frame.SetHeight = function(f, h)
+                origSetHeight(f, 42)
+            end
+            nameLabel.frame:SetHeight(42)
 
             if not nameLabel.frame.titleText then
                 nameLabel.frame.titleText = nameLabel.frame:CreateFontString(nil, "ARTWORK")
@@ -1896,6 +1925,7 @@ function BisTooltipAddon:RefreshFavoritesWindow(immediate)
             nameLabel.frame.titleText:Show()
 
             nameLabel:SetCallback("OnRelease", function(self)
+                self.frame.SetHeight = origSetHeight
                 if self.frame.titleText then
                     self.frame.titleText:SetText("")
                     self.frame.titleText:Hide()
@@ -1918,7 +1948,6 @@ function BisTooltipAddon:RefreshFavoritesWindow(immediate)
             nameLabel:SetCallback("OnEnter", function(widget) HandleItemTooltip(widget, display_id) end)
             nameLabel:SetCallback("OnLeave", function() GameTooltip:Hide() end)
 
-            row:AddChild(nameLabel)
             itemWidget.favNameLabel = nameLabel
 
             local removeBtn = AceGUI:Create("Button")
@@ -1936,6 +1965,7 @@ function BisTooltipAddon:RefreshFavoritesWindow(immediate)
                 end
             end)
             removeBtn:SetCallback("OnClick", function()
+                favs_dirty = true
                 BisTooltipAddon:ToggleFavorite(itemID)
                 GameTooltip:Hide()
             end)
@@ -1949,7 +1979,13 @@ function BisTooltipAddon:RefreshFavoritesWindow(immediate)
                 GameTooltip:Show()
             end)
             removeBtn:SetCallback("OnLeave", function() GameTooltip:Hide() end)
+
+            row:PauseLayout()
+            row:AddChild(itemWidget)
+            row:AddChild(nameLabel)
             row:AddChild(removeBtn)
+            row:ResumeLayout()
+            row:DoLayout()
 
             favorites_scroll:AddChild(row)
         end
@@ -1968,6 +2004,10 @@ function BisTooltipAddon:RefreshFavoritesWindow(immediate)
     if favSearchQuery ~= "" then
         ApplyFavSearchInstant()
     end
+
+    wipe(memo_state)
+    wipe(memo_fav)
+    wipe(memo_ilvl)
 end
 
 local function ClampPosition(pos, width, height)
@@ -2194,7 +2234,11 @@ function BisTooltipAddon:OpenFavoritesFrame()
     end
 
     favorites_frame:Show()
-    self:RefreshFavoritesWindow(true)
+    if favs_dirty or #displayed_fav_rows == 0 then
+        self:RefreshFavoritesWindow(true)
+    else
+        RefreshItemStateVisuals()
+    end
 end
 
 function BisTooltipAddon:CloseFavoritesFrame()
