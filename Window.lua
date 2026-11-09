@@ -33,6 +33,7 @@ local displayed_fav_widgets = {}
 local missing_widgets = {}
 local fetch_attempts = {}
 local displayed_item_widgets = {}
+local displayed_slot_rows = {}
 local scanner = CreateFrame("GameTooltip", "BisTooltipScanner", UIParent, "GameTooltipTemplate")
 local item_fetch_frame = CreateFrame("Frame")
 local fetch_timer = 0
@@ -1134,20 +1135,28 @@ local function drawItemSlot(slot_name, item_list)
     f.label:SetJustifyH("LEFT")
     spec_frame:AddChild(f)
 
+    local slotRow = {
+        labelWidget = f,
+        items = {}
+    }
+    displayed_slot_rows[#displayed_slot_rows + 1] = slotRow
+
     local enhs = EMPTY_TABLE
     local enh_class = BisTooltip_Enhancements and (BisTooltip_Enhancements[class] or BisTooltip_Enhancements[GetCleanClassName(class)])
     if enh_class and enh_class[spec] and enh_class[spec][phase] then
         enhs = enh_class[spec][phase][slot_name] or EMPTY_TABLE
     end
 
+    local enhWidget
     if #enhs > 0 then
-        spec_frame:AddChild(createEnhancementsFrame(enhs))
+        enhWidget = createEnhancementsFrame(enhs)
     else
-        local enhSpacer = AceGUI:Create("Label")
-        enhSpacer:SetText(" ")
-        enhSpacer:SetWidth(75)
-        spec_frame:AddChild(enhSpacer)
+        enhWidget = AceGUI:Create("Label")
+        enhWidget:SetText(" ")
+        enhWidget:SetWidth(75)
     end
+    spec_frame:AddChild(enhWidget)
+    slotRow.enhWidget = enhWidget
 
     local count = 0
     for _, original_item_id in ipairs(item_list) do
@@ -1158,6 +1167,7 @@ local function drawItemSlot(slot_name, item_list)
         local item_widget = createItemFrame(display_id, 40)
         if display_id > 0 then
             displayed_item_widgets[#displayed_item_widgets + 1] = item_widget
+            slotRow.items[#slotRow.items + 1] = item_widget
         end
         spec_frame:AddChild(item_widget)
         count = count + 1
@@ -1217,6 +1227,18 @@ local function RestoreMainItemsAlpha()
             if widget.image then widget.image:SetAlpha(SEARCH_MATCH_ALPHA) end
         end
     end
+    for i = 1, #displayed_slot_rows do
+        local slot = displayed_slot_rows[i]
+        if slot then
+            slot._targetAlpha = SEARCH_MATCH_ALPHA
+            if slot.labelWidget and slot.labelWidget.frame then
+                slot.labelWidget.frame:SetAlpha(SEARCH_MATCH_ALPHA)
+            end
+            if slot.enhWidget and slot.enhWidget.frame then
+                slot.enhWidget.frame:SetAlpha(SEARCH_MATCH_ALPHA)
+            end
+        end
+    end
 end
 
 local function UpdateMainSearchTargets()
@@ -1237,6 +1259,24 @@ local function UpdateMainSearchTargets()
                 else
                     widget._targetAlpha = SEARCH_DIM_ALPHA
                 end
+            end
+        end
+    end
+
+    for i = 1, #displayed_slot_rows do
+        local slot = displayed_slot_rows[i]
+        if slot and slot.labelWidget and slot.labelWidget.frame then
+            if query == "" then
+                slot._targetAlpha = SEARCH_MATCH_ALPHA
+            else
+                local hasMatch = false
+                for j = 1, #slot.items do
+                    if slot.items[j]._targetAlpha == SEARCH_MATCH_ALPHA then
+                        hasMatch = true
+                        break
+                    end
+                end
+                slot._targetAlpha = hasMatch and SEARCH_MATCH_ALPHA or SEARCH_DIM_ALPHA
             end
         end
     end
@@ -1270,6 +1310,18 @@ ApplyMainSearchInstant = function()
             widget.frame:SetAlpha(widget._targetAlpha or SEARCH_MATCH_ALPHA)
         end
     end
+    for i = 1, #displayed_slot_rows do
+        local slot = displayed_slot_rows[i]
+        if slot then
+            local alpha = slot._targetAlpha or SEARCH_MATCH_ALPHA
+            if slot.labelWidget and slot.labelWidget.frame then
+                slot.labelWidget.frame:SetAlpha(alpha)
+            end
+            if slot.enhWidget and slot.enhWidget.frame then
+                slot.enhWidget.frame:SetAlpha(alpha)
+            end
+        end
+    end
 end
 
 mainSearchFrame:SetScript("OnUpdate", function(self, elapsed)
@@ -1288,6 +1340,31 @@ mainSearchFrame:SetScript("OnUpdate", function(self, elapsed)
                 else
                     widget.frame:SetAlpha(current + diff * step)
                     stillAnimating = true
+                end
+            end
+        end
+    end
+
+    for i = 1, #displayed_slot_rows do
+        local slot = displayed_slot_rows[i]
+        if slot then
+            local target = slot._targetAlpha or SEARCH_MATCH_ALPHA
+            if slot.labelWidget and slot.labelWidget.frame then
+                local current = slot.labelWidget.frame:GetAlpha() or 1
+                if current ~= target then
+                    local diff = target - current
+                    local newAlpha = (diff > -0.01 and diff < 0.01) and target or (current + diff * step)
+                    slot.labelWidget.frame:SetAlpha(newAlpha)
+                    if slot.enhWidget and slot.enhWidget.frame then
+                        slot.enhWidget.frame:SetAlpha(newAlpha)
+                    end
+                    if newAlpha ~= target then
+                        stillAnimating = true
+                    end
+                elseif slot.enhWidget and slot.enhWidget.frame then
+                    if (slot.enhWidget.frame:GetAlpha() or 1) ~= target then
+                        slot.enhWidget.frame:SetAlpha(target)
+                    end
                 end
             end
         end
@@ -1317,6 +1394,7 @@ local function drawSpecData()
     end
 
     wipe(displayed_item_widgets)
+    wipe(displayed_slot_rows)
 
     spec_frame:ReleaseChildren()
 
