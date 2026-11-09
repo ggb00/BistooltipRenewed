@@ -282,22 +282,11 @@ end
 local EMPTY_TABLE = {}
 
 local ROW_BACKDROP = {
+    bgFile = "Interface\\Buttons\\WHITE8X8",
     edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
     tile = false, tileSize = 16, edgeSize = 12,
     insets = { left = 3, right = 3, top = 3, bottom = 3 }
 }
-
-local isScrollingFavorites = false
-local favScrollTimer = 0
-local favScrollWatcher = CreateFrame("Frame")
-favScrollWatcher:Hide()
-favScrollWatcher:SetScript("OnUpdate", function(self, elapsed)
-    favScrollTimer = favScrollTimer - elapsed
-    if favScrollTimer <= 0 then
-        isScrollingFavorites = false
-        self:Hide()
-    end
-end)
 
 local ENHANCEMENT_TABLE_LAYOUT = {
     columns = {16, 16, 16, 16},
@@ -1816,37 +1805,44 @@ local function PopulateFavRow(row, itemID, display_id)
     end
 
     local nameButton = row.nameButton
+    local titleStr = itemName or ("Item #" .. display_id)
+    local r, g, b = 0.75, 0.75, 0.75
     if itemName then
-        local r, g, b = GetItemQualityColor(itemRarity or 1)
-        nameButton.titleText:SetText(itemName)
-        nameButton.titleText:SetTextColor(r, g, b, 1)
-    else
-        nameButton.titleText:SetText("Item #" .. display_id)
-        nameButton.titleText:SetTextColor(0.75, 0.75, 0.75, 1)
+        r, g, b = GetItemQualityColor(itemRarity or 1)
     end
 
-    nameButton.titleText:ClearAllPoints()
-    nameButton.subText:ClearAllPoints()
+    if nameButton._lastTitle ~= titleStr or nameButton._lastRarity ~= (itemRarity or 0) then
+        nameButton.titleText:SetText(titleStr)
+        nameButton.titleText:SetTextColor(r, g, b, 1)
+        nameButton._lastTitle = titleStr
+        nameButton._lastRarity = itemRarity or 0
+    end
 
-    if slotText and slotText ~= "" then
-        nameButton.titleText:SetPoint("TOPLEFT", nameButton, "TOPLEFT", 8, -5)
-        nameButton.titleText:SetPoint("RIGHT", nameButton, "RIGHT", -6, 0)
-        nameButton.titleText:SetHeight(14)
-        nameButton.titleText:SetJustifyV("TOP")
+    if nameButton._lastSlot ~= slotText then
+        nameButton._lastSlot = slotText
+        nameButton.titleText:ClearAllPoints()
+        nameButton.subText:ClearAllPoints()
 
-        nameButton.subText:SetPoint("BOTTOMLEFT", nameButton, "BOTTOMLEFT", 8, 5)
-        nameButton.subText:SetPoint("RIGHT", nameButton, "RIGHT", -6, 0)
-        nameButton.subText:SetHeight(12)
-        nameButton.subText:SetText(slotText)
-        nameButton.subText:Show()
-    else
-        nameButton.titleText:SetPoint("LEFT", nameButton, "LEFT", 8, 0)
-        nameButton.titleText:SetPoint("RIGHT", nameButton, "RIGHT", -6, 0)
-        nameButton.titleText:SetHeight(14)
-        nameButton.titleText:SetJustifyV("MIDDLE")
+        if slotText and slotText ~= "" then
+            nameButton.titleText:SetPoint("TOPLEFT", nameButton, "TOPLEFT", 8, -5)
+            nameButton.titleText:SetPoint("RIGHT", nameButton, "RIGHT", -6, 0)
+            nameButton.titleText:SetHeight(14)
+            nameButton.titleText:SetJustifyV("TOP")
 
-        nameButton.subText:SetText("")
-        nameButton.subText:Hide()
+            nameButton.subText:SetPoint("BOTTOMLEFT", nameButton, "BOTTOMLEFT", 8, 5)
+            nameButton.subText:SetPoint("RIGHT", nameButton, "RIGHT", -6, 0)
+            nameButton.subText:SetHeight(12)
+            nameButton.subText:SetText(slotText)
+            nameButton.subText:Show()
+        else
+            nameButton.titleText:SetPoint("LEFT", nameButton, "LEFT", 8, 0)
+            nameButton.titleText:SetPoint("RIGHT", nameButton, "RIGHT", -6, 0)
+            nameButton.titleText:SetHeight(14)
+            nameButton.titleText:SetJustifyV("MIDDLE")
+
+            nameButton.subText:SetText("")
+            nameButton.subText:Hide()
+        end
     end
     nameButton.titleText:Show()
 end
@@ -2066,7 +2062,7 @@ function BisTooltipAddon:RefreshFavoritesWindow(immediate)
                 nameButton:SetPoint("LEFT", itemWidget.frame, "RIGHT", 6, 0)
                 nameButton:SetPoint("RIGHT", removeBtn, "LEFT", -4, 0)
                 nameButton:SetBackdrop(ROW_BACKDROP)
-                nameButton:SetBackdropColor(0, 0, 0, 0.40)
+                nameButton:SetBackdropColor(0, 0, 0, 0.45)
                 nameButton:SetBackdropBorderColor(0.65, 0.65, 0.65, 0.80)
 
                 local titleText = nameButton:CreateFontString(nil, "ARTWORK")
