@@ -1668,11 +1668,13 @@ local favSearchBox = nil
 local favSearchCount = nil
 local favSearchFrame = CreateFrame("Frame")
 favSearchFrame:Hide()
+
+local favScrollbarAnimFrame = CreateFrame("Frame")
+favScrollbarAnimFrame:Hide()
+local targetScrollbarAlpha = 1.0
+
 local displayed_fav_rows = {}
 local favRowPool = {}
-
-local favAnimElapsed = 0
-local FAV_ANIM_DURATION = 0.16
 local preSearchScrollValue = nil
 
 local function RestoreFavRowsAlpha()
@@ -1692,6 +1694,13 @@ local function RestoreFavRowsAlpha()
         favorites_scroll:SetScroll(preSearchScrollValue)
         preSearchScrollValue = nil
     end
+
+    for i = 1, #displayed_fav_rows do
+        local row = displayed_fav_rows[i]
+        if row and row.frame then
+            row.frame:SetAlpha(1.0)
+        end
+    end
 end
 
 ApplyFavSearchInstant = function()
@@ -1700,17 +1709,22 @@ ApplyFavSearchInstant = function()
     end
 end
 
-favSearchFrame:SetScript("OnUpdate", function(self, elapsed)
-    favAnimElapsed = favAnimElapsed + elapsed
-    local progress = favAnimElapsed / FAV_ANIM_DURATION
-    if progress > 1 then progress = 1 end
-
-    if favorites_scroll and favorites_scroll.content then
-        favorites_scroll.content:SetAlpha(progress)
+favScrollbarAnimFrame:SetScript("OnUpdate", function(self, elapsed)
+    if not favorites_scroll or not favorites_scroll.scrollbar then
+        self:Hide()
+        return
     end
 
-    if progress >= 1 then
+    local sbar = favorites_scroll.scrollbar
+    local current = sbar:GetAlpha() or 1.0
+    local diff = targetScrollbarAlpha - current
+    local step = min(1, elapsed * 10)
+
+    if diff > -0.02 and diff < 0.02 then
+        sbar:SetAlpha(targetScrollbarAlpha)
         self:Hide()
+    else
+        sbar:SetAlpha(current + diff * step)
     end
 end)
 
@@ -1747,10 +1761,12 @@ local function QueueFavSearch(text)
             favorites_scroll:SetScroll(preSearchScrollValue)
             preSearchScrollValue = nil
         end
-        if favorites_scroll and favorites_scroll.content then
-            favorites_scroll.content:SetAlpha(0.3)
-            favAnimElapsed = 0
-            favSearchFrame:Show()
+    end
+
+    for i = 1, #displayed_fav_rows do
+        local row = displayed_fav_rows[i]
+        if row and row.frame then
+            row.frame:SetAlpha(1.0)
         end
     end
 end
@@ -1781,8 +1797,21 @@ local function PopulateFavRow(row, itemID, display_id)
         itemWidget:SetImage("Interface\\Icons\\INV_Misc_QuestionMark")
         ApplyBoeMark(itemWidget, false)
         ApplyItemStateVisuals(itemWidget, display_id, true)
-        if not missing_widgets[display_id] then missing_widgets[display_id] = {} end
-        table.insert(missing_widgets[display_id], itemWidget)
+
+        if not missing_widgets[display_id] then
+            missing_widgets[display_id] = { itemWidget }
+        else
+            local alreadyQueued = false
+            for idx = 1, #missing_widgets[display_id] do
+                if missing_widgets[display_id][idx] == itemWidget then
+                    alreadyQueued = true
+                    break
+                end
+            end
+            if not alreadyQueued then
+                table.insert(missing_widgets[display_id], itemWidget)
+            end
+        end
         StartItemFetch()
     end
 
@@ -1830,6 +1859,40 @@ favUpdateFrame:SetScript("OnUpdate", function(self)
         BisTooltipAddon:RefreshFavoritesWindow(true)
     end
 end)
+
+local function LockFavoritesScrollbar()
+    if not favorites_scroll or not favorites_scroll.frame then return end
+    local sframe = favorites_scroll.scrollframe
+    local sbar = favorites_scroll.scrollbar
+    if not sframe or not sbar then return end
+
+    sframe:ClearAllPoints()
+    sframe:SetPoint("TOPLEFT", favorites_scroll.frame, "TOPLEFT", 0, 0)
+    sframe:SetPoint("BOTTOMRIGHT", favorites_scroll.frame, "BOTTOMRIGHT", -26, 0)
+
+    local content = favorites_scroll.content
+    local height = content and content:GetHeight() or 0
+    local frameHeight = sframe:GetHeight() or 430
+    local currange = height - frameHeight
+
+    sbar:Show()
+
+    if currange <= 0 then
+        targetScrollbarAlpha = 0.25
+        sbar:EnableMouse(false)
+        if favorites_scroll.scrollupbutton then favorites_scroll.scrollupbutton:Disable() end
+        if favorites_scroll.scrolldownbutton then favorites_scroll.scrolldownbutton:Disable() end
+    else
+        targetScrollbarAlpha = 1.0
+        sbar:EnableMouse(true)
+        if favorites_scroll.scrollupbutton then favorites_scroll.scrollupbutton:Enable() end
+        if favorites_scroll.scrolldownbutton then favorites_scroll.scrolldownbutton:Enable() end
+    end
+
+    if sbar:GetAlpha() ~= targetScrollbarAlpha then
+        favScrollbarAnimFrame:Show()
+    end
+end
 
 function BisTooltipAddon:RefreshFavoritesWindow(immediate)
     if not favorites_frame or not favorites_frame.frame:IsShown() or not favorites_scroll then
@@ -2120,6 +2183,7 @@ function BisTooltipAddon:RefreshFavoritesWindow(immediate)
     favorites_scroll:ResumeLayout()
     favorites_scroll:DoLayout()
     favorites_scroll:SetScroll(targetScroll or 0)
+    LockFavoritesScrollbar()
 
     if favorites_frame.clearBtn then
         favorites_frame.clearBtn:SetDisabled(totalFavCount == 0)
@@ -2180,7 +2244,8 @@ function BisTooltipAddon:OpenFavoritesFrame()
 
         favorites_frame.frame:HookScript("OnHide", function()
             StaticPopup_Hide("BISTOOLTIP_CONFIRM_CLEAR_FAVORITES")
-            favSearchFrame:Hide()
+            if favSearchFrame then favSearchFrame:Hide() end
+            if favScrollbarAnimFrame then favScrollbarAnimFrame:Hide() end
             favSearchQuery = ""
             if favSearchBox then
                 favSearchBox:SetText("")
@@ -2269,9 +2334,9 @@ function BisTooltipAddon:OpenFavoritesFrame()
             widget:ClearFocus()
         end)
         if favSearchBox.editbox then
-            favSearchBox.editbox:HookScript("OnEscapePressed", function()
-                favSearchBox:SetText("")
-                QueueFavSearch("")
+            favSearchBox.editbox:HookScript("OnEscapePressed", function(self)
+                self:ClearFocus()
+                RestoreFavRowsAlpha()
             end)
         end
         favSearchBox:SetCallback("OnEnter", function(widget)
@@ -2292,6 +2357,9 @@ function BisTooltipAddon:OpenFavoritesFrame()
         favorites_scroll:SetFullWidth(true)
         favorites_scroll:SetHeight(430)
         favorites_scroll:SetAutoAdjustHeight(false)
+
+        hooksecurefunc(favorites_scroll, "DoLayout", LockFavoritesScrollbar)
+        hooksecurefunc(favorites_scroll, "SetScroll", LockFavoritesScrollbar)
 
         BisTooltipAddon.db.profile.fav_scroll_status = BisTooltipAddon.db.profile.fav_scroll_status or {}
         favorites_scroll:SetStatusTable(BisTooltipAddon.db.profile.fav_scroll_status)
@@ -2364,8 +2432,9 @@ function BisTooltipAddon:OpenFavoritesFrame()
 end
 
 function BisTooltipAddon:CloseFavoritesFrame()
-    favUpdateFrame:Hide()
-    favSearchFrame:Hide()
+    if favUpdateFrame then favUpdateFrame:Hide() end
+    if favSearchFrame then favSearchFrame:Hide() end
+    if favScrollbarAnimFrame then favScrollbarAnimFrame:Hide() end
     favSearchQuery = ""
     if favSearchBox then
         favSearchBox:SetText("")
