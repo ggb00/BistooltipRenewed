@@ -1,8 +1,5 @@
 -- Config.lua
 local AceConfigDialog = LibStub("AceConfigDialog-3.0")
-local AceGUI = LibStub("AceGUI-3.0")
-local LDB = LibStub("LibDataBroker-1.1", true)
-local LDBIcon = LDB and LibStub("LibDBIcon-1.0", true)
 local icon_loaded = false
 local icon_name = "BisRenewedIcon"
 local CURRENT_DB_VERSION = 9
@@ -66,7 +63,7 @@ local configTable = {
         minimap_icon = {
             name = "Show Minimap Icon",
             order = 2,
-            desc = "Toggle display of the minimap icon\n(Requires Reload)",
+            desc = "Toggle display of the minimap icon",
             type = "toggle",
             width = "full",
             set = function(info, val)
@@ -503,7 +500,6 @@ local function migrateAddonDB()
     if not dbVersion or dbVersion < CURRENT_DB_VERSION then
         if type(BisTooltipAddon.db.profile.highlight_spec) ~= "table" then BisTooltipAddon.db.profile.highlight_spec = {} end
         if type(BisTooltipAddon.db.profile.filter_specs) ~= "table" then BisTooltipAddon.db.profile.filter_specs = {} end
-        if not BisTooltipAddon.db.profile.class_index then BisTooltipAddon.db.profile.class_index = GetPlayerClassIndex() end
         if not BisTooltipAddon.db.profile.spec_index then BisTooltipAddon.db.profile.spec_index = 1 end
         if not BisTooltipAddon.db.profile.phase_index then BisTooltipAddon.db.profile.phase_index = 1 end
 
@@ -552,7 +548,15 @@ local function migrateAddonDB()
     end
 
     if not BisTooltipAddon.db.profile.favorite_color then BisTooltipAddon.db.profile.favorite_color = "yellow" end
-    BisTooltipAddon.db.profile.fav_counter = tonumber(BisTooltipAddon.db.profile.fav_counter) or 0
+    local maxOrder = tonumber(BisTooltipAddon.db.profile.fav_counter) or 0
+    if type(BisTooltipAddon.db.profile.favorites) == "table" then
+        for _, order in pairs(BisTooltipAddon.db.profile.favorites) do
+            if type(order) == "number" and order > maxOrder then
+                maxOrder = order
+            end
+        end
+    end
+    BisTooltipAddon.db.profile.fav_counter = maxOrder
     if type(BisTooltipAddon.db.profile.fav_scroll_status) ~= "table" then BisTooltipAddon.db.profile.fav_scroll_status = {} end
 end
 
