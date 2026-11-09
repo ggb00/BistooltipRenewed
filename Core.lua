@@ -6,7 +6,7 @@ BINDING_NAME_BISTOOLTIP_TOGGLE_MAIN = "Toggle Main Window"
 BINDING_NAME_BISTOOLTIP_TOGGLE_FAV = "Toggle Favorites Window"
 
 BisTooltipAddon = LibStub("AceAddon-3.0"):NewAddon("BiS-Tooltip Renewed", "AceConsole-3.0")
-local BisTooltip_AliToHorde = {}
+local BisTooltip_AliToHorde
 local BisTooltip_EquippedCache = {}
 local BisTooltip_ItemStateCache = {}
 
@@ -162,6 +162,9 @@ function BisTooltipAddon:ToggleFavorite(itemID)
 
     if self.RefreshFavoriteForItem then
         self:RefreshFavoriteForItem(itemID)
+        if altID then
+            self:RefreshFavoriteForItem(altID)
+        end
     elseif self.RefreshItemStateVisuals then
         self.RefreshItemStateVisuals()
     end
@@ -300,7 +303,9 @@ function BisTooltipAddon:BuildReverseLookup()
 end
 
 function BisTooltipAddon:Print(msg)
-    DEFAULT_CHAT_FRAME:AddMessage("|cffffd100BiS-Tooltip Renewed|r: " .. tostring(msg))
+    if DEFAULT_CHAT_FRAME then
+        DEFAULT_CHAT_FRAME:AddMessage("|cffffd100BiS-Tooltip Renewed|r: " .. tostring(msg))
+    end
 end
 
 function BisTooltipAddon:HandleChatCommand(input)
@@ -321,7 +326,9 @@ function BisTooltipAddon:HandleChatCommand(input)
         DEFAULT_CHAT_FRAME:AddMessage("  |cffffff00/bis config|r - Open configuration panel")
         DEFAULT_CHAT_FRAME:AddMessage("  |cff888888Keybindings can be set in Game Menu (Esc) -> Key Bindings|r")
     elseif cmd == "" then
-        self:createMainFrame()
+        if self.createMainFrame then
+            self:createMainFrame()
+        end
     else
         self:Print("Unknown command '|cffffff00" .. cmd .. "|r'. Type '|cffffff00/bis help|r' for options.")
     end
