@@ -540,43 +540,40 @@ end
 local function UpdateFavoriteLabel(item_id)
     for i = 1, #displayed_fav_widgets do
         local widget = displayed_fav_widgets[i]
-        if widget and widget.item_id == item_id and widget.favNameLabel then
-            local itemName, _, itemRarity, _, _, _, itemSubType, _, equipSlot = GetItemInfo(item_id)
-            if itemName then
-                local r, g, b = GetItemQualityColor(itemRarity or 1)
-                local label = widget.favNameLabel
-                if label.frame and label.frame.titleText then
-                    label.frame.titleText:SetText(itemName)
-                    label.frame.titleText:SetTextColor(r, g, b, 1)
+        if widget and widget.item_id == item_id then
+            local btn = widget.favNameButton
+            if btn and btn.titleText then
+                local itemName, _, itemRarity, _, _, _, itemSubType, _, equipSlot = GetItemInfo(item_id)
+                if itemName then
+                    local r, g, b = GetItemQualityColor(itemRarity or 1)
+                    btn.titleText:SetText(itemName)
+                    btn.titleText:SetTextColor(r, g, b, 1)
 
                     local slotText = (equipSlot and equipSlot ~= "" and _G[equipSlot]) or itemSubType
-                    label.frame.titleText:ClearAllPoints()
-                    if slotText and slotText ~= "" and label.frame.subText then
-                        label.frame.titleText:SetPoint("TOPLEFT", label.frame, "TOPLEFT", 6, -6)
-                        label.frame.titleText:SetPoint("RIGHT", label.frame, "RIGHT", -6, 0)
-                        label.frame.titleText:SetHeight(14)
-                        label.frame.titleText:SetJustifyV("TOP")
+                    btn.titleText:ClearAllPoints()
+                    if slotText and slotText ~= "" and btn.subText then
+                        btn.titleText:SetPoint("TOPLEFT", btn, "TOPLEFT", 8, -5)
+                        btn.titleText:SetPoint("RIGHT", btn, "RIGHT", -6, 0)
+                        btn.titleText:SetHeight(14)
+                        btn.titleText:SetJustifyV("TOP")
 
-                        label.frame.subText:ClearAllPoints()
-                        label.frame.subText:SetPoint("BOTTOMLEFT", label.frame, "BOTTOMLEFT", 6, 5)
-                        label.frame.subText:SetPoint("RIGHT", label.frame, "RIGHT", -6, 0)
-                        label.frame.subText:SetHeight(12)
-                        label.frame.subText:SetText(slotText)
-                        label.frame.subText:Show()
+                        btn.subText:ClearAllPoints()
+                        btn.subText:SetPoint("BOTTOMLEFT", btn, "BOTTOMLEFT", 8, 5)
+                        btn.subText:SetPoint("RIGHT", btn, "RIGHT", -6, 0)
+                        btn.subText:SetHeight(12)
+                        btn.subText:SetText(slotText)
+                        btn.subText:Show()
                     else
-                        label.frame.titleText:SetPoint("LEFT", label.frame, "LEFT", 6, 0)
-                        label.frame.titleText:SetPoint("RIGHT", label.frame, "RIGHT", -6, 0)
-                        label.frame.titleText:SetHeight(14)
-                        label.frame.titleText:SetJustifyV("MIDDLE")
-                        if label.frame.subText then
-                            label.frame.subText:SetText("")
-                            label.frame.subText:Hide()
+                        btn.titleText:SetPoint("LEFT", btn, "LEFT", 8, 0)
+                        btn.titleText:SetPoint("RIGHT", btn, "RIGHT", -6, 0)
+                        btn.titleText:SetHeight(14)
+                        btn.titleText:SetJustifyV("MIDDLE")
+                        if btn.subText then
+                            btn.subText:SetText("")
+                            btn.subText:Hide()
                         end
                     end
-                    label.frame.titleText:Show()
-                else
-                    label:SetText(itemName)
-                    label:SetColor(r, g, b)
+                    btn.titleText:Show()
                 end
             end
         end
@@ -1752,6 +1749,73 @@ local function QueueFavSearch(text)
     favSearchFrame:Show()
 end
 
+local function PopulateFavRow(row, itemID, display_id)
+    row.item_id = display_id
+    row.rawItemID = itemID
+
+    local itemWidget = row.itemWidget
+    itemWidget.item_id = display_id
+
+    local itemName, _, itemRarity, _, _, _, itemSubType, _, equipSlot, itemIcon = GetItemInfo(display_id)
+    local slotText = (equipSlot and equipSlot ~= "" and _G[equipSlot]) or itemSubType
+
+    if itemName then
+        itemWidget:SetImage(itemIcon)
+        ApplyItemStateVisuals(itemWidget, display_id, false)
+        local cachedBoe = boe_cache[display_id]
+        if cachedBoe == true then
+            ApplyBoeMark(itemWidget, true)
+        elseif cachedBoe == nil and display_id > 0 then
+            ApplyBoeMark(itemWidget, false)
+            QueueBoeCheck(display_id)
+        else
+            ApplyBoeMark(itemWidget, false)
+        end
+    else
+        itemWidget:SetImage("Interface\\Icons\\INV_Misc_QuestionMark")
+        ApplyBoeMark(itemWidget, false)
+        ApplyItemStateVisuals(itemWidget, display_id, true)
+        if not missing_widgets[display_id] then missing_widgets[display_id] = {} end
+        table.insert(missing_widgets[display_id], itemWidget)
+        StartItemFetch()
+    end
+
+    local nameButton = row.nameButton
+    if itemName then
+        local r, g, b = GetItemQualityColor(itemRarity or 1)
+        nameButton.titleText:SetText(itemName)
+        nameButton.titleText:SetTextColor(r, g, b, 1)
+    else
+        nameButton.titleText:SetText("Item #" .. display_id)
+        nameButton.titleText:SetTextColor(0.75, 0.75, 0.75, 1)
+    end
+
+    nameButton.titleText:ClearAllPoints()
+    nameButton.subText:ClearAllPoints()
+
+    if slotText and slotText ~= "" then
+        nameButton.titleText:SetPoint("TOPLEFT", nameButton, "TOPLEFT", 8, -5)
+        nameButton.titleText:SetPoint("RIGHT", nameButton, "RIGHT", -6, 0)
+        nameButton.titleText:SetHeight(14)
+        nameButton.titleText:SetJustifyV("TOP")
+
+        nameButton.subText:SetPoint("BOTTOMLEFT", nameButton, "BOTTOMLEFT", 8, 5)
+        nameButton.subText:SetPoint("RIGHT", nameButton, "RIGHT", -6, 0)
+        nameButton.subText:SetHeight(12)
+        nameButton.subText:SetText(slotText)
+        nameButton.subText:Show()
+    else
+        nameButton.titleText:SetPoint("LEFT", nameButton, "LEFT", 8, 0)
+        nameButton.titleText:SetPoint("RIGHT", nameButton, "RIGHT", -6, 0)
+        nameButton.titleText:SetHeight(14)
+        nameButton.titleText:SetJustifyV("MIDDLE")
+
+        nameButton.subText:SetText("")
+        nameButton.subText:Hide()
+    end
+    nameButton.titleText:Show()
+end
+
 local favUpdateFrame = CreateFrame("Frame")
 favUpdateFrame:Hide()
 favUpdateFrame:SetScript("OnUpdate", function(self)
@@ -1781,16 +1845,10 @@ function BisTooltipAddon:RefreshFavoritesWindow(immediate)
     wipe(memo_fav)
     wipe(memo_ilvl)
 
-    wipe(displayed_fav_widgets)
-    wipe(displayed_fav_rows)
-
     local targetScroll = 0
     if BisTooltipAddon.db.profile.fav_scroll_status and BisTooltipAddon.db.profile.fav_scroll_status.scrollvalue then
         targetScroll = BisTooltipAddon.db.profile.fav_scroll_status.scrollvalue
     end
-
-    favorites_scroll:ReleaseChildren()
-    favorites_scroll:PauseLayout()
 
     local favList = {}
     local favData = self.db and self.db.profile and self.db.profile.favorites
@@ -1800,7 +1858,13 @@ function BisTooltipAddon:RefreshFavoritesWindow(immediate)
         end
     end
 
-    if #favList == 0 then
+    local numFavs = #favList
+
+    if numFavs == 0 then
+        favorites_scroll:ReleaseChildren()
+        wipe(displayed_fav_widgets)
+        wipe(displayed_fav_rows)
+
         local emptyLabel = AceGUI:Create("Label")
         emptyLabel:SetText("\n\n|cffffd100No favorite items yet.|r\n\nRight-click any item in the BiS list to add it to your Favorites!")
         emptyLabel:SetFont("Fonts\\FRIZQT__.TTF", 14, "")
@@ -1810,184 +1874,152 @@ function BisTooltipAddon:RefreshFavoritesWindow(immediate)
             if self.label then self.label:SetJustifyH("LEFT") end
         end)
         favorites_scroll:AddChild(emptyLabel)
-    else
-        currentFavSortData = favData
-        table.sort(favList, CompareFavorites)
-        currentFavSortData = nil
+        favorites_scroll:DoLayout()
+        if favorites_frame.clearBtn then
+            favorites_frame.clearBtn:SetDisabled(true)
+        end
+        UpdateFavStatusDisplay("COUNT", 0)
+        return
+    end
 
-        for _, itemID in ipairs(favList) do
-            local display_id = (BisTooltipAddon.GetFactionItem and BisTooltipAddon:GetFactionItem(itemID)) or itemID
+    favorites_scroll:PauseLayout()
 
-            local row = AceGUI:Create("SimpleGroup")
-            row:SetLayout("Table")
+    if #displayed_fav_rows == 0 and #favorites_scroll.children > 0 then
+        favorites_scroll:ReleaseChildren()
+    end
+
+    currentFavSortData = favData
+    table.sort(favList, CompareFavorites)
+    currentFavSortData = nil
+
+    local currentRows = #displayed_fav_rows
+
+    for i = 1, numFavs do
+        local itemID = favList[i]
+        local display_id = (BisTooltipAddon.GetFactionItem and BisTooltipAddon:GetFactionItem(itemID)) or itemID
+        local row = displayed_fav_rows[i]
+
+        if not row then
+            row = AceGUI:Create("SimpleGroup")
+            row:SetLayout("None")
             row:SetFullWidth(true)
-            row:SetUserData("table", FAV_ROW_TABLE_LAYOUT)
-            row.item_id = display_id
-            displayed_fav_rows[#displayed_fav_rows + 1] = row
-
-            if row.content then
-                row.content:ClearAllPoints()
-                row.content:SetPoint("TOPLEFT", row.frame, "TOPLEFT", 6, 0)
-                row.content:SetPoint("BOTTOMRIGHT", row.frame, "BOTTOMRIGHT", 0, 0)
-            end
+            row:SetHeight(42)
 
             local itemWidget = createItemFrame(display_id, 36)
             itemWidget:SetWidth(36)
             itemWidget:SetHeight(42)
+            itemWidget.frame:ClearAllPoints()
+            itemWidget.frame:SetPoint("LEFT", row.frame, "LEFT", 4, 0)
             itemWidget.image:ClearAllPoints()
             itemWidget.image:SetPoint("CENTER", itemWidget.frame, "CENTER", 0, 0)
-            displayed_fav_widgets[#displayed_fav_widgets + 1] = itemWidget
+            row:AddChild(itemWidget)
 
-            local card = row.frame.favCard
-            if not card then
-                card = CreateFrame("Frame", nil, row.frame)
-                row.frame.favCard = card
-                card:SetBackdrop(ROW_BACKDROP)
-                card:SetBackdropColor(0, 0, 0, 0)
-                card:SetBackdropBorderColor(0.65, 0.65, 0.65, 0.80)
-            end
-            card:ClearAllPoints()
-            card:SetPoint("TOP", itemWidget.frame, "TOP", 0, 0)
-            card:SetPoint("BOTTOM", itemWidget.frame, "BOTTOM", 0, 0)
-            card:SetPoint("LEFT", row.frame, "LEFT", 46, 0)
-            card:SetPoint("RIGHT", row.frame, "RIGHT", -2, 0)
-            card:Show()
+            local nameButton = CreateFrame("Button", nil, row.frame)
+            nameButton:SetHeight(40)
+            nameButton:SetPoint("LEFT", itemWidget.frame, "RIGHT", 6, 0)
+            nameButton:SetPoint("RIGHT", row.frame, "RIGHT", -32, 0)
+            nameButton:SetBackdrop(ROW_BACKDROP)
+            nameButton:SetBackdropColor(0, 0, 0, 0.25)
+            nameButton:SetBackdropBorderColor(0.65, 0.65, 0.65, 0.80)
 
-            row:SetCallback("OnRelease", function(self)
-                if self.frame.favCard then
-                    self.frame.favCard:Hide()
-                end
+            local titleText = nameButton:CreateFontString(nil, "ARTWORK")
+            titleText:SetFont("Fonts\\FRIZQT__.TTF", 13, "")
+            titleText:SetJustifyH("LEFT")
+
+            local subText = nameButton:CreateFontString(nil, "ARTWORK")
+            subText:SetFont("Fonts\\FRIZQT__.TTF", 10, "")
+            subText:SetTextColor(0.85, 0.85, 0.85, 1)
+            subText:SetJustifyH("LEFT")
+            subText:SetJustifyV("BOTTOM")
+            subText:SetHeight(12)
+
+            nameButton.titleText = titleText
+            nameButton.subText = subText
+
+            nameButton:SetScript("OnEnter", function(self)
+                self:SetBackdropBorderColor(1, 0.82, 0, 1)
+                if row.item_id then HandleItemTooltip(row.itemWidget, row.item_id) end
             end)
-
-            local itemName, _, itemRarity, _, _, _, itemSubType, _, equipSlot = GetItemInfo(display_id)
-            local slotText = (equipSlot and equipSlot ~= "" and _G[equipSlot]) or itemSubType
-
-            local nameLabel = AceGUI:Create("InteractiveLabel")
-            nameLabel:SetWidth(314)
-            nameLabel:SetHeight(42)
-
-            nameLabel.label:SetText("")
-            nameLabel.label:Hide()
-
-            local origSetHeight = nameLabel.frame.SetHeight
-            nameLabel.frame.SetHeight = function(f, h)
-                origSetHeight(f, 42)
-            end
-            nameLabel.frame:SetHeight(42)
-
-            if not nameLabel.frame.titleText then
-                nameLabel.frame.titleText = nameLabel.frame:CreateFontString(nil, "ARTWORK")
-                nameLabel.frame.titleText:SetFont("Fonts\\FRIZQT__.TTF", 13, "")
-                nameLabel.frame.titleText:SetJustifyH("LEFT")
-            end
-
-            if not nameLabel.frame.subText then
-                nameLabel.frame.subText = nameLabel.frame:CreateFontString(nil, "ARTWORK")
-                nameLabel.frame.subText:SetFont("Fonts\\FRIZQT__.TTF", 10, "")
-                nameLabel.frame.subText:SetTextColor(0.85, 0.85, 0.85, 1)
-                nameLabel.frame.subText:SetJustifyH("LEFT")
-                nameLabel.frame.subText:SetJustifyV("BOTTOM")
-                nameLabel.frame.subText:SetHeight(12)
-            end
-
-            if itemName then
-                local r, g, b = GetItemQualityColor(itemRarity or 1)
-                nameLabel.frame.titleText:SetText(itemName)
-                nameLabel.frame.titleText:SetTextColor(r, g, b, 1)
-            else
-                nameLabel.frame.titleText:SetText("Item #" .. display_id)
-                nameLabel.frame.titleText:SetTextColor(0.75, 0.75, 0.75, 1)
-            end
-
-            nameLabel.frame.titleText:ClearAllPoints()
-            nameLabel.frame.subText:ClearAllPoints()
-
-            if slotText and slotText ~= "" then
-                nameLabel.frame.titleText:SetPoint("TOPLEFT", nameLabel.frame, "TOPLEFT", 6, -6)
-                nameLabel.frame.titleText:SetPoint("RIGHT", nameLabel.frame, "RIGHT", -6, 0)
-                nameLabel.frame.titleText:SetHeight(14)
-                nameLabel.frame.titleText:SetJustifyV("TOP")
-
-                nameLabel.frame.subText:SetPoint("BOTTOMLEFT", nameLabel.frame, "BOTTOMLEFT", 6, 5)
-                nameLabel.frame.subText:SetPoint("RIGHT", nameLabel.frame, "RIGHT", -6, 0)
-                nameLabel.frame.subText:SetHeight(12)
-                nameLabel.frame.subText:SetText(slotText)
-                nameLabel.frame.subText:Show()
-            else
-                nameLabel.frame.titleText:SetPoint("LEFT", nameLabel.frame, "LEFT", 6, 0)
-                nameLabel.frame.titleText:SetPoint("RIGHT", nameLabel.frame, "RIGHT", -6, 0)
-                nameLabel.frame.titleText:SetHeight(14)
-                nameLabel.frame.titleText:SetJustifyV("MIDDLE")
-
-                nameLabel.frame.subText:SetText("")
-                nameLabel.frame.subText:Hide()
-            end
-            nameLabel.frame.titleText:Show()
-
-            nameLabel:SetCallback("OnRelease", function(self)
-                self.frame.SetHeight = origSetHeight
-                if self.frame.titleText then
-                    self.frame.titleText:SetText("")
-                    self.frame.titleText:Hide()
-                end
-                if self.frame.subText then
-                    self.frame.subText:SetText("")
-                    self.frame.subText:Hide()
-                end
+            nameButton:SetScript("OnLeave", function(self)
+                self:SetBackdropBorderColor(0.65, 0.65, 0.65, 0.80)
+                GameTooltip:Hide()
             end)
-
-            nameLabel:SetCallback("OnClick", function()
-                local _, link = GetItemInfo(display_id)
-                local validLink = link or ("item:" .. display_id .. ":0:0:0:0:0:0:0")
+            nameButton:SetScript("OnClick", function()
+                local curID = row.item_id
+                if not curID then return end
+                local _, link = GetItemInfo(curID)
+                local validLink = link or ("item:" .. curID .. ":0:0:0:0:0:0:0")
                 if IsModifiedClick() then
                     HandleModifiedItemClick(validLink)
                 else
                     SetItemRef(validLink, validLink, "LeftButton")
                 end
             end)
-            nameLabel:SetCallback("OnEnter", function(widget) HandleItemTooltip(widget, display_id) end)
-            nameLabel:SetCallback("OnLeave", function() GameTooltip:Hide() end)
 
-            itemWidget.favNameLabel = nameLabel
+            local removeBtn = CreateFrame("Button", nil, row.frame)
+            removeBtn:SetWidth(24)
+            removeBtn:SetHeight(24)
+            removeBtn:SetPoint("RIGHT", row.frame, "RIGHT", -4, 0)
 
-            local removeBtn = AceGUI:Create("Button")
-            removeBtn:SetText("X")
-            removeBtn:SetWidth(26)
-            if removeBtn.text then
-                removeBtn.text:ClearAllPoints()
-                removeBtn.text:SetPoint("CENTER", 0, 0)
-            end
-            removeBtn:SetCallback("OnRelease", function(self)
-                if self.text then
-                    self.text:ClearAllPoints()
-                    self.text:SetPoint("LEFT", self.frame, "LEFT", 10, 0)
-                    self.text:SetPoint("RIGHT", self.frame, "RIGHT", -10, 0)
-                end
-            end)
-            removeBtn:SetCallback("OnClick", function()
-                favs_dirty = true
-                BisTooltipAddon:ToggleFavorite(itemID)
-                GameTooltip:Hide()
-            end)
-            removeBtn:SetCallback("OnEnter", function(widget)
-                GameTooltip:SetOwner(widget.frame, "ANCHOR_RIGHT")
+            local removeBtnText = removeBtn:CreateFontString(nil, "OVERLAY")
+            removeBtnText:SetFont("Fonts\\FRIZQT__.TTF", 12, "OUTLINE")
+            removeBtnText:SetText("X")
+            removeBtnText:SetPoint("CENTER", 0, 0)
+            removeBtnText:SetTextColor(0.65, 0.65, 0.65, 1)
+            removeBtn.text = removeBtnText
+
+            removeBtn:SetScript("OnEnter", function(self)
+                self.text:SetTextColor(1, 0.25, 0.25, 1)
+                GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
                 GameTooltip:AddLine("Remove from Favorites", 1, 1, 1)
-                if itemName then
-                    local r, g, b = GetItemQualityColor(itemRarity or 1)
-                    GameTooltip:AddLine(itemName, r, g, b)
+                if row.item_id then
+                    local name, _, rarity = GetItemInfo(row.item_id)
+                    if name then
+                        local r, g, b = GetItemQualityColor(rarity or 1)
+                        GameTooltip:AddLine(name, r, g, b)
+                    end
                 end
                 GameTooltip:Show()
             end)
-            removeBtn:SetCallback("OnLeave", function() GameTooltip:Hide() end)
+            removeBtn:SetScript("OnLeave", function(self)
+                self.text:SetTextColor(0.65, 0.65, 0.65, 1)
+                GameTooltip:Hide()
+            end)
+            removeBtn:SetScript("OnClick", function()
+                favs_dirty = true
+                if row.rawItemID then
+                    BisTooltipAddon:ToggleFavorite(row.rawItemID)
+                end
+                GameTooltip:Hide()
+            end)
 
-            row:PauseLayout()
-            row:AddChild(itemWidget)
-            row:AddChild(nameLabel)
-            row:AddChild(removeBtn)
-            row:ResumeLayout()
-            row:DoLayout()
+            row.itemWidget = itemWidget
+            row.nameButton = nameButton
+            row.removeBtn = removeBtn
+            itemWidget.favNameButton = nameButton
 
             favorites_scroll:AddChild(row)
+            displayed_fav_rows[i] = row
+            displayed_fav_widgets[i] = itemWidget
+        end
+
+        PopulateFavRow(row, itemID, display_id)
+    end
+
+    if currentRows > numFavs then
+        for i = currentRows, numFavs + 1, -1 do
+            local excessRow = displayed_fav_rows[i]
+            displayed_fav_rows[i] = nil
+            displayed_fav_widgets[i] = nil
+            if excessRow then
+                for cIdx = #favorites_scroll.children, 1, -1 do
+                    if favorites_scroll.children[cIdx] == excessRow then
+                        table.remove(favorites_scroll.children, cIdx)
+                        break
+                    end
+                end
+                excessRow:Release()
+            end
         end
     end
 
@@ -1996,10 +2028,10 @@ function BisTooltipAddon:RefreshFavoritesWindow(immediate)
     favorites_scroll:SetScroll(targetScroll or 0)
 
     if favorites_frame.clearBtn then
-        favorites_frame.clearBtn:SetDisabled(#favList == 0)
+        favorites_frame.clearBtn:SetDisabled(false)
     end
 
-    UpdateFavStatusDisplay("COUNT", #favList)
+    UpdateFavStatusDisplay("COUNT", numFavs)
 
     if favSearchQuery ~= "" then
         ApplyFavSearchInstant()
