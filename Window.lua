@@ -1408,9 +1408,11 @@ local function QueueMainSearch(text)
 end
 
 local function drawSpecData()
-    BisTooltipAddon.db.profile.class_index = class_index
-    BisTooltipAddon.db.profile.spec_index = spec_index
-    BisTooltipAddon.db.profile.phase_index = phase_index
+    if BisTooltipAddon.db and BisTooltipAddon.db.char then
+        BisTooltipAddon.db.char.class_index = class_index
+        BisTooltipAddon.db.char.spec_index = spec_index
+        BisTooltipAddon.db.char.phase_index = phase_index
+    end
 
     local targetScroll = 0
     if BisTooltipAddon.db.profile.scroll_status and BisTooltipAddon.db.profile.scroll_status.scrollvalue then
@@ -1504,9 +1506,10 @@ local function buildSpecsDict(class_i)
 end
 
 local function loadData()
-    class_index = BisTooltipAddon.db.profile.class_index or 1
-    spec_index = BisTooltipAddon.db.profile.spec_index or 1
-    phase_index = BisTooltipAddon.db.profile.phase_index or 1
+    local dbChar = BisTooltipAddon.db and BisTooltipAddon.db.char
+    class_index = (dbChar and dbChar.class_index) or 1
+    spec_index = (dbChar and dbChar.spec_index) or 1
+    phase_index = (dbChar and dbChar.phase_index) or 1
 
     if not class_options[class_index] then class_index = 1 end
     if class_options[class_index] then

@@ -30,8 +30,12 @@ local function GetPlayerClassIndex()
 end
 
 local db_defaults = {
+    char = {
+        class_index = nil,
+        spec_index = 1,
+        phase_index = 1,
+    },
     profile = {
-        class_index = nil, spec_index = 1, phase_index = 1,
         filter_specs = {}, highlight_spec = {},
         highlight_color = "purple", use_class_colors = true,
         filter_class_names = false,
@@ -500,17 +504,20 @@ local function migrateAddonDB()
     if not dbVersion or dbVersion < CURRENT_DB_VERSION then
         if type(BisTooltipAddon.db.profile.highlight_spec) ~= "table" then BisTooltipAddon.db.profile.highlight_spec = {} end
         if type(BisTooltipAddon.db.profile.filter_specs) ~= "table" then BisTooltipAddon.db.profile.filter_specs = {} end
-        if not BisTooltipAddon.db.profile.spec_index then BisTooltipAddon.db.profile.spec_index = 1 end
-        if not BisTooltipAddon.db.profile.phase_index then BisTooltipAddon.db.profile.phase_index = 1 end
-
         if type(BisTooltipAddon.db.profile.fav_scroll_status) == "table" then
             BisTooltipAddon.db.profile.fav_scroll_status.scrollvalue = 0
         end
         BisTooltipAddon.db.profile.version = CURRENT_DB_VERSION
     end
 
-    if not BisTooltipAddon.db.profile.class_index then
-        BisTooltipAddon.db.profile.class_index = GetPlayerClassIndex()
+    if not BisTooltipAddon.db.char.class_index then
+        BisTooltipAddon.db.char.class_index = GetPlayerClassIndex()
+    end
+    if not BisTooltipAddon.db.char.spec_index then
+        BisTooltipAddon.db.char.spec_index = 1
+    end
+    if not BisTooltipAddon.db.char.phase_index then
+        BisTooltipAddon.db.char.phase_index = 1
     end
 
     if BisTooltipAddon.db.profile.show_sources == nil then BisTooltipAddon.db.profile.show_sources = true end
