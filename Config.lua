@@ -502,6 +502,26 @@ local function migrateAddonDB()
 
     local dbVersion = tonumber(BisTooltipAddon.db.profile.version)
     if not dbVersion or dbVersion < CURRENT_DB_VERSION then
+        if type(BisTooltipAddon.db.profile.favorites) == "table" then
+            local cleanFavorites = {}
+            local maxOrder = 0
+            for itemID, orderVal in pairs(BisTooltipAddon.db.profile.favorites) do
+                local numID = tonumber(itemID)
+                local order = (type(orderVal) == "number") and orderVal or 0
+                if numID and numID > 0 and orderVal then
+                    if not cleanFavorites[numID] or order > cleanFavorites[numID] then
+                        cleanFavorites[numID] = order
+                    end
+                    if order > maxOrder then
+                        maxOrder = order
+                    end
+                end
+            end
+            BisTooltipAddon.db.profile.favorites = cleanFavorites
+            local currentCounter = tonumber(BisTooltipAddon.db.profile.fav_counter) or 0
+            BisTooltipAddon.db.profile.fav_counter = (currentCounter > maxOrder) and currentCounter or maxOrder
+        end
+
         if type(BisTooltipAddon.db.profile.highlight_spec) ~= "table" then BisTooltipAddon.db.profile.highlight_spec = {} end
         if type(BisTooltipAddon.db.profile.filter_specs) ~= "table" then BisTooltipAddon.db.profile.filter_specs = {} end
         if type(BisTooltipAddon.db.profile.fav_scroll_status) == "table" then
@@ -510,14 +530,19 @@ local function migrateAddonDB()
         BisTooltipAddon.db.profile.version = CURRENT_DB_VERSION
     end
 
+    local playerClassIdx = GetPlayerClassIndex()
     if not BisTooltipAddon.db.char.class_index then
-        BisTooltipAddon.db.char.class_index = GetPlayerClassIndex()
+        BisTooltipAddon.db.char.class_index = playerClassIdx
     end
     if not BisTooltipAddon.db.char.spec_index then
-        BisTooltipAddon.db.char.spec_index = 1
+        if BisTooltipAddon.db.profile.class_index == playerClassIdx and BisTooltipAddon.db.profile.spec_index then
+            BisTooltipAddon.db.char.spec_index = BisTooltipAddon.db.profile.spec_index
+        else
+            BisTooltipAddon.db.char.spec_index = 1
+        end
     end
     if not BisTooltipAddon.db.char.phase_index then
-        BisTooltipAddon.db.char.phase_index = 1
+        BisTooltipAddon.db.char.phase_index = BisTooltipAddon.db.profile.phase_index or 1
     end
 
     if BisTooltipAddon.db.profile.show_sources == nil then BisTooltipAddon.db.profile.show_sources = true end
