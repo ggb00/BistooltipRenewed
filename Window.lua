@@ -1305,10 +1305,12 @@ local function UpdateMainSearchTargets()
         end
     end
 
+    local clearBtn = mainSearchBox and mainSearchBox.editbox and mainSearchBox.editbox.clearBtn
     if mainSearchCount then
         if query == "" then
             mainSearchCount:SetText("")
             mainSearchCount:Hide()
+            if clearBtn then clearBtn:Hide() end
             if mainSearchBox and mainSearchBox.editbox then
                 mainSearchBox.editbox:SetTextInsets(0, 0, 3, 3)
             end
@@ -1319,8 +1321,9 @@ local function UpdateMainSearchTargets()
                 mainSearchCount:SetText("|cff888888(" .. matchCount .. ")|r")
             end
             mainSearchCount:Show()
+            if clearBtn then clearBtn:Show() end
             if mainSearchBox and mainSearchBox.editbox then
-                mainSearchBox.editbox:SetTextInsets(0, 28, 3, 3)
+                mainSearchBox.editbox:SetTextInsets(0, 44, 3, 3)
             end
         end
     end
@@ -1587,12 +1590,38 @@ local function drawDropdowns()
     end
 
     if not mainSearchCount and mainSearchBox.editbox then
+        local mainClearBtn = CreateFrame("Button", nil, mainSearchBox.editbox)
+        mainClearBtn:SetWidth(14)
+        mainClearBtn:SetHeight(14)
+        mainClearBtn:SetPoint("RIGHT", mainSearchBox.editbox, "RIGHT", -4, 0)
+
+        local mainClearText = mainClearBtn:CreateFontString(nil, "OVERLAY")
+        mainClearText:SetFont("Fonts\\FRIZQT__.TTF", 11, "OUTLINE")
+        mainClearText:SetText("X")
+        mainClearText:SetPoint("CENTER", 0, 0)
+        mainClearText:SetTextColor(0.65, 0.65, 0.65, 1)
+        mainClearBtn.text = mainClearText
+
+        mainClearBtn:SetScript("OnEnter", function(self)
+            self.text:SetTextColor(1, 0.25, 0.25, 1)
+        end)
+        mainClearBtn:SetScript("OnLeave", function(self)
+            self.text:SetTextColor(0.65, 0.65, 0.65, 1)
+        end)
+        mainClearBtn:SetScript("OnClick", function()
+            mainSearchBox:SetText("")
+            QueueMainSearch("")
+            mainSearchBox.editbox:ClearFocus()
+        end)
+        mainClearBtn:Hide()
+        mainSearchBox.editbox.clearBtn = mainClearBtn
+
         mainSearchCount = mainSearchBox.editbox:CreateFontString(nil, "OVERLAY")
         mainSearchCount:SetFont("Fonts\\FRIZQT__.TTF", 10, "")
         mainSearchCount:SetShadowOffset(1, -1)
         mainSearchCount:SetShadowColor(0, 0, 0, 0.8)
         mainSearchCount:SetJustifyH("RIGHT")
-        mainSearchCount:SetPoint("RIGHT", mainSearchBox.editbox, "RIGHT", -6, 0)
+        mainSearchCount:SetPoint("RIGHT", mainClearBtn, "LEFT", -2, 0)
         mainSearchCount:Hide()
     end
 
@@ -1672,7 +1701,10 @@ local function RestoreFavRowsAlpha()
     favSearchQuery = ""
     if favSearchBox then
         favSearchBox:SetText("")
-        if favSearchBox.editbox then favSearchBox.editbox:SetTextInsets(0, 0, 3, 3) end
+        if favSearchBox.editbox then
+            if favSearchBox.editbox.clearBtn then favSearchBox.editbox.clearBtn:Hide() end
+            favSearchBox.editbox:SetTextInsets(0, 0, 3, 3)
+        end
     end
     if favSearchCount then
         favSearchCount:SetText("")
@@ -1941,10 +1973,12 @@ function BisTooltipAddon:RefreshFavoritesWindow(immediate)
         end
     end
 
+    local clearBtn = favSearchBox and favSearchBox.editbox and favSearchBox.editbox.clearBtn
     if favSearchCount then
         if favSearchQuery == "" then
             favSearchCount:SetText("")
             favSearchCount:Hide()
+            if clearBtn then clearBtn:Hide() end
             if favSearchBox and favSearchBox.editbox then
                 favSearchBox.editbox:SetTextInsets(0, 0, 3, 3)
             end
@@ -1956,8 +1990,9 @@ function BisTooltipAddon:RefreshFavoritesWindow(immediate)
                 favSearchCount:SetText("|cff888888(" .. matchCount .. ")|r")
             end
             favSearchCount:Show()
+            if clearBtn then clearBtn:Show() end
             if favSearchBox and favSearchBox.editbox then
-                favSearchBox.editbox:SetTextInsets(0, 28, 3, 3)
+                favSearchBox.editbox:SetTextInsets(0, 44, 3, 3)
             end
         end
     end
@@ -2316,12 +2351,37 @@ function BisTooltipAddon:OpenFavoritesFrame()
         end
 
         if not favSearchCount and favSearchBox.editbox then
+            local favClearBtn = CreateFrame("Button", nil, favSearchBox.editbox)
+            favClearBtn:SetWidth(14)
+            favClearBtn:SetHeight(14)
+            favClearBtn:SetPoint("RIGHT", favSearchBox.editbox, "RIGHT", -4, 0)
+
+            local favClearText = favClearBtn:CreateFontString(nil, "OVERLAY")
+            favClearText:SetFont("Fonts\\FRIZQT__.TTF", 11, "OUTLINE")
+            favClearText:SetText("X")
+            favClearText:SetPoint("CENTER", 0, 0)
+            favClearText:SetTextColor(0.65, 0.65, 0.65, 1)
+            favClearBtn.text = favClearText
+
+            favClearBtn:SetScript("OnEnter", function(self)
+                self.text:SetTextColor(1, 0.25, 0.25, 1)
+            end)
+            favClearBtn:SetScript("OnLeave", function(self)
+                self.text:SetTextColor(0.65, 0.65, 0.65, 1)
+            end)
+            favClearBtn:SetScript("OnClick", function()
+                favSearchBox.editbox:ClearFocus()
+                RestoreFavRowsAlpha()
+            end)
+            favClearBtn:Hide()
+            favSearchBox.editbox.clearBtn = favClearBtn
+
             favSearchCount = favSearchBox.editbox:CreateFontString(nil, "OVERLAY")
             favSearchCount:SetFont("Fonts\\FRIZQT__.TTF", 10, "")
             favSearchCount:SetShadowOffset(1, -1)
             favSearchCount:SetShadowColor(0, 0, 0, 0.8)
             favSearchCount:SetJustifyH("RIGHT")
-            favSearchCount:SetPoint("RIGHT", favSearchBox.editbox, "RIGHT", -6, 0)
+            favSearchCount:SetPoint("RIGHT", favClearBtn, "LEFT", -2, 0)
             favSearchCount:Hide()
         end
 
