@@ -1,5 +1,4 @@
 -- Tooltip.lua
-local GetItemInfo = GetItemInfo
 local tonumber, tostring, type, ipairs = tonumber, tostring, type, ipairs
 local string_match, string_format = string.match, string.format
 
@@ -116,7 +115,7 @@ end
 local function StyleTooltip(tooltip, isForcedItem)
     if not tooltip or not tooltip.GetItem then return end
 
-    local darkEnabled = BisTooltipAddon.db and BisTooltipAddon.db.char and BisTooltipAddon.db.char.dark_tooltips
+    local darkEnabled = BisTooltipAddon.db and BisTooltipAddon.db.profile and BisTooltipAddon.db.profile.dark_tooltips
 
     local isItem = isForcedItem
     if isItem == nil then
@@ -159,7 +158,7 @@ local function ProcessTooltip(tooltip, link)
     local tt = tooltip or (this ~= nil and this) or GameTooltip
     if not tt or not tt.GetItem then return end
 
-    local db = BisTooltipAddon.db and BisTooltipAddon.db.char
+    local db = BisTooltipAddon.db and BisTooltipAddon.db.profile
     if not db then return end
 
     if not link then
@@ -169,12 +168,12 @@ local function ProcessTooltip(tooltip, link)
 
     local itemId = tonumber(string_match(link, "item:(%d+)"))
     if not itemId then return end
+    if tt.BisTooltipRendered == itemId then return end
 
     StyleTooltip(tt, true)
 
     if db.tooltip_with_ctrl and not IsControlKeyDown() then return end
 
-    if tt.BisTooltipRendered == itemId then return end
     tt.BisTooltipRendered = itemId
 
     local translated_id = BisTooltipAddon.GetAltItemID and BisTooltipAddon:GetAltItemID(itemId)
@@ -198,7 +197,7 @@ local function ProcessTooltip(tooltip, link)
             local isFiltered = not isHighlighted and not isAltDown and (type(filterSpecs[dClass]) == "table") and filterSpecs[dClass][dSpec]
 
             if not isFiltered then
-                local fData = BisTooltipAddon.FormattedNames[dClass]
+                local fData = BisTooltipAddon.FormattedNames and BisTooltipAddon.FormattedNames[dClass]
                 local fSpec = fData and fData[dSpec]
                 local lineText
 
@@ -250,7 +249,7 @@ local function ProcessTooltip(tooltip, link)
         end
     end
 
-    if BisTooltipAddon.IsFavorite and (BisTooltipAddon:IsFavorite(itemId) or (translated_id and BisTooltipAddon:IsFavorite(translated_id))) then
+    if BisTooltipAddon.IsFavorite and BisTooltipAddon:IsFavorite(itemId) then
         local markIndex = (db and db.favorite_icon) or 1
         if markIndex < 1 or markIndex > 8 then markIndex = 1 end
         local iconStr = RAID_ICON_STRINGS[markIndex] or RAID_ICON_STRINGS[1]
@@ -283,9 +282,9 @@ local function ProcessTooltip(tooltip, link)
                     end
                 end
 
-                if ownerName:find("bank") then
+                if ownerName:find("bank", 1, true) then
                     inBankUI = true
-                elseif not inBankUI and (ownerName:find("inventory") or ownerName:find("bagnon") or ownerName:find("bag")) then
+                elseif not inBankUI and (ownerName:find("inventory", 1, true) or ownerName:find("bagnon", 1, true) or ownerName:find("bag", 1, true)) then
                     inBagUI = true
                 end
             end
@@ -304,7 +303,9 @@ local function ProcessTooltip(tooltip, link)
         end
     end
 
-    tt:Show()
+    if tt:IsShown() then
+        tt:Show()
+    end
 end
 
 local function OnTooltipSetItem(tooltip)
@@ -406,10 +407,7 @@ local function UpdateComparison(tt)
                 tt.shoppingTooltips = { ShoppingTooltip1, ShoppingTooltip2, ShoppingTooltip3 }
             end
         end
-        local oldThis = this
-        this = tt
-        GameTooltip_ShowCompareItem()
-        this = oldThis
+        GameTooltip_ShowCompareItem(tt)
     end
 end
 
@@ -451,7 +449,6 @@ function BisTooltipAddon:initBisTooltip()
     if ItemRefShoppingTooltip2 then ItemRefShoppingTooltip2:HookScript("OnTooltipCleared", OnTooltipCleared) end
 
     hooksecurefunc(GameTooltip, "SetInventoryItem", HookSetInventoryItem)
-    if ItemRefTooltip then hooksecurefunc(ItemRefTooltip, "SetInventoryItem", HookSetInventoryItem) end
 
     if ItemRefTooltip and not ItemRefTooltip.shoppingTooltips then
         ItemRefTooltip.shoppingTooltips = { ItemRefShoppingTooltip1, ItemRefShoppingTooltip2 }
@@ -484,35 +481,16 @@ function BisTooltipAddon:initBisTooltip()
     eventFrame:RegisterEvent("PLAYER_LOGIN")
     eventFrame:RegisterEvent("ADDON_LOADED")
     eventFrame:RegisterEvent("MODIFIER_STATE_CHANGED")
-    eventFrame:RegisterEvent("GET_ITEM_INFO_RECEIVED")
-    eventFrame:SetScript("OnEvent", function(_, event, arg1, arg2)
+    eventFrame:SetScript("OnEvent", function(_, event, arg1)
         if event == "PLAYER_LOGIN" or (event == "ADDON_LOADED" and arg1 and arg1:find("AtlasLoot", 1, true)) then
             HookAtlasLoot()
-            return
-        end
-
-        if event == "GET_ITEM_INFO_RECEIVED" then
-            local receivedId = tonumber(arg1)
-            if not receivedId or arg2 == false then return end
-
-            local function RefreshIfMatching(tt)
-                if not tt or not tt:IsShown() or not tt.GetItem then return end
-                local _, link = tt:GetItem()
-                if link and link:find("item:" .. receivedId .. ":", 1, true) then
-                    RefreshTooltip(tt)
-                end
-            end
-
-            RefreshIfMatching(GameTooltip)
-            RefreshIfMatching(ItemRefTooltip)
-            RefreshIfMatching(AtlasLootTooltip)
             return
         end
 
         if event == "MODIFIER_STATE_CHANGED" then
             local key = arg1
             if key == "LALT" or key == "RALT" or key == "LCTRL" or key == "RCTRL" then
-                local db = BisTooltipAddon.db and BisTooltipAddon.db.char
+                local db = BisTooltipAddon.db and BisTooltipAddon.db.profile
                 local isCtrl = (key == "LCTRL" or key == "RCTRL")
                 if isCtrl and not (db and db.tooltip_with_ctrl) then
                     return

@@ -1,7 +1,14 @@
 -- Core.lua
+local addonName = ...
+
+BINDING_HEADER_BISTOOLTIP = "BiS-Tooltip Renewed"
+BINDING_NAME_BISTOOLTIP_TOGGLE_MAIN = "Toggle Main Window"
+BINDING_NAME_BISTOOLTIP_TOGGLE_FAV = "Toggle Favorites Window"
+
 BisTooltipAddon = LibStub("AceAddon-3.0"):NewAddon("BiS-Tooltip Renewed", "AceConsole-3.0")
-local BisTooltip_AliToHorde = {}
+local BisTooltip_AliToHorde
 local BisTooltip_EquippedCache = {}
+local BisTooltip_ItemStateCache = {}
 
 BisTooltip_HexColors = {
     ["purple"]    = "CC4CFF",
@@ -40,12 +47,16 @@ equipWatcher:RegisterEvent("PLAYERBANKSLOTS_CHANGED")
 equipWatcher:RegisterEvent("BANKFRAME_OPENED")
 equipWatcher:RegisterEvent("BANKFRAME_CLOSED")
 equipWatcher:SetScript("OnEvent", function(_, event, arg1)
-    if event == "PLAYER_EQUIPMENT_CHANGED" or event == "PLAYER_ENTERING_WORLD" then
-        RebuildEquippedCache()
-    elseif event == "BAG_UPDATE" then
+    if event == "BAG_UPDATE" then
         if arg1 and (arg1 < -1 or arg1 > 11) then
             return
         end
+    end
+
+    wipe(BisTooltip_ItemStateCache)
+
+    if event == "PLAYER_EQUIPMENT_CHANGED" or event == "PLAYER_ENTERING_WORLD" then
+        RebuildEquippedCache()
     end
 
     if BisTooltipAddon.IsWindowOpen and BisTooltipAddon:IsWindowOpen() then
@@ -90,40 +101,71 @@ function BisTooltipAddon:GetItemState(itemID)
     if not itemID then return 0 end
     itemID = tonumber(itemID)
     if not itemID then return 0 end
-    if BisTooltip_EquippedCache[itemID] then return 2 end
-    local altID = self:GetAltItemID(itemID)
-    if altID and BisTooltip_EquippedCache[altID] then return 2 end
-    if GetItemCount(itemID, false) > 0 or (altID and GetItemCount(altID, false) > 0) then return 1 end
-    if GetItemCount(itemID, true) > 0 or (altID and GetItemCount(altID, true) > 0) then return 3 end
-    return 0
+    if BisTooltip_ItemStateCache[itemID] ~= nil then
+        return BisTooltip_ItemStateCache[itemID]
+    end
+
+    local state = 0
+    if BisTooltip_EquippedCache[itemID] then
+        state = 2
+    else
+        local altID = self:GetAltItemID(itemID)
+        if altID and BisTooltip_EquippedCache[altID] then
+            state = 2
+        elseif GetItemCount(itemID, false) > 0 or (altID and GetItemCount(altID, false) > 0) then
+            state = 1
+        elseif GetItemCount(itemID, true) > 0 or (altID and GetItemCount(altID, true) > 0) then
+            state = 3
+        end
+    end
+
+    BisTooltip_ItemStateCache[itemID] = state
+    return state
 end
 
 function BisTooltipAddon:IsFavorite(itemID)
-    if not itemID or not self.db or not self.db.char or not self.db.char.favorites then return false end
+    if not itemID or not self.db or not self.db.profile or not self.db.profile.favorites then return false end
     itemID = tonumber(itemID)
     if not itemID then return false end
-    if self.db.char.favorites[itemID] then return true end
+    if self.db.profile.favorites[itemID] then return true end
     local altID = self:GetAltItemID(itemID)
-    if altID and self.db.char.favorites[altID] then return true end
+    if altID and self.db.profile.favorites[altID] then return true end
     return false
 end
 
+local MAX_FAVORITES = 256
+
 function BisTooltipAddon:ToggleFavorite(itemID)
-    if not itemID or not self.db or not self.db.char then return end
+    if not itemID or not self.db or not self.db.profile then return end
     itemID = tonumber(itemID)
     if not itemID then return end
-    self.db.char.favorites = self.db.char.favorites or {}
+    self.db.profile.favorites = self.db.profile.favorites or {}
     local altID = self:GetAltItemID(itemID)
 
     if self:IsFavorite(itemID) then
-        self.db.char.favorites[itemID] = nil
-        if altID then self.db.char.favorites[altID] = nil end
+        self.db.profile.favorites[itemID] = nil
+        if altID then self.db.profile.favorites[altID] = nil end
     else
-        self.db.char.fav_counter = (self.db.char.fav_counter or 0) + 1
-        self.db.char.favorites[itemID] = self.db.char.fav_counter
+        local count = 0
+        for _ in pairs(self.db.profile.favorites) do count = count + 1 end
+        if count >= MAX_FAVORITES then
+            if UIErrorsFrame then
+                UIErrorsFrame:AddMessage("Favorites list is full (maximum " .. MAX_FAVORITES .. " items).", 1.0, 0.1, 0.1, 1.0, UIERRORS_HOLD_TIME or 3)
+            end
+            self:Print("|cffff2020Favorites list is full (maximum " .. MAX_FAVORITES .. " items).|r")
+            return
+        end
+
+        self.db.profile.fav_counter = (self.db.profile.fav_counter or 0) + 1
+        self.db.profile.favorites[itemID] = self.db.profile.fav_counter
     end
 
-    if self.RefreshItemStateVisuals then
+    if self.RefreshFavoriteForItem then
+        self:RefreshFavoriteForItem(itemID)
+        if altID then
+            self:RefreshFavoriteForItem(altID)
+        end
+    elseif self.RefreshItemStateVisuals then
         self.RefreshItemStateVisuals()
     end
     if self.RefreshFavoritesWindow then
@@ -237,7 +279,7 @@ function BisTooltipAddon:BuildReverseLookup()
                 local phase = sortedPhases[p]
                 local rank = entry[phase]
                 if rank then
-                    labels[#labels + 1] = (rank == 1) and (phase .. " BIS") or (phase .. " alt " .. (rank - 1))
+                    labels[#labels + 1] = (rank == 1) and (phase .. " BiS") or (phase .. " Alt " .. (rank - 1))
                 end
             end
 
@@ -260,6 +302,12 @@ function BisTooltipAddon:BuildReverseLookup()
     labels = nil
 end
 
+function BisTooltipAddon:Print(msg)
+    if DEFAULT_CHAT_FRAME then
+        DEFAULT_CHAT_FRAME:AddMessage("|cffffd100BiS-Tooltip Renewed|r: " .. tostring(msg))
+    end
+end
+
 function BisTooltipAddon:HandleChatCommand(input)
     local cmd = strtrim(input or ""):lower()
     if cmd == "fav" or cmd == "favorites" or cmd == "wishlist" then
@@ -271,33 +319,40 @@ function BisTooltipAddon:HandleChatCommand(input)
             self:openConfigDialog()
         end
     elseif cmd == "help" or cmd == "?" then
-        DEFAULT_CHAT_FRAME:AddMessage("|cffffd100BiS-Tooltip Renewed commands:|r")
+        self:Print("Available commands:")
         DEFAULT_CHAT_FRAME:AddMessage("  |cffffff00/bis|r - Toggle main BiS list window")
+        DEFAULT_CHAT_FRAME:AddMessage("  |cffffff00/bistooltip|r - Same as /bis")
         DEFAULT_CHAT_FRAME:AddMessage("  |cffffff00/bis fav|r - Toggle Favorites list window")
         DEFAULT_CHAT_FRAME:AddMessage("  |cffffff00/bis config|r - Open configuration panel")
+        DEFAULT_CHAT_FRAME:AddMessage("  |cff888888Keybindings can be set in Game Menu (Esc) -> Key Bindings|r")
+    elseif cmd == "" then
+        if self.createMainFrame then
+            self:createMainFrame()
+        end
     else
-        self:createMainFrame()
+        self:Print("Unknown command '|cffffff00" .. cmd .. "|r'. Type '|cffffff00/bis help|r' for options.")
     end
 end
 
 function BisTooltipAddon:OnInitialize()
     RebuildEquippedCache()
     self:BuildFactionMaps()
-    self:BuildReverseLookup()
+
+    local success, err = pcall(self.BuildReverseLookup, self)
+    if not success then
+        self:Print("|cffff2020Error building item database: " .. tostring(err) .. "|r")
+    end
 
     self.BuildFactionMaps = nil
     self.BuildReverseLookup = nil
 
     self.AceAddonName = "BiS-Tooltip Renewed"
-    local version = GetAddOnMetadata("BistooltipRenewed", "Version")
+    local version = GetAddOnMetadata(addonName, "Version")
     self.AddonNameAndVersion = version and ("BiS-Tooltip Renewed v" .. version) or "BiS-Tooltip Renewed"
     self:initConfig()
     self:addMapIcon()
     self:initBisTooltip()
 
-    self:RegisterChatCommand("bt", "HandleChatCommand")
     self:RegisterChatCommand("bis", "HandleChatCommand")
     self:RegisterChatCommand("bistooltip", "HandleChatCommand")
-
-    collectgarbage("collect")
 end

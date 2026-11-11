@@ -1,19 +1,27 @@
 -- Config.lua
 local AceConfigDialog = LibStub("AceConfigDialog-3.0")
-local AceGUI = LibStub("AceGUI-3.0")
-local LDB = LibStub("LibDataBroker-1.1", true)
-local LDBIcon = LDB and LibStub("LibDBIcon-1.0", true)
 local icon_loaded = false
-local icon_name = "BisTooltipIcon"
-local CURRENT_DB_VERSION = 8.4
+local icon_name = "BisRenewedIcon"
+local CURRENT_DB_VERSION = 9
 
 local keyToClassSpec = {}
 
+local function updateMapIconButton()
+    local icon_lib = LibStub("LibDBIcon-1.0", true)
+    if not icon_lib or not icon_lib:IsRegistered(icon_name) then return end
+    if BisTooltipAddon.db.profile.minimap.hide then
+        icon_lib:Hide(icon_name)
+    else
+        icon_lib:Show(icon_name)
+    end
+end
+
 local function GetPlayerClassIndex()
-    local playerClass = UnitClass("player")
-    if BisTooltip_ClassData then
+    local _, englishClass = UnitClass("player")
+    if BisTooltip_ClassData and englishClass then
         for i = 1, #BisTooltip_ClassData do
-            if BisTooltip_ClassData[i].name == playerClass then
+            local cleanName = BisTooltip_ClassData[i].name:gsub("%s+", ""):upper()
+            if cleanName == englishClass then
                 return i
             end
         end
@@ -23,7 +31,11 @@ end
 
 local db_defaults = {
     char = {
-        class_index = nil, spec_index = 1, phase_index = 1,
+        class_index = nil,
+        spec_index = 1,
+        phase_index = 1,
+    },
+    profile = {
         filter_specs = {}, highlight_spec = {},
         highlight_color = "purple", use_class_colors = true,
         filter_class_names = false,
@@ -31,7 +43,7 @@ local db_defaults = {
         show_sources = true, source_color = "green",
         show_item_states = true, dark_tooltips = false,
         show_item_borders = true, frame_pos = nil, scroll_status = {},
-        show_ilvl = false, ilvl_color = "white",
+        show_ilvl = false, ilvl_color = "white", indicator_scale = 1.0,
         favorites = {}, favorites_pos = nil, fav_counter = 0, favorite_icon = 1,
         favorite_color = "yellow", fav_scroll_status = {}
     }
@@ -40,6 +52,12 @@ local db_defaults = {
 local configTable = {
     type = "group",
     args = {
+        author_info = {
+            type = "description",
+            name = "|cff888888by ggb|r\n",
+            order = 0.5,
+        },
+
         header_general = {
             name = "General",
             type = "header",
@@ -49,20 +67,14 @@ local configTable = {
         minimap_icon = {
             name = "Show Minimap Icon",
             order = 2,
-            desc = "Toggle display of the minimap icon\n(Requires Reload)",
+            desc = "Toggle display of the minimap icon",
             type = "toggle",
             width = "full",
             set = function(info, val)
-                BisTooltipAddon.db.char.minimap.hide = not val
-                if LDBIcon then
-                    if val then
-                        LDBIcon:Show(icon_name)
-                    else
-                        LDBIcon:Hide(icon_name)
-                    end
-                end
+                BisTooltipAddon.db.profile.minimap.hide = not val
+                updateMapIconButton()
             end,
-            get = function(info) return not BisTooltipAddon.db.char.minimap.hide end
+            get = function(info) return not BisTooltipAddon.db.profile.minimap.hide end
         },
 
         show_item_borders = {
@@ -72,35 +84,35 @@ local configTable = {
             type = "toggle",
             width = "full",
             set = function(info, val)
-                BisTooltipAddon.db.char.show_item_borders = val
+                BisTooltipAddon.db.profile.show_item_borders = val
                 if BisTooltipAddon.RefreshItemStateVisuals then BisTooltipAddon.RefreshItemStateVisuals() end
             end,
-            get = function(info) return BisTooltipAddon.db.char.show_item_borders end
+            get = function(info) return BisTooltipAddon.db.profile.show_item_borders end
         },
 
         show_ilvl = {
-            name = "Show iLvL",
+            name = "Show Item Level",
             order = 4,
             desc = "Display item level on item icons in the addon window",
             type = "toggle",
             width = "full",
             set = function(info, val)
-                BisTooltipAddon.db.char.show_ilvl = val
+                BisTooltipAddon.db.profile.show_ilvl = val
                 if BisTooltipAddon.RefreshItemStateVisuals then BisTooltipAddon.RefreshItemStateVisuals() end
             end,
             get = function(info)
-                if BisTooltipAddon.db.char.show_ilvl == nil then return false end
-                return BisTooltipAddon.db.char.show_ilvl
+                if BisTooltipAddon.db.profile.show_ilvl == nil then return false end
+                return BisTooltipAddon.db.profile.show_ilvl
             end
         },
 
         ilvl_color = {
-            name = "iLvL Color",
+            name = "Item Level Color",
             order = 5,
             desc = "Changes the text color of the item level on icons",
             type = "select",
             width = "full",
-            disabled = function() return BisTooltipAddon.db.char.show_ilvl == false end,
+            disabled = function() return BisTooltipAddon.db.profile.show_ilvl == false end,
             values = {
                 ["purple"]    = "Purple",
                 ["green"]     = "Green",
@@ -113,11 +125,35 @@ local configTable = {
                 ["white"]     = "White"
             },
             set = function(info, val)
-                BisTooltipAddon.db.char.ilvl_color = val
+                BisTooltipAddon.db.profile.ilvl_color = val
                 if BisTooltipAddon.RefreshItemStateVisuals then BisTooltipAddon.RefreshItemStateVisuals() end
             end,
             get = function(info)
-                return BisTooltipAddon.db.char.ilvl_color or "white"
+                return BisTooltipAddon.db.profile.ilvl_color or "white"
+            end
+        },
+
+        indicator_scale = {
+            name = "Overlay Icon Scale",
+            order = 6,
+            desc = "Adjust the size of the Favorite, BoE, and Bag/Bank status icons overlay on item",
+            type = "range",
+            min = 0.75,
+            max = 1.50,
+            step = 0.05,
+            isPercent = true,
+            width = "full",
+            set = function(info, val)
+                BisTooltipAddon.db.profile.indicator_scale = val
+                if BisTooltipAddon.RefreshItemStateVisuals then
+                    BisTooltipAddon.RefreshItemStateVisuals()
+                end
+                if BisTooltipAddon.RefreshFavoritesWindow then
+                    BisTooltipAddon:RefreshFavoritesWindow()
+                end
+            end,
+            get = function(info)
+                return BisTooltipAddon.db.profile.indicator_scale or 1.0
             end
         },
 
@@ -128,31 +164,31 @@ local configTable = {
         },
 
         tooltip_with_ctrl = {
-            name = "Show Item Tooltips only with Ctrl",
+            name = "Only show BiS info with Ctrl held",
             order = 11,
-            desc = "Only show tooltips when holding down Ctrl key",
+            desc = "Only display BiS tooltip lines when holding down the Ctrl key",
             type = "toggle",
             width = "full",
             set = function(info, val)
-                BisTooltipAddon.db.char.tooltip_with_ctrl = val
+                BisTooltipAddon.db.profile.tooltip_with_ctrl = val
                 if BisTooltipAddon.ClearTooltipCache then BisTooltipAddon:ClearTooltipCache() end
             end,
-            get = function(info) return BisTooltipAddon.db.char.tooltip_with_ctrl end
+            get = function(info) return BisTooltipAddon.db.profile.tooltip_with_ctrl end
         },
 
         show_item_states = {
             name = "Show Bags/Bank Item Status",
             order = 12,
-            desc = "Show a line that says whenever an item is already in your bags or bank",
+            desc = "Show icons on items and tooltip text when an item is in your bags or bank",
             type = "toggle",
             width = "full",
             set = function(info, val)
-                BisTooltipAddon.db.char.show_item_states = val
+                BisTooltipAddon.db.profile.show_item_states = val
                 if BisTooltipAddon.ClearTooltipCache then BisTooltipAddon:ClearTooltipCache() end
             end,
             get = function(info)
-                if BisTooltipAddon.db.char.show_item_states == nil then return true end
-                return BisTooltipAddon.db.char.show_item_states
+                if BisTooltipAddon.db.profile.show_item_states == nil then return true end
+                return BisTooltipAddon.db.profile.show_item_states
             end
         },
 
@@ -163,10 +199,10 @@ local configTable = {
             type = "toggle",
             width = "full",
             set = function(info, val)
-                BisTooltipAddon.db.char.filter_class_names = val
+                BisTooltipAddon.db.profile.filter_class_names = val
                 if BisTooltipAddon.ClearTooltipCache then BisTooltipAddon:ClearTooltipCache() end
             end,
-            get = function(info) return BisTooltipAddon.db.char.filter_class_names end
+            get = function(info) return BisTooltipAddon.db.profile.filter_class_names end
         },
 
         use_class_colors = {
@@ -176,12 +212,12 @@ local configTable = {
             type = "toggle",
             width = "full",
             set = function(info, val)
-                BisTooltipAddon.db.char.use_class_colors = val
+                BisTooltipAddon.db.profile.use_class_colors = val
                 if BisTooltipAddon.ClearTooltipCache then BisTooltipAddon:ClearTooltipCache() end
             end,
             get = function(info)
-                if BisTooltipAddon.db.char.use_class_colors == nil then return true end
-                return BisTooltipAddon.db.char.use_class_colors
+                if BisTooltipAddon.db.profile.use_class_colors == nil then return true end
+                return BisTooltipAddon.db.profile.use_class_colors
             end
         },
 
@@ -192,10 +228,10 @@ local configTable = {
             type = "toggle",
             width = "full",
             set = function(info, val)
-                BisTooltipAddon.db.char.dark_tooltips = val
+                BisTooltipAddon.db.profile.dark_tooltips = val
                 if BisTooltipAddon.ClearTooltipCache then BisTooltipAddon:ClearTooltipCache() end
             end,
-            get = function(info) return BisTooltipAddon.db.char.dark_tooltips end
+            get = function(info) return BisTooltipAddon.db.profile.dark_tooltips end
         },
 
         highlight_spec = {
@@ -207,11 +243,11 @@ local configTable = {
             width = "full",
             set = function(info, key)
                 if key == "none" then
-                    BisTooltipAddon.db.char.highlight_spec = {}
+                    BisTooltipAddon.db.profile.highlight_spec = {}
                 else
                     local entry = keyToClassSpec[key]
                     if entry then
-                        BisTooltipAddon.db.char.highlight_spec = {
+                        BisTooltipAddon.db.profile.highlight_spec = {
                             key = key,
                             class_name = entry.class,
                             spec_name = entry.spec
@@ -221,7 +257,7 @@ local configTable = {
                 if BisTooltipAddon.ClearTooltipCache then BisTooltipAddon:ClearTooltipCache() end
             end,
             get = function(info)
-                return (BisTooltipAddon.db.char.highlight_spec and BisTooltipAddon.db.char.highlight_spec.key) or "none"
+                return (BisTooltipAddon.db.profile.highlight_spec and BisTooltipAddon.db.profile.highlight_spec.key) or "none"
             end
         },
 
@@ -243,10 +279,10 @@ local configTable = {
                 ["cyan"]      = "Cyan"
             },
             set = function(info, val)
-                BisTooltipAddon.db.char.highlight_color = val
+                BisTooltipAddon.db.profile.highlight_color = val
                 if BisTooltipAddon.ClearTooltipCache then BisTooltipAddon:ClearTooltipCache() end
             end,
-            get = function(info) return BisTooltipAddon.db.char.highlight_color or "class" end
+            get = function(info) return BisTooltipAddon.db.profile.highlight_color or "class" end
         },
 
         show_sources = {
@@ -256,12 +292,12 @@ local configTable = {
             type = "toggle",
             width = "full",
             set = function(info, val)
-                BisTooltipAddon.db.char.show_sources = val
+                BisTooltipAddon.db.profile.show_sources = val
                 if BisTooltipAddon.ClearTooltipCache then BisTooltipAddon:ClearTooltipCache() end
             end,
             get = function(info)
-                if BisTooltipAddon.db.char.show_sources == nil then return true end
-                return BisTooltipAddon.db.char.show_sources
+                if BisTooltipAddon.db.profile.show_sources == nil then return true end
+                return BisTooltipAddon.db.profile.show_sources
             end
         },
 
@@ -271,7 +307,7 @@ local configTable = {
             desc = "Changes the text color of the item's drop source",
             type = "select",
             width = "full",
-            disabled = function() return BisTooltipAddon.db.char.show_sources == false end,
+            disabled = function() return BisTooltipAddon.db.profile.show_sources == false end,
             values = {
                 ["purple"]    = "Purple",
                 ["green"]     = "Green",
@@ -284,10 +320,10 @@ local configTable = {
                 ["white"]     = "White"
             },
             set = function(info, val)
-                BisTooltipAddon.db.char.source_color = val
+                BisTooltipAddon.db.profile.source_color = val
                 if BisTooltipAddon.ClearTooltipCache then BisTooltipAddon:ClearTooltipCache() end
             end,
-            get = function(info) return BisTooltipAddon.db.char.source_color or "green" end
+            get = function(info) return BisTooltipAddon.db.profile.source_color or "green" end
         },
 
         header_favorites = {
@@ -313,7 +349,7 @@ local configTable = {
                 [8] = "|TInterface\\TargetingFrame\\UI-RaidTargetingIcons:14:14:0:0:256:256:192:256:64:128|t Skull",
             },
             set = function(info, val)
-                BisTooltipAddon.db.char.favorite_icon = val
+                BisTooltipAddon.db.profile.favorite_icon = val
                 if BisTooltipAddon.RefreshItemStateVisuals then
                     BisTooltipAddon.RefreshItemStateVisuals()
                 end
@@ -325,7 +361,7 @@ local configTable = {
                 end
             end,
             get = function(info)
-                return BisTooltipAddon.db.char.favorite_icon or 1
+                return BisTooltipAddon.db.profile.favorite_icon or 1
             end
         },
 
@@ -347,13 +383,13 @@ local configTable = {
                 ["white"]     = "White"
             },
             set = function(info, val)
-                BisTooltipAddon.db.char.favorite_color = val
+                BisTooltipAddon.db.profile.favorite_color = val
                 if BisTooltipAddon.ClearTooltipCache then
                     BisTooltipAddon:ClearTooltipCache()
                 end
             end,
             get = function(info)
-                return BisTooltipAddon.db.char.favorite_color or "yellow"
+                return BisTooltipAddon.db.profile.favorite_color or "yellow"
             end
         },
 
@@ -368,8 +404,8 @@ local configTable = {
                 if not entry then return end
                 local class_name = entry.class
                 local spec_name = entry.spec
-                if not BisTooltipAddon.db.char.filter_specs[class_name] then BisTooltipAddon.db.char.filter_specs[class_name] = {} end
-                BisTooltipAddon.db.char.filter_specs[class_name][spec_name] = val
+                if type(BisTooltipAddon.db.profile.filter_specs[class_name]) ~= "table" then BisTooltipAddon.db.profile.filter_specs[class_name] = {} end
+                BisTooltipAddon.db.profile.filter_specs[class_name][spec_name] = val
                 if BisTooltipAddon.ClearTooltipCache then BisTooltipAddon:ClearTooltipCache() end
             end,
             get = function(info, key)
@@ -377,10 +413,22 @@ local configTable = {
                 if not entry then return false end
                 local class_name = entry.class
                 local spec_name = entry.spec
-                local fs = BisTooltipAddon.db and BisTooltipAddon.db.char and BisTooltipAddon.db.char.filter_specs
+                local fs = BisTooltipAddon.db and BisTooltipAddon.db.profile and BisTooltipAddon.db.profile.filter_specs
                 if not fs or type(fs[class_name]) ~= "table" then return false end
                 return fs[class_name][spec_name] or false
             end
+        },
+
+        header_keybindings = {
+            name = "Keybindings",
+            type = "header",
+            order = 40,
+        },
+
+        keybinding_info = {
+            name = "Keybindings can be configured in the game menu:\n|cffffd100Game Menu (Esc) -> Key Bindings -> BiS-Tooltip Renewed|r\n\nYou can set keybinds to toggle both the Main Window and the Favorites Window.",
+            type = "description",
+            order = 41,
         }
     }
 }
@@ -406,60 +454,142 @@ local function buildFilterSpecOptions()
     configTable.args.highlight_spec.values = highlight_specs_options
 end
 
-local function migrateAddonDB()
-    if not BisTooltipAddon.db.char.version or BisTooltipAddon.db.char.version < CURRENT_DB_VERSION then
-        BisTooltipAddon.db.char.version = CURRENT_DB_VERSION
-        if not BisTooltipAddon.db.char.highlight_spec then BisTooltipAddon.db.char.highlight_spec = {} end
-        if not BisTooltipAddon.db.char.filter_specs then BisTooltipAddon.db.char.filter_specs = {} end
-        if not BisTooltipAddon.db.char.class_index then BisTooltipAddon.db.char.class_index = GetPlayerClassIndex() end
-        if not BisTooltipAddon.db.char.spec_index then BisTooltipAddon.db.char.spec_index = 1 end
-        if not BisTooltipAddon.db.char.phase_index then BisTooltipAddon.db.char.phase_index = 1 end
-
-        local favIcon = tonumber(BisTooltipAddon.db.char.favorite_icon)
-        if not favIcon or favIcon < 1 or favIcon > 8 then
-            BisTooltipAddon.db.char.favorite_icon = 1
+local function DeepCopyTable(src)
+    if type(src) ~= "table" then return src end
+    local copy = {}
+    for k, v in pairs(src) do
+        if type(v) == "table" then
+            copy[k] = DeepCopyTable(v)
         else
-            BisTooltipAddon.db.char.favorite_icon = favIcon
-        end
-        if BisTooltipAddon.db.char.fav_scroll_status then
-            BisTooltipAddon.db.char.fav_scroll_status.scrollvalue = 0
+            copy[k] = v
         end
     end
+    return copy
+end
 
+local function migrateAddonDB()
+    local legacyChar = BisTooltipAddon.db.char
+    if legacyChar and not legacyChar.migratedToProfile and next(legacyChar) then
+        for k, v in pairs(legacyChar) do
+            if k == "favorites" and type(v) == "table" then
+                BisTooltipAddon.db.profile.favorites = BisTooltipAddon.db.profile.favorites or {}
+                for itemID, orderVal in pairs(v) do
+                    local existingOrder = BisTooltipAddon.db.profile.favorites[itemID] or 0
+                    local legacyOrder = type(orderVal) == "number" and orderVal or 0
+                    BisTooltipAddon.db.profile.favorites[itemID] = (existingOrder > legacyOrder) and existingOrder or legacyOrder
+                end
+            elseif k == "fav_counter" and type(v) == "number" then
+                local currentCounter = BisTooltipAddon.db.profile.fav_counter or 0
+                BisTooltipAddon.db.profile.fav_counter = (currentCounter > v) and currentCounter or v
+            elseif k == "filter_specs" and type(v) == "table" then
+                BisTooltipAddon.db.profile.filter_specs = BisTooltipAddon.db.profile.filter_specs or {}
+                for class, specs in pairs(v) do
+                    if type(specs) == "table" then
+                        BisTooltipAddon.db.profile.filter_specs[class] = BisTooltipAddon.db.profile.filter_specs[class] or {}
+                        for spec, isFiltered in pairs(specs) do
+                            if BisTooltipAddon.db.profile.filter_specs[class][spec] == nil then
+                                BisTooltipAddon.db.profile.filter_specs[class][spec] = isFiltered
+                            end
+                        end
+                    end
+                end
+            elseif k ~= "migratedToProfile" and BisTooltipAddon.db.profile[k] == nil then
+                BisTooltipAddon.db.profile[k] = DeepCopyTable(v)
+            end
+        end
+        legacyChar.migratedToProfile = true
+    end
+
+    local dbVersion = tonumber(BisTooltipAddon.db.profile.version)
+    if not dbVersion or dbVersion < CURRENT_DB_VERSION then
+        if type(BisTooltipAddon.db.profile.favorites) == "table" then
+            local cleanFavorites = {}
+            local maxOrder = 0
+            for itemID, orderVal in pairs(BisTooltipAddon.db.profile.favorites) do
+                local numID = tonumber(itemID)
+                local order = (type(orderVal) == "number") and orderVal or 0
+                if numID and numID > 0 and orderVal then
+                    if not cleanFavorites[numID] or order > cleanFavorites[numID] then
+                        cleanFavorites[numID] = order
+                    end
+                    if order > maxOrder then
+                        maxOrder = order
+                    end
+                end
+            end
+            BisTooltipAddon.db.profile.favorites = cleanFavorites
+            local currentCounter = tonumber(BisTooltipAddon.db.profile.fav_counter) or 0
+            BisTooltipAddon.db.profile.fav_counter = (currentCounter > maxOrder) and currentCounter or maxOrder
+        end
+
+        if type(BisTooltipAddon.db.profile.highlight_spec) ~= "table" then BisTooltipAddon.db.profile.highlight_spec = {} end
+        if type(BisTooltipAddon.db.profile.filter_specs) ~= "table" then BisTooltipAddon.db.profile.filter_specs = {} end
+        if type(BisTooltipAddon.db.profile.fav_scroll_status) == "table" then
+            BisTooltipAddon.db.profile.fav_scroll_status.scrollvalue = 0
+        end
+        BisTooltipAddon.db.profile.version = CURRENT_DB_VERSION
+    end
+
+    local playerClassIdx = GetPlayerClassIndex()
     if not BisTooltipAddon.db.char.class_index then
-        BisTooltipAddon.db.char.class_index = GetPlayerClassIndex()
+        BisTooltipAddon.db.char.class_index = playerClassIdx
+    end
+    if not BisTooltipAddon.db.char.spec_index then
+        if BisTooltipAddon.db.profile.class_index == playerClassIdx and BisTooltipAddon.db.profile.spec_index then
+            BisTooltipAddon.db.char.spec_index = BisTooltipAddon.db.profile.spec_index
+        else
+            BisTooltipAddon.db.char.spec_index = 1
+        end
+    end
+    if not BisTooltipAddon.db.char.phase_index then
+        BisTooltipAddon.db.char.phase_index = BisTooltipAddon.db.profile.phase_index or 1
     end
 
-    if BisTooltipAddon.db.char.show_sources == nil then BisTooltipAddon.db.char.show_sources = true end
-    if BisTooltipAddon.db.char.show_item_states == nil then BisTooltipAddon.db.char.show_item_states = true end
-    if BisTooltipAddon.db.char.filter_class_names == nil then BisTooltipAddon.db.char.filter_class_names = false end
-    if BisTooltipAddon.db.char.tooltip_with_ctrl == nil then BisTooltipAddon.db.char.tooltip_with_ctrl = false end
+    if BisTooltipAddon.db.profile.show_sources == nil then BisTooltipAddon.db.profile.show_sources = true end
+    if BisTooltipAddon.db.profile.show_item_states == nil then BisTooltipAddon.db.profile.show_item_states = true end
+    if BisTooltipAddon.db.profile.filter_class_names == nil then BisTooltipAddon.db.profile.filter_class_names = false end
+    if BisTooltipAddon.db.profile.tooltip_with_ctrl == nil then BisTooltipAddon.db.profile.tooltip_with_ctrl = false end
 
-    if BisTooltipAddon.db.char.minimap == nil then
-        BisTooltipAddon.db.char.minimap = { hide = false }
+    if type(BisTooltipAddon.db.profile.minimap) ~= "table" then
+        BisTooltipAddon.db.profile.minimap = { hide = false }
     end
 
-    if not BisTooltipAddon.db.char.scroll_status then BisTooltipAddon.db.char.scroll_status = {} end
-    if not BisTooltipAddon.db.char.highlight_color then BisTooltipAddon.db.char.highlight_color = "purple" end
-    if BisTooltipAddon.db.char.use_class_colors == nil then BisTooltipAddon.db.char.use_class_colors = true end
-    if not BisTooltipAddon.db.char.source_color then BisTooltipAddon.db.char.source_color = "green" end
-    if BisTooltipAddon.db.char.dark_tooltips == nil then BisTooltipAddon.db.char.dark_tooltips = false end
-    if BisTooltipAddon.db.char.show_item_borders == nil then BisTooltipAddon.db.char.show_item_borders = true end
-    if BisTooltipAddon.db.char.show_ilvl == nil then BisTooltipAddon.db.char.show_ilvl = false end
-    if not BisTooltipAddon.db.char.ilvl_color then BisTooltipAddon.db.char.ilvl_color = "white" end
+    if type(BisTooltipAddon.db.profile.scroll_status) ~= "table" then BisTooltipAddon.db.profile.scroll_status = {} end
+    if not BisTooltipAddon.db.profile.highlight_color then BisTooltipAddon.db.profile.highlight_color = "purple" end
+    if BisTooltipAddon.db.profile.use_class_colors == nil then BisTooltipAddon.db.profile.use_class_colors = true end
+    if not BisTooltipAddon.db.profile.source_color then BisTooltipAddon.db.profile.source_color = "green" end
+    if BisTooltipAddon.db.profile.dark_tooltips == nil then BisTooltipAddon.db.profile.dark_tooltips = false end
+    if BisTooltipAddon.db.profile.show_item_borders == nil then BisTooltipAddon.db.profile.show_item_borders = true end
+    if BisTooltipAddon.db.profile.show_ilvl == nil then BisTooltipAddon.db.profile.show_ilvl = false end
+    if not BisTooltipAddon.db.profile.ilvl_color then BisTooltipAddon.db.profile.ilvl_color = "white" end
 
-    if not BisTooltipAddon.db.char.favorites then BisTooltipAddon.db.char.favorites = {} end
-
-    local favIcon = tonumber(BisTooltipAddon.db.char.favorite_icon)
-    if not favIcon or favIcon < 1 or favIcon > 8 then
-        BisTooltipAddon.db.char.favorite_icon = 1
+    local indScale = tonumber(BisTooltipAddon.db.profile.indicator_scale)
+    if not indScale or indScale < 0.75 or indScale > 1.50 then
+        BisTooltipAddon.db.profile.indicator_scale = 1.0
     else
-        BisTooltipAddon.db.char.favorite_icon = favIcon
+        BisTooltipAddon.db.profile.indicator_scale = indScale
     end
 
-    if not BisTooltipAddon.db.char.favorite_color then BisTooltipAddon.db.char.favorite_color = "yellow" end
-    BisTooltipAddon.db.char.fav_counter = tonumber(BisTooltipAddon.db.char.fav_counter) or 0
-    if not BisTooltipAddon.db.char.fav_scroll_status then BisTooltipAddon.db.char.fav_scroll_status = {} end
+    if type(BisTooltipAddon.db.profile.favorites) ~= "table" then BisTooltipAddon.db.profile.favorites = {} end
+
+    local favIcon = tonumber(BisTooltipAddon.db.profile.favorite_icon)
+    if not favIcon or favIcon < 1 or favIcon > 8 then
+        BisTooltipAddon.db.profile.favorite_icon = 1
+    else
+        BisTooltipAddon.db.profile.favorite_icon = favIcon
+    end
+
+    if not BisTooltipAddon.db.profile.favorite_color then BisTooltipAddon.db.profile.favorite_color = "yellow" end
+    local maxOrder = tonumber(BisTooltipAddon.db.profile.fav_counter) or 0
+    if type(BisTooltipAddon.db.profile.favorites) == "table" then
+        for _, order in pairs(BisTooltipAddon.db.profile.favorites) do
+            if type(order) == "number" and order > maxOrder then
+                maxOrder = order
+            end
+        end
+    end
+    BisTooltipAddon.db.profile.fav_counter = maxOrder
+    if type(BisTooltipAddon.db.profile.fav_scroll_status) ~= "table" then BisTooltipAddon.db.profile.fav_scroll_status = {} end
 end
 
 function BisTooltipAddon:openConfigDialog()
@@ -491,24 +621,62 @@ function BisTooltipAddon:addMapIcon()
                     end
                 end,
                 OnTooltipShow = function(tt)
-                    tt:AddLine(BisTooltipAddon.AddonNameAndVersion)
-                    tt:AddLine("|cffffff00Left click|r to open the BiS lists window")
-                    tt:AddLine("|cffffff00Shift + Left click|r to open Favorites list")
-                    tt:AddLine("|cffffff00Right click|r to open addon configuration window")
+                    local keyMain = GetBindingKey("BISTOOLTIP_TOGGLE_MAIN")
+                    local keyFav = GetBindingKey("BISTOOLTIP_TOGGLE_FAV")
+                    local strMain = keyMain and (" (|cffffffff" .. keyMain .. "|r)") or ""
+                    local strFav = keyFav and (" (|cffffffff" .. keyFav .. "|r)") or ""
+
+                    tt:AddLine("BiS-Tooltip Renewed")
+                    tt:AddLine("|cffffff00Left click|r" .. strMain .. " to open the BiS lists window")
+                    tt:AddLine("|cffffff00Shift + Left click|r" .. strFav .. " to open Favorites list")
+                    tt:AddLine("|cffffff00Right click|r to open addon config window")
                 end
             })
 
             if LDBIcon then
-                LDBIcon:Register(icon_name, PC_MinimapBtn, BisTooltipAddon.db.char.minimap)
+                LDBIcon:Register(icon_name, PC_MinimapBtn, BisTooltipAddon.db.profile.minimap)
             end
         end
     end
+end
+
+local function OnProfileChanged()
+    local icon_lib = LibStub("LibDBIcon-1.0", true)
+    if icon_lib and icon_lib:IsRegistered(icon_name) and icon_lib.Refresh then
+        icon_lib:Refresh(icon_name, BisTooltipAddon.db.profile.minimap)
+    end
+    if BisTooltipAddon.reloadData then
+        BisTooltipAddon:reloadData()
+    end
+    if BisTooltipAddon.RefreshFavoritesWindow then
+        BisTooltipAddon:RefreshFavoritesWindow()
+    end
+    if BisTooltipAddon.RefreshItemStateVisuals then
+        BisTooltipAddon:RefreshItemStateVisuals()
+    end
+    if BisTooltipAddon.ClearTooltipCache then
+        BisTooltipAddon:ClearTooltipCache()
+    end
+    updateMapIconButton()
 end
 
 function BisTooltipAddon:initConfig()
     BisTooltipAddon.db = LibStub("AceDB-3.0"):New("BisTooltipRenewedDB", db_defaults, "Default")
     migrateAddonDB()
     buildFilterSpecOptions()
+    configTable.name = BisTooltipAddon.AddonNameAndVersion or "BiS-Tooltip Renewed"
     LibStub("AceConfig-3.0"):RegisterOptionsTable(BisTooltipAddon.AceAddonName, configTable)
     AceConfigDialog:AddToBlizOptions(BisTooltipAddon.AceAddonName, BisTooltipAddon.AceAddonName)
+
+    local AceDBOptions = LibStub("AceDBOptions-3.0", true)
+    if AceDBOptions then
+        local profileOptions = AceDBOptions:GetOptionsTable(BisTooltipAddon.db)
+        local profileAppName = BisTooltipAddon.AceAddonName .. " Profiles"
+        LibStub("AceConfig-3.0"):RegisterOptionsTable(profileAppName, profileOptions)
+        AceConfigDialog:AddToBlizOptions(profileAppName, "Profiles", BisTooltipAddon.AceAddonName)
+    end
+
+    BisTooltipAddon.db.RegisterCallback(BisTooltipAddon, "OnProfileChanged", OnProfileChanged)
+    BisTooltipAddon.db.RegisterCallback(BisTooltipAddon, "OnProfileCopied", OnProfileChanged)
+    BisTooltipAddon.db.RegisterCallback(BisTooltipAddon, "OnProfileReset", OnProfileChanged)
 end

@@ -4,7 +4,8 @@ local AceGUI = LibStub("AceGUI-3.0")
 
 local GetItemInfo, GetSpellInfo, GetSpellLink = GetItemInfo, GetSpellInfo, GetSpellLink
 local tonumber, tostring, type, ipairs, pairs = tonumber, tostring, type, ipairs, pairs
-local wipe, tinsert, max = wipe, tinsert, math.max
+local wipe, tinsert, max, min = wipe, tinsert, math.max, math.min
+local stringfind = string.find
 
 local class = nil
 local spec = nil
@@ -32,16 +33,113 @@ local displayed_fav_widgets = {}
 local missing_widgets = {}
 local fetch_attempts = {}
 local displayed_item_widgets = {}
+local displayed_slot_rows = {}
 local scanner = CreateFrame("GameTooltip", "BisTooltipScanner", UIParent, "GameTooltipTemplate")
 local item_fetch_frame = CreateFrame("Frame")
 local fetch_timer = 0
-local MAX_FETCH_ATTEMPTS = 10
+local fetch_clock = 0
+local fetch_next_request = {}
+local FETCH_CHECK_INTERVAL = 0.05
+local FETCH_REQUEST_INTERVAL = 0.5
+local FETCH_SLOW_INTERVAL = 2
+local FETCH_FAST_REQUESTS = 6
+local FETCH_MAX_ATTEMPTS = 8
+
+local statusText = nil
+local statusTimer = 0
+local currentStatusState = "IDLE"
+local STATUS_FADE_DURATION = 1.0
+local fetch_has_failure = false
+
+local function UpdateStatusDisplay(state)
+    if not statusText then return end
+    if state == currentStatusState and state == "FETCHING" then return end
+    currentStatusState = state
+
+    if state == "FETCHING" then
+        statusTimer = 0
+        statusText:SetText("|cffffd100Loading items...|r")
+        statusText:SetAlpha(1)
+        statusText:Show()
+    elseif state == "SUCCESS" then
+        statusTimer = STATUS_FADE_DURATION * 2
+        statusText:SetText("|cff20ff20All items loaded|r")
+        statusText:SetAlpha(1)
+        statusText:Show()
+    elseif state == "WARNING" then
+        statusTimer = STATUS_FADE_DURATION + 1.5
+        statusText:SetText("|cffff2020Some items could not be loaded|r")
+        statusText:SetAlpha(1)
+        statusText:Show()
+    else
+        statusTimer = 0
+        statusText:SetText("")
+        statusText:Hide()
+    end
+end
+
+local favStatusText = nil
+local favStatusTimer = 0
+local currentFavStatusState = "IDLE"
+local favSwitchedText = false
+local FAV_FADE_OUT = 0.5
+local FAV_FADE_IN = 0.5
+
+local function UpdateFavStatusDisplay(state, count)
+    if not favStatusText then return end
+    if state == "FETCHING" then
+        if currentFavStatusState == "FETCHING" then return end
+        currentFavStatusState = "FETCHING"
+        favStatusTimer = 0
+        favSwitchedText = false
+        favStatusText:SetText("|cffffd100Loading items...|r")
+        favStatusText:SetAlpha(1)
+        favStatusText:Show()
+    elseif state == "SUCCESS" then
+        currentFavStatusState = "SUCCESS"
+        favStatusTimer = 1.0 + FAV_FADE_OUT + FAV_FADE_IN
+        favSwitchedText = false
+        favStatusText:SetText("|cff20ff20All items loaded|r")
+        favStatusText:SetAlpha(1)
+        favStatusText:Show()
+    elseif state == "WARNING" then
+        currentFavStatusState = "WARNING"
+        favStatusTimer = 1.5 + FAV_FADE_OUT + FAV_FADE_IN
+        favSwitchedText = false
+        favStatusText:SetText("|cffff2020Some items could not be loaded|r")
+        favStatusText:SetAlpha(1)
+        favStatusText:Show()
+    elseif state == "COUNT" then
+        if currentFavStatusState == "IDLE" or currentFavStatusState == "COUNT" then
+            currentFavStatusState = "COUNT"
+            favStatusTimer = 0
+            favStatusText:SetText("|cff888888Items: " .. (count or 0) .. "|r")
+            favStatusText:SetAlpha(1)
+            favStatusText:Show()
+        end
+    else
+        currentFavStatusState = "IDLE"
+        favStatusTimer = 0
+        favSwitchedText = false
+    end
+end
 
 local boe_cache = {}
-local function IsItemBoe(itemId)
-    if not itemId or itemId <= 0 then return false end
+local boe_queue = {}
+local boe_retry = {}
+local boe_next_retry = {}
+local boe_frame = CreateFrame("Frame")
+local boe_clock = 0
+local boe_timer = 0
+local BOE_SCAN_BATCH = 8
+local BOE_THROTTLE = 0.05
+local BOE_MAX_RETRIES = 5
+local BOE_RETRY_DELAY = 0.5
+
+local function ScanItemBoe(itemId)
+    if not itemId or itemId <= 0 then return false, true end
     if boe_cache[itemId] ~= nil then
-        return boe_cache[itemId]
+        return boe_cache[itemId], true
     end
     scanner:SetOwner(UIParent, "ANCHOR_NONE")
     scanner:ClearLines()
@@ -59,10 +157,100 @@ local function IsItemBoe(itemId)
     end
     scanner:ClearLines()
     scanner:Hide()
-    if numLines > 0 then
-        boe_cache[itemId] = isBoe
+
+    if isBoe then
+        boe_cache[itemId] = true
+        return true, true
+    elseif numLines >= 2 and GetItemInfo(itemId) then
+        boe_cache[itemId] = false
+        return false, true
     end
+
+    return false, false
+end
+
+local function QueueBoeCheck(itemId) end
+
+local function IsItemBoe(itemId)
+    local isBoe, known = ScanItemBoe(itemId)
+    if not known then QueueBoeCheck(itemId) end
     return isBoe
+end
+
+local function ApplyBoeMark(widget, isBoe)
+    if not widget or not widget.frame or not widget.frame.bisBoeMark then return end
+    local size = widget.image and widget.image:GetWidth() or 40
+    if isBoe and size >= 30 then
+        local scale = (BisTooltipAddon.db and BisTooltipAddon.db.profile and BisTooltipAddon.db.profile.indicator_scale) or 1.0
+        widget.frame.bisBoeMark:SetWidth(12 * scale)
+        widget.frame.bisBoeMark:SetHeight(12 * scale)
+        widget.frame.bisBoeMark:Show()
+    else
+        widget.frame.bisBoeMark:Hide()
+    end
+end
+
+local function ApplyBoeToItem(itemId, isBoe)
+    for i = 1, #displayed_item_widgets do
+        local widget = displayed_item_widgets[i]
+        if widget and widget.item_id == itemId then
+            ApplyBoeMark(widget, isBoe)
+        end
+    end
+    for i = 1, #displayed_fav_widgets do
+        local widget = displayed_fav_widgets[i]
+        if widget and widget.item_id == itemId then
+            ApplyBoeMark(widget, isBoe)
+        end
+    end
+end
+
+local function ProcessBoeQueue(self, elapsed)
+    boe_clock = boe_clock + (elapsed or 0)
+    boe_timer = boe_timer + (elapsed or 0)
+    if boe_timer < BOE_THROTTLE then return end
+    boe_timer = 0
+
+    local now = boe_clock
+    local budget = BOE_SCAN_BATCH
+    for itemId in pairs(boe_queue) do
+        if budget <= 0 then break end
+        local nextRetry = boe_next_retry[itemId] or 0
+        if now >= nextRetry then
+            local isBoe, known = ScanItemBoe(itemId)
+            if known then
+                boe_queue[itemId] = nil
+                boe_retry[itemId] = nil
+                boe_next_retry[itemId] = nil
+                ApplyBoeToItem(itemId, isBoe)
+            else
+                local retries = (boe_retry[itemId] or 0) + 1
+                if retries >= BOE_MAX_RETRIES then
+                    boe_queue[itemId] = nil
+                    boe_retry[itemId] = nil
+                    boe_next_retry[itemId] = nil
+                else
+                    boe_retry[itemId] = retries
+                    boe_next_retry[itemId] = now + BOE_RETRY_DELAY
+                end
+            end
+            budget = budget - 1
+        end
+    end
+    if not next(boe_queue) then
+        boe_frame:SetScript("OnUpdate", nil)
+        boe_timer = 0
+        boe_clock = 0
+    end
+end
+
+QueueBoeCheck = function(itemId)
+    if not itemId or itemId <= 0 or boe_cache[itemId] ~= nil then return end
+    if boe_queue[itemId] then return end
+    boe_queue[itemId] = true
+    if not boe_frame:GetScript("OnUpdate") then
+        boe_frame:SetScript("OnUpdate", ProcessBoeQueue)
+    end
 end
 
 local checkmark_path = "Interface\\AddOns\\" .. addonName .. "\\checkmark-16.tga"
@@ -94,6 +282,7 @@ end
 local EMPTY_TABLE = {}
 
 local ROW_BACKDROP = {
+    bgFile = "Interface\\Buttons\\WHITE8X8",
     edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
     tile = false, tileSize = 16, edgeSize = 12,
     insets = { left = 3, right = 3, top = 3, bottom = 3 }
@@ -105,14 +294,19 @@ local ENHANCEMENT_TABLE_LAYOUT = {
 }
 
 local FAV_ROW_TABLE_LAYOUT = {
-    columns = {36, 336, 26},
+    columns = {36, 314, 26},
     space = 4, align = "middle"
 }
 
+local currentFavSortData = nil
 local function CompareFavorites(a, b)
-    local favData = BisTooltipAddon.db and BisTooltipAddon.db.char and BisTooltipAddon.db.char.favorites
-    local orderA = (favData and type(favData[a]) == "number") and favData[a] or 0
-    local orderB = (favData and type(favData[b]) == "number") and favData[b] or 0
+    local orderA = currentFavSortData and (currentFavSortData[a] or currentFavSortData[tostring(a)]) or 0
+    local orderB = currentFavSortData and (currentFavSortData[b] or currentFavSortData[tostring(b)]) or 0
+    orderA = (type(orderA) == "number") and orderA or 0
+    orderB = (type(orderB) == "number") and orderB or 0
+    if orderA == orderB then
+        return a > b
+    end
     return orderA > orderB
 end
 
@@ -121,11 +315,11 @@ StaticPopupDialogs["BISTOOLTIP_CONFIRM_CLEAR_FAVORITES"] = {
     button1 = YES,
     button2 = NO,
     OnAccept = function()
-        if BisTooltipAddon.db and BisTooltipAddon.db.char then
-            wipe(BisTooltipAddon.db.char.favorites)
-            BisTooltipAddon.db.char.fav_counter = 0
-            if BisTooltipAddon.db.char.fav_scroll_status then
-                BisTooltipAddon.db.char.fav_scroll_status.scrollvalue = 0
+        if BisTooltipAddon.db and BisTooltipAddon.db.profile then
+            wipe(BisTooltipAddon.db.profile.favorites)
+            BisTooltipAddon.db.profile.fav_counter = 0
+            if BisTooltipAddon.db.profile.fav_scroll_status then
+                BisTooltipAddon.db.profile.fav_scroll_status.scrollvalue = 0
             end
         end
         if BisTooltipAddon.RefreshFavoritesWindow then
@@ -167,6 +361,7 @@ local function SetupSeparatorHeading(sep)
 end
 
 local function HandleItemTooltip(widget, item_id)
+    if not widget or not widget.frame or not item_id or item_id <= 0 then return end
     GameTooltip:SetOwner(widget.frame, "ANCHOR_NONE")
 
     local right = widget.frame:GetRight() or 0
@@ -183,19 +378,20 @@ local function HandleItemTooltip(widget, item_id)
     GameTooltip:SetHyperlink(validLink)
 
     if BisTooltipAddon:IsFavorite(item_id) then
-        GameTooltip:AddLine("|cff888888(Right-click to remove from Favorites)|r")
+        GameTooltip:AddLine("|cff888888<Right-click to remove from Favorites>|r")
     else
         GameTooltip:AddLine("|cff888888<Right-click to add to Favorites>|r")
     end
 
     GameTooltip:Show()
     if IsShiftKeyDown() or IsModifiedClick("COMPAREITEMS") or (GetCVarBool and GetCVarBool("alwaysCompareItems")) then
-        local oldThis = this
-        this = GameTooltip
-        GameTooltip_ShowCompareItem()
-        this = oldThis
+        GameTooltip_ShowCompareItem(GameTooltip)
     end
 end
+
+local memo_state = {}
+local memo_fav = {}
+local memo_ilvl = {}
 
 local function ApplyItemStateVisuals(widget, item_id, is_missing)
     local size = widget.image and widget.image:GetWidth() or 40
@@ -209,47 +405,99 @@ local function ApplyItemStateVisuals(widget, item_id, is_missing)
         return
     end
 
-    local markIndex = (BisTooltipAddon.db and BisTooltipAddon.db.char and BisTooltipAddon.db.char.favorite_icon) or 1
+    local markIndex = (BisTooltipAddon.db and BisTooltipAddon.db.profile and BisTooltipAddon.db.profile.favorite_icon) or 1
     if markIndex < 1 or markIndex > 8 then markIndex = 1 end
+    local scale = (BisTooltipAddon.db and BisTooltipAddon.db.profile and BisTooltipAddon.db.profile.indicator_scale) or 1.0
 
     if widget.frame.bisILvl then
-        local db = BisTooltipAddon.db and BisTooltipAddon.db.char
+        local db = BisTooltipAddon.db and BisTooltipAddon.db.profile
         local showILvl = db and (db.show_ilvl ~= false)
+        local colorKey = (db and db.ilvl_color) or "white"
 
         if showILvl and not is_missing and item_id and item_id > 0 then
-            local _, _, _, itemLevel = GetItemInfo(item_id)
+            local itemLevel = memo_ilvl and memo_ilvl[item_id]
+            if itemLevel == nil then
+                local name, _, _, ilvl = GetItemInfo(item_id)
+                if name and ilvl and ilvl > 0 then
+                    itemLevel = ilvl
+                else
+                    itemLevel = 0
+                end
+                if memo_ilvl then memo_ilvl[item_id] = itemLevel end
+            end
+
             if itemLevel and itemLevel > 0 then
-                local colorKey = (db and db.ilvl_color) or "white"
                 local hex = (BisTooltip_HexColors and BisTooltip_HexColors[colorKey]) or "FFFFFF"
-                widget.frame.bisILvl:SetText("|cFF" .. hex .. itemLevel .. "|r")
+                local text = "|cFF" .. hex .. itemLevel .. "|r"
+                if widget._lastILvlText ~= text then
+                    widget._lastILvlText = text
+                    widget.frame.bisILvl:SetText(text)
+                end
                 widget.frame.bisILvl:Show()
             else
+                widget._lastILvlText = nil
                 widget.frame.bisILvl:Hide()
             end
         else
+            widget._lastILvlText = nil
             widget.frame.bisILvl:Hide()
         end
     end
 
     if widget.frame.bisStarMark then
-        if BisTooltipAddon:IsFavorite(item_id) then
-            widget.frame.bisStarMark:SetTexture("Interface\\TargetingFrame\\UI-RaidTargetingIcons")
-            SetRaidTargetIconTexture(widget.frame.bisStarMark, markIndex)
+        local isFav = memo_fav and memo_fav[item_id]
+        if isFav == nil then
+            isFav = BisTooltipAddon:IsFavorite(item_id)
+            if memo_fav then memo_fav[item_id] = isFav end
+        end
+
+        if isFav then
+            if widget._lastFav ~= true or widget._lastMarkIndex ~= markIndex or widget._lastIndicatorScale ~= scale then
+                widget._lastFav = true
+                widget._lastMarkIndex = markIndex
+                widget._lastIndicatorScale = scale
+                widget.frame.bisStarMark:SetWidth(14 * scale)
+                widget.frame.bisStarMark:SetHeight(14 * scale)
+                widget.frame.bisStarMark:SetTexture("Interface\\TargetingFrame\\UI-RaidTargetingIcons")
+                SetRaidTargetIconTexture(widget.frame.bisStarMark, markIndex)
+            end
             widget.frame.bisStarMark:Show()
         else
+            widget._lastFav = false
             widget.frame.bisStarMark:Hide()
         end
     end
 
+    if widget.frame.bisBoeMark then
+        widget.frame.bisBoeMark:SetWidth(12 * scale)
+        widget.frame.bisBoeMark:SetHeight(12 * scale)
+    end
+
     if is_missing then
+        widget._lastState = -1
         widget.image:SetVertexColor(1, 1, 1, 1)
         widget.frame.bisCheckMark:Hide()
         if widget.frame.bisBorder then widget.frame.bisBorder:Hide() end
         return
     end
 
-    local state = BisTooltipAddon:GetItemState(item_id)
-    local show_borders = BisTooltipAddon.db.char.show_item_borders
+    local show_item_states = not (BisTooltipAddon.db and BisTooltipAddon.db.profile and BisTooltipAddon.db.profile.show_item_states == false)
+    local state = memo_state and memo_state[item_id]
+    if state == nil then
+        state = BisTooltipAddon:GetItemState(item_id)
+        if memo_state then memo_state[item_id] = state end
+    end
+    if not show_item_states and (state == 1 or state == 3) then
+        state = 0
+    end
+    local show_borders = BisTooltipAddon.db.profile.show_item_borders
+
+    if widget._lastState == state and widget._lastShowBorders == show_borders and widget._lastIndicatorScale == scale then
+        return
+    end
+    widget._lastState = state
+    widget._lastShowBorders = show_borders
+    widget._lastIndicatorScale = scale
 
     if state == 2 then
         widget.image:SetVertexColor(0.35, 0.35, 0.35, 1)
@@ -275,8 +523,8 @@ local function ApplyItemStateVisuals(widget, item_id, is_missing)
         local iconTexture = (state == 3) and "Interface\\Icons\\inv_box_01" or "Interface\\Icons\\inv_misc_bag_08"
         widget.frame.bisCheckMark:SetTexture(iconTexture)
         widget.frame.bisCheckMark:SetTexCoord(0.08, 0.92, 0.08, 0.92)
-        widget.frame.bisCheckMark:SetWidth(16)
-        widget.frame.bisCheckMark:SetHeight(16)
+        widget.frame.bisCheckMark:SetWidth(16 * scale)
+        widget.frame.bisCheckMark:SetHeight(16 * scale)
         widget.frame.bisCheckMark:ClearAllPoints()
         widget.frame.bisCheckMark:SetPoint("BOTTOMRIGHT", -2, 6)
         widget.frame.bisCheckMark:Show()
@@ -297,12 +545,60 @@ local function ApplyItemStateVisuals(widget, item_id, is_missing)
     end
 end
 
+local function UpdateFavoriteLabel(item_id)
+    for i = 1, #displayed_fav_widgets do
+        local widget = displayed_fav_widgets[i]
+        if widget and widget.item_id == item_id then
+            local btn = widget.favNameButton
+            if btn and btn.titleText then
+                local itemName, _, itemRarity, _, _, _, itemSubType, _, equipSlot = GetItemInfo(item_id)
+                if itemName then
+                    local r, g, b = GetItemQualityColor(itemRarity or 1)
+                    btn.titleText:SetText(itemName)
+                    btn.titleText:SetTextColor(r, g, b, 1)
+
+                    local slotText = (equipSlot and equipSlot ~= "" and _G[equipSlot]) or itemSubType
+                    btn.titleText:ClearAllPoints()
+                    if slotText and slotText ~= "" and btn.subText then
+                        btn.titleText:SetPoint("TOPLEFT", btn, "TOPLEFT", 8, -5)
+                        btn.titleText:SetPoint("RIGHT", btn, "RIGHT", -6, 0)
+                        btn.titleText:SetHeight(14)
+                        btn.titleText:SetJustifyV("TOP")
+
+                        btn.subText:ClearAllPoints()
+                        btn.subText:SetPoint("BOTTOMLEFT", btn, "BOTTOMLEFT", 8, 5)
+                        btn.subText:SetPoint("RIGHT", btn, "RIGHT", -6, 0)
+                        btn.subText:SetHeight(12)
+                        btn.subText:SetText(slotText)
+                        btn.subText:Show()
+                    else
+                        btn.titleText:SetPoint("LEFT", btn, "LEFT", 8, 0)
+                        btn.titleText:SetPoint("RIGHT", btn, "RIGHT", -6, 0)
+                        btn.titleText:SetHeight(14)
+                        btn.titleText:SetJustifyV("MIDDLE")
+                        if btn.subText then
+                            btn.subText:SetText("")
+                            btn.subText:Hide()
+                        end
+                    end
+                    btn.titleText:Show()
+                end
+            end
+        end
+    end
+end
+
 local function RefreshItemStateVisuals()
+    wipe(memo_state)
+    wipe(memo_fav)
+    wipe(memo_ilvl)
+
     if main_frame and main_frame.frame:IsShown() then
         for i = 1, #displayed_item_widgets do
             local widget = displayed_item_widgets[i]
             if widget and widget.frame and widget.item_id then
-                ApplyItemStateVisuals(widget, widget.item_id, false)
+                local is_missing = not GetItemInfo(widget.item_id)
+                ApplyItemStateVisuals(widget, widget.item_id, is_missing)
             end
         end
     end
@@ -310,81 +606,267 @@ local function RefreshItemStateVisuals()
         for i = 1, #displayed_fav_widgets do
             local widget = displayed_fav_widgets[i]
             if widget and widget.frame and widget.item_id then
-                ApplyItemStateVisuals(widget, widget.item_id, false)
+                local is_missing = not GetItemInfo(widget.item_id)
+                ApplyItemStateVisuals(widget, widget.item_id, is_missing)
             end
         end
     end
+
+    wipe(memo_state)
+    wipe(memo_fav)
+    wipe(memo_ilvl)
 end
 BisTooltipAddon.RefreshItemStateVisuals = RefreshItemStateVisuals
+
+local favs_dirty = true
+
+function BisTooltipAddon:RefreshFavoriteForItem(item_id)
+    favs_dirty = true
+    if not item_id then return end
+    item_id = tonumber(item_id)
+    if not item_id then return end
+    local altID = self.GetAltItemID and self:GetAltItemID(item_id)
+
+    wipe(memo_state)
+    wipe(memo_fav)
+    wipe(memo_ilvl)
+
+    if main_frame and main_frame.frame:IsShown() then
+        for i = 1, #displayed_item_widgets do
+            local widget = displayed_item_widgets[i]
+            if widget and widget.frame and (widget.item_id == item_id or (altID and widget.item_id == altID)) then
+                local is_missing = not GetItemInfo(widget.item_id)
+                ApplyItemStateVisuals(widget, widget.item_id, is_missing)
+            end
+        end
+    end
+
+    if favorites_frame and favorites_frame.frame:IsShown() then
+        for i = 1, #displayed_fav_widgets do
+            local widget = displayed_fav_widgets[i]
+            if widget and widget.frame and (widget.item_id == item_id or (altID and widget.item_id == altID)) then
+                local is_missing = not GetItemInfo(widget.item_id)
+                ApplyItemStateVisuals(widget, widget.item_id, is_missing)
+            end
+        end
+    end
+
+    wipe(memo_state)
+    wipe(memo_fav)
+    wipe(memo_ilvl)
+end
 
 function BisTooltipAddon:IsWindowOpen()
     return (main_frame and main_frame.frame and main_frame.frame:IsShown())
         or (favorites_frame and favorites_frame.frame and favorites_frame.frame:IsShown())
 end
 
+local mainSearchQuery = ""
+local favSearchQuery = ""
+local ApplyMainSearchInstant
+local ApplyFavSearchInstant
+
+local itemNameLowerCache = {}
+local function GetItemNameLower(itemId)
+    if not itemId or itemId <= 0 then return nil end
+    local lower = itemNameLowerCache[itemId]
+    if not lower then
+        local name = GetItemInfo(itemId)
+        if name then
+            lower = string.lower(name)
+            itemNameLowerCache[itemId] = lower
+        end
+    end
+    return lower
+end
+
 local function ProcessMissingItems(self, elapsed)
-    fetch_timer = fetch_timer + elapsed
-    if fetch_timer <= 0.25 then return end
-    fetch_timer = 0
+    if statusTimer > 0 then
+        statusTimer = statusTimer - elapsed
+        if statusTimer <= 0 then
+            UpdateStatusDisplay("IDLE")
+        elseif statusTimer <= STATUS_FADE_DURATION and statusText then
+            statusText:SetAlpha(statusTimer / STATUS_FADE_DURATION)
+        end
+    end
 
-    local hasRemaining = false
-    local resolvedAny = false
-    local ownerSet = false
+    if favStatusTimer > 0 then
+        favStatusTimer = favStatusTimer - elapsed
+        local fadeTotal = FAV_FADE_OUT + FAV_FADE_IN
 
-    for item_id, widgets in pairs(missing_widgets) do
-        local itemName, _, _, _, _, _, _, _, _, itemIcon = GetItemInfo(item_id)
-
-        if itemName then
-            resolvedAny = true
-            local isBoe = IsItemBoe(item_id)
-            for _, widget in ipairs(widgets) do
-                if widget and widget.frame and widget.frame:IsShown() and widget.item_id == item_id then
-                    widget:SetImage(itemIcon)
-                    local wSize = widget.image and widget.image:GetWidth() or 40
-                    if isBoe and wSize >= 30 then
-                        widget.frame.bisBoeMark:Show()
-                    else
-                        widget.frame.bisBoeMark:Hide()
-                    end
-                    ApplyItemStateVisuals(widget, item_id, false)
+        if favStatusTimer <= 0 then
+            favStatusTimer = 0
+            currentFavStatusState = "COUNT"
+            if not favSwitchedText then
+                favSwitchedText = true
+                local favCount = 0
+                local favData = BisTooltipAddon.db and BisTooltipAddon.db.profile and BisTooltipAddon.db.profile.favorites
+                if favData then
+                    for _, v in pairs(favData) do if v then favCount = favCount + 1 end end
+                end
+                if favStatusText then
+                    favStatusText:SetText("|cff888888Items: " .. favCount .. "|r")
                 end
             end
-            missing_widgets[item_id] = nil
-            fetch_attempts[item_id] = nil
-        else
-            local attempts = (fetch_attempts[item_id] or 0) + 1
-            fetch_attempts[item_id] = attempts
-
-            if attempts >= MAX_FETCH_ATTEMPTS then
-                missing_widgets[item_id] = nil
-                fetch_attempts[item_id] = nil
-            else
-                hasRemaining = true
-                if not ownerSet then
-                    scanner:SetOwner(UIParent, "ANCHOR_NONE")
-                    ownerSet = true
+            if favStatusText then favStatusText:SetAlpha(1) end
+        elseif favStatusTimer <= FAV_FADE_IN then
+            if not favSwitchedText then
+                favSwitchedText = true
+                local favCount = 0
+                local favData = BisTooltipAddon.db and BisTooltipAddon.db.profile and BisTooltipAddon.db.profile.favorites
+                if favData then
+                    for _, v in pairs(favData) do if v then favCount = favCount + 1 end end
                 end
-                scanner:SetHyperlink("item:" .. item_id .. ":0:0:0:0:0:0:0")
-                scanner:ClearLines()
-                scanner:Hide()
+                if favStatusText then
+                    favStatusText:SetText("|cff888888Items: " .. favCount .. "|r")
+                end
+            end
+            if favStatusText then
+                favStatusText:SetAlpha((FAV_FADE_IN - favStatusTimer) / FAV_FADE_IN)
+            end
+        elseif favStatusTimer <= fadeTotal then
+            if favStatusText then
+                favStatusText:SetAlpha((favStatusTimer - FAV_FADE_IN) / FAV_FADE_OUT)
             end
         end
     end
 
-    if not hasRemaining then
-        item_fetch_frame:SetScript("OnUpdate", nil)
+    local hasMissing = (next(missing_widgets) ~= nil)
+
+    if hasMissing then
+        fetch_clock = fetch_clock + elapsed
+        fetch_timer = fetch_timer + elapsed
+        if fetch_timer >= FETCH_CHECK_INTERVAL then
+            fetch_timer = 0
+
+            local now = fetch_clock
+            local ownerSet = false
+            local resolvedAny = false
+
+            for item_id, widgets in pairs(missing_widgets) do
+                local nextRequest = fetch_next_request[item_id] or 0
+                if now >= nextRequest then
+                    local itemName, _, _, _, _, _, _, _, _, itemIcon = GetItemInfo(item_id)
+
+                    if itemName then
+                        resolvedAny = true
+                        itemNameLowerCache[item_id] = string.lower(itemName)
+                        for _, widget in ipairs(widgets) do
+                            if widget and widget.frame and widget.item_id == item_id then
+                                widget:SetImage(itemIcon)
+                                ApplyItemStateVisuals(widget, item_id, false)
+                            end
+                        end
+                        local cachedBoe = boe_cache[item_id]
+                        if cachedBoe == true then
+                            ApplyBoeToItem(item_id, true)
+                        elseif cachedBoe == nil then
+                            QueueBoeCheck(item_id)
+                        end
+                        if favorites_frame and favorites_frame.frame:IsShown() then
+                            UpdateFavoriteLabel(item_id)
+                        end
+                        missing_widgets[item_id] = nil
+                        fetch_attempts[item_id] = nil
+                        fetch_next_request[item_id] = nil
+                    else
+                        local attempts = (fetch_attempts[item_id] or 0) + 1
+                        fetch_attempts[item_id] = attempts
+
+                        if attempts > FETCH_MAX_ATTEMPTS then
+                            missing_widgets[item_id] = nil
+                            fetch_attempts[item_id] = nil
+                            fetch_next_request[item_id] = nil
+                            fetch_has_failure = true
+                        else
+                            if attempts > FETCH_FAST_REQUESTS then
+                                fetch_next_request[item_id] = now + FETCH_SLOW_INTERVAL
+                            else
+                                fetch_next_request[item_id] = now + FETCH_REQUEST_INTERVAL
+                            end
+
+                            if not ownerSet then
+                                scanner:SetOwner(UIParent, "ANCHOR_NONE")
+                                ownerSet = true
+                            end
+                            scanner:SetHyperlink("item:" .. item_id .. ":0:0:0:0:0:0:0")
+                            scanner:ClearLines()
+                            scanner:Hide()
+                        end
+                    end
+                end
+            end
+
+            if resolvedAny then
+                if mainSearchQuery ~= "" and main_frame and main_frame.frame:IsShown() then
+                    ApplyMainSearchInstant()
+                end
+                if favSearchQuery ~= "" and favorites_frame and favorites_frame.frame:IsShown() then
+                    ApplyFavSearchInstant()
+                end
+            end
+        end
     end
 
-    if resolvedAny and favorites_frame and favorites_frame.frame:IsShown() then
-        BisTooltipAddon:RefreshFavoritesWindow()
+    local isStillLoading = (next(missing_widgets) ~= nil) or (next(boe_queue) ~= nil)
+
+    if not isStillLoading then
+        if currentStatusState == "FETCHING" then
+            UpdateStatusDisplay(fetch_has_failure and "WARNING" or "SUCCESS")
+        end
+        if currentFavStatusState == "FETCHING" then
+            UpdateFavStatusDisplay(fetch_has_failure and "WARNING" or "SUCCESS")
+        end
+        if statusTimer <= 0 and favStatusTimer <= 0 then
+            item_fetch_frame:SetScript("OnUpdate", nil)
+        end
     end
 end
 
+local function HasFavPendingItems()
+    if not (favorites_frame and favorites_frame.frame and favorites_frame.frame:IsShown()) then return false end
+    for i = 1, #displayed_fav_widgets do
+        local w = displayed_fav_widgets[i]
+        if w and w.item_id then
+            if missing_widgets[w.item_id] or boe_queue[w.item_id] then
+                return true
+            end
+        end
+    end
+    return false
+end
+
+local function HasMainPendingItems()
+    if not (main_frame and main_frame.frame and main_frame.frame:IsShown()) then return false end
+    for i = 1, #displayed_item_widgets do
+        local w = displayed_item_widgets[i]
+        if w and w.item_id then
+            if missing_widgets[w.item_id] or boe_queue[w.item_id] then
+                return true
+            end
+        end
+    end
+    return false
+end
+
 local function StartItemFetch()
-    if next(missing_widgets) then
+    local hasMissing = (next(missing_widgets) ~= nil)
+    local hasBoe = (next(boe_queue) ~= nil)
+
+    if hasMissing or hasBoe then
+        fetch_has_failure = false
+        if HasMainPendingItems() then
+            UpdateStatusDisplay("FETCHING")
+        end
+        if HasFavPendingItems() then
+            UpdateFavStatusDisplay("FETCHING")
+        end
         item_fetch_frame:SetScript("OnUpdate", ProcessMissingItems)
     else
-        item_fetch_frame:SetScript("OnUpdate", nil)
+        UpdateStatusDisplay("IDLE")
+        if not (favorites_frame and favorites_frame.frame and favorites_frame.frame:IsShown() and favStatusTimer > 0) then
+            item_fetch_frame:SetScript("OnUpdate", nil)
+        end
     end
 end
 
@@ -424,7 +906,9 @@ local function createItemFrame(item_id, size)
             if #list == 0 then
                 missing_widgets[id] = nil
                 fetch_attempts[id] = nil
+                fetch_next_request[id] = nil
                 if not next(missing_widgets) then
+                    UpdateStatusDisplay("IDLE")
                     item_fetch_frame:SetScript("OnUpdate", nil)
                 end
             end
@@ -439,6 +923,13 @@ local function createItemFrame(item_id, size)
         if self.frame.bisBorder then self.frame.bisBorder:Hide() end
         if self.frame.bisStarMark then self.frame.bisStarMark:Hide() end
         if self.frame.bisILvl then self.frame.bisILvl:Hide() end
+        self.frame:SetAlpha(1.0)
+        self._lastState = nil
+        self._lastShowBorders = nil
+        self._lastFav = nil
+        self._lastMarkIndex = nil
+        self._lastILvlText = nil
+        self._lastIndicatorScale = nil
         self.item_id = nil
     end)
     item_frame:SetImageSize(size, size)
@@ -460,10 +951,12 @@ local function createItemFrame(item_id, size)
     end
     item_frame.frame.bisCheckMark:SetDrawLayer("OVERLAY", 1)
 
+    local scale = (BisTooltipAddon.db and BisTooltipAddon.db.profile and BisTooltipAddon.db.profile.indicator_scale) or 1.0
+
     if not item_frame.frame.bisBoeMark then
         item_frame.frame.bisBoeMark = item_frame.frame:CreateTexture(nil, "OVERLAY")
-        item_frame.frame.bisBoeMark:SetWidth(12)
-        item_frame.frame.bisBoeMark:SetHeight(12)
+        item_frame.frame.bisBoeMark:SetWidth(12 * scale)
+        item_frame.frame.bisBoeMark:SetHeight(12 * scale)
         item_frame.frame.bisBoeMark:SetPoint("TOPRIGHT", -2, -5)
         item_frame.frame.bisBoeMark:SetTexture("Interface\\Icons\\INV_Misc_Coin_01")
     end
@@ -475,8 +968,8 @@ local function createItemFrame(item_id, size)
     end
     item_frame.frame.bisStarMark:SetDrawLayer("OVERLAY", 3)
     local starSize = (size < 30) and 10 or 14
-    item_frame.frame.bisStarMark:SetWidth(starSize)
-    item_frame.frame.bisStarMark:SetHeight(starSize)
+    item_frame.frame.bisStarMark:SetWidth(starSize * scale)
+    item_frame.frame.bisStarMark:SetHeight(starSize * scale)
     item_frame.frame.bisStarMark:ClearAllPoints()
     item_frame.frame.bisStarMark:SetPoint("TOPLEFT", item_frame.image, "TOPLEFT", -2, 2)
 
@@ -489,18 +982,21 @@ local function createItemFrame(item_id, size)
     end
 
     item_frame:SetCallback("OnClick", function(widget, _, button)
+        local currentID = widget.item_id or item_id
+        if not currentID or currentID <= 0 then return end
+
         if button == "RightButton" then
-            BisTooltipAddon:ToggleFavorite(item_id)
+            BisTooltipAddon:ToggleFavorite(currentID)
             if widget.frame and widget.frame:IsShown() and GameTooltip:IsOwned(widget.frame) then
-                HandleItemTooltip(widget, item_id)
+                HandleItemTooltip(widget, currentID)
             else
                 GameTooltip:Hide()
             end
             return
         end
 
-        local _, link = GetItemInfo(item_id)
-        local validLink = link or ("item:" .. item_id .. ":0:0:0:0:0:0:0")
+        local _, link = GetItemInfo(currentID)
+        local validLink = link or ("item:" .. currentID .. ":0:0:0:0:0:0:0")
         if IsModifiedClick() then
             HandleModifiedItemClick(validLink)
         else
@@ -509,7 +1005,10 @@ local function createItemFrame(item_id, size)
     end)
 
     item_frame:SetCallback("OnEnter", function(widget)
-        HandleItemTooltip(widget, item_id)
+        local currentID = widget.item_id or item_id
+        if currentID and currentID > 0 then
+            HandleItemTooltip(widget, currentID)
+        end
     end)
 
     item_frame:SetCallback("OnLeave", function() GameTooltip:Hide() end)
@@ -528,10 +1027,16 @@ local function createItemFrame(item_id, size)
     end
 
     item_frame:SetImage(itemIcon)
-    if size >= 30 and IsItemBoe(item_id) then
-        item_frame.frame.bisBoeMark:Show()
-    else
-        item_frame.frame.bisBoeMark:Hide()
+    local cachedBoe = boe_cache[item_id]
+    if item_frame.frame.bisBoeMark then
+        if size >= 30 and cachedBoe == true then
+            item_frame.frame.bisBoeMark:Show()
+        else
+            item_frame.frame.bisBoeMark:Hide()
+        end
+    end
+    if size >= 30 and cachedBoe == nil then
+        QueueBoeCheck(item_id)
     end
     ApplyItemStateVisuals(item_frame, item_id, false)
 
@@ -606,6 +1111,9 @@ end
 
 local function createEnhancementsFrame(enhancements)
     local frame = AceGUI:Create("SimpleGroup")
+    if frame.nameButton then frame.nameButton:Hide() end
+    if frame.removeBtn then frame.removeBtn:Hide() end
+    if frame.frame and frame.frame.favCard then frame.frame.favCard:Hide() end
     frame:SetLayout("Table")
     frame:SetWidth(75)
     frame:SetHeight(18)
@@ -641,7 +1149,7 @@ local SLOT_DISPLAY_ORDER = {
     "Trinket 1", "Trinket 2", "Weapon", "Off hand", "Ranged", "Relic"
 }
 
-local HEADER_TEXTS = {"BIS", "Alt 1", "Alt 2", "Alt 3", "Alt 4", "Alt 5"}
+local HEADER_TEXTS = {"BiS", "Alt 1", "Alt 2", "Alt 3", "Alt 4", "Alt 5"}
 
 local function drawItemSlot(slot_name, item_list)
     local f = AceGUI:Create("Label")
@@ -651,20 +1159,28 @@ local function drawItemSlot(slot_name, item_list)
     f.label:SetJustifyH("LEFT")
     spec_frame:AddChild(f)
 
+    local slotRow = {
+        labelWidget = f,
+        items = {}
+    }
+    displayed_slot_rows[#displayed_slot_rows + 1] = slotRow
+
     local enhs = EMPTY_TABLE
     local enh_class = BisTooltip_Enhancements and (BisTooltip_Enhancements[class] or BisTooltip_Enhancements[GetCleanClassName(class)])
     if enh_class and enh_class[spec] and enh_class[spec][phase] then
         enhs = enh_class[spec][phase][slot_name] or EMPTY_TABLE
     end
 
+    local enhWidget
     if #enhs > 0 then
-        spec_frame:AddChild(createEnhancementsFrame(enhs))
+        enhWidget = createEnhancementsFrame(enhs)
     else
-        local enhSpacer = AceGUI:Create("Label")
-        enhSpacer:SetText(" ")
-        enhSpacer:SetWidth(75)
-        spec_frame:AddChild(enhSpacer)
+        enhWidget = AceGUI:Create("Label")
+        enhWidget:SetText(" ")
+        enhWidget:SetWidth(75)
     end
+    spec_frame:AddChild(enhWidget)
+    slotRow.enhWidget = enhWidget
 
     local count = 0
     for _, original_item_id in ipairs(item_list) do
@@ -675,6 +1191,7 @@ local function drawItemSlot(slot_name, item_list)
         local item_widget = createItemFrame(display_id, 40)
         if display_id > 0 then
             displayed_item_widgets[#displayed_item_widgets + 1] = item_widget
+            slotRow.items[#slotRow.items + 1] = item_widget
         end
         spec_frame:AddChild(item_widget)
         count = count + 1
@@ -698,7 +1215,7 @@ local function drawTableHeader(frame)
 
     local eLabel = AceGUI:Create("Label")
     eLabel:SetText("Enchants")
-    eLabel:SetFont("Fonts\\FRIZQT__.TTF", 11, "")
+    eLabel:SetFont("Fonts\\FRIZQT__.TTF", 12, "")
     eLabel:SetColor(color, color, color)
     eLabel:SetWidth(75)
     eLabel.label:SetJustifyH("LEFT")
@@ -717,23 +1234,205 @@ local function drawTableHeader(frame)
     end
 end
 
+local mainSearchBox = nil
+local mainSearchCount = nil
+local mainSearchFrame = CreateFrame("Frame")
+mainSearchFrame:Hide()
+
+local SEARCH_DIM_ALPHA = 0.10
+local SEARCH_MATCH_ALPHA = 1.0
+
+local function RestoreMainItemsAlpha()
+    for i = 1, #displayed_item_widgets do
+        local widget = displayed_item_widgets[i]
+        if widget and widget.frame then
+            widget._targetAlpha = SEARCH_MATCH_ALPHA
+            widget.frame:SetAlpha(SEARCH_MATCH_ALPHA)
+            if widget.image then widget.image:SetAlpha(SEARCH_MATCH_ALPHA) end
+        end
+    end
+    for i = 1, #displayed_slot_rows do
+        local slot = displayed_slot_rows[i]
+        if slot then
+            slot._targetAlpha = SEARCH_MATCH_ALPHA
+            if slot.labelWidget and slot.labelWidget.frame then
+                slot.labelWidget.frame:SetAlpha(SEARCH_MATCH_ALPHA)
+            end
+            if slot.enhWidget and slot.enhWidget.frame then
+                slot.enhWidget.frame:SetAlpha(SEARCH_MATCH_ALPHA)
+            end
+        end
+    end
+end
+
+local function UpdateMainSearchTargets()
+    local query = mainSearchQuery
+    local matchCount = 0
+
+    for i = 1, #displayed_item_widgets do
+        local widget = displayed_item_widgets[i]
+        if widget and widget.frame and widget.item_id then
+            if query == "" then
+                widget._targetAlpha = SEARCH_MATCH_ALPHA
+            else
+                local lowerName = GetItemNameLower(widget.item_id)
+                local matches = lowerName and (stringfind(lowerName, query, 1, true) ~= nil)
+                if matches then
+                    matchCount = matchCount + 1
+                    widget._targetAlpha = SEARCH_MATCH_ALPHA
+                else
+                    widget._targetAlpha = SEARCH_DIM_ALPHA
+                end
+            end
+        end
+    end
+
+    for i = 1, #displayed_slot_rows do
+        local slot = displayed_slot_rows[i]
+        if slot and slot.labelWidget and slot.labelWidget.frame then
+            if query == "" then
+                slot._targetAlpha = SEARCH_MATCH_ALPHA
+            else
+                local hasMatch = false
+                for j = 1, #slot.items do
+                    if slot.items[j]._targetAlpha == SEARCH_MATCH_ALPHA then
+                        hasMatch = true
+                        break
+                    end
+                end
+                slot._targetAlpha = hasMatch and SEARCH_MATCH_ALPHA or SEARCH_DIM_ALPHA
+            end
+        end
+    end
+
+    local clearBtn = mainSearchBox and mainSearchBox.editbox and mainSearchBox.editbox.clearBtn
+    if mainSearchCount then
+        if query == "" then
+            mainSearchCount:SetText("")
+            mainSearchCount:Hide()
+            if clearBtn then clearBtn:Hide() end
+            if mainSearchBox and mainSearchBox.editbox then
+                mainSearchBox.editbox:SetTextInsets(0, 0, 3, 3)
+            end
+        else
+            if matchCount == 0 then
+                mainSearchCount:SetText("|cffff4444(0)|r")
+            else
+                mainSearchCount:SetText("|cff888888(" .. matchCount .. ")|r")
+            end
+            mainSearchCount:Show()
+            if clearBtn then clearBtn:Show() end
+            if mainSearchBox and mainSearchBox.editbox then
+                mainSearchBox.editbox:SetTextInsets(0, 44, 3, 3)
+            end
+        end
+    end
+end
+
+ApplyMainSearchInstant = function()
+    UpdateMainSearchTargets()
+    for i = 1, #displayed_item_widgets do
+        local widget = displayed_item_widgets[i]
+        if widget and widget.frame then
+            widget.frame:SetAlpha(widget._targetAlpha or SEARCH_MATCH_ALPHA)
+        end
+    end
+    for i = 1, #displayed_slot_rows do
+        local slot = displayed_slot_rows[i]
+        if slot then
+            local alpha = slot._targetAlpha or SEARCH_MATCH_ALPHA
+            if slot.labelWidget and slot.labelWidget.frame then
+                slot.labelWidget.frame:SetAlpha(alpha)
+            end
+            if slot.enhWidget and slot.enhWidget.frame then
+                slot.enhWidget.frame:SetAlpha(alpha)
+            end
+        end
+    end
+end
+
+mainSearchFrame:SetScript("OnUpdate", function(self, elapsed)
+    local stillAnimating = false
+    local step = min(1, elapsed * 16)
+
+    for i = 1, #displayed_item_widgets do
+        local widget = displayed_item_widgets[i]
+        if widget and widget.frame then
+            local current = widget.frame:GetAlpha() or 1
+            local target = widget._targetAlpha or SEARCH_MATCH_ALPHA
+            if current ~= target then
+                local diff = target - current
+                if diff > -0.01 and diff < 0.01 then
+                    widget.frame:SetAlpha(target)
+                else
+                    widget.frame:SetAlpha(current + diff * step)
+                    stillAnimating = true
+                end
+            end
+        end
+    end
+
+    for i = 1, #displayed_slot_rows do
+        local slot = displayed_slot_rows[i]
+        if slot then
+            local target = slot._targetAlpha or SEARCH_MATCH_ALPHA
+            if slot.labelWidget and slot.labelWidget.frame then
+                local current = slot.labelWidget.frame:GetAlpha() or 1
+                if current ~= target then
+                    local diff = target - current
+                    local newAlpha = (diff > -0.01 and diff < 0.01) and target or (current + diff * step)
+                    slot.labelWidget.frame:SetAlpha(newAlpha)
+                    if slot.enhWidget and slot.enhWidget.frame then
+                        slot.enhWidget.frame:SetAlpha(newAlpha)
+                    end
+                    if newAlpha ~= target then
+                        stillAnimating = true
+                    end
+                elseif slot.enhWidget and slot.enhWidget.frame then
+                    if (slot.enhWidget.frame:GetAlpha() or 1) ~= target then
+                        slot.enhWidget.frame:SetAlpha(target)
+                    end
+                end
+            end
+        end
+    end
+
+    if not stillAnimating then
+        self:Hide()
+    end
+end)
+
+local function QueueMainSearch(text)
+    local trimmed = strtrim(text or "")
+    if #trimmed > 128 then trimmed = trimmed:sub(1, 128) end
+    mainSearchQuery = trimmed:lower()
+    UpdateMainSearchTargets()
+    mainSearchFrame:Show()
+end
+
 local function drawSpecData()
-    BisTooltipAddon.db.char.class_index = class_index
-    BisTooltipAddon.db.char.spec_index = spec_index
-    BisTooltipAddon.db.char.phase_index = phase_index
+    if BisTooltipAddon.db and BisTooltipAddon.db.char then
+        BisTooltipAddon.db.char.class_index = class_index
+        BisTooltipAddon.db.char.spec_index = spec_index
+        BisTooltipAddon.db.char.phase_index = phase_index
+    end
 
     local targetScroll = 0
-    if BisTooltipAddon.db.char.scroll_status and BisTooltipAddon.db.char.scroll_status.scrollvalue then
-        targetScroll = BisTooltipAddon.db.char.scroll_status.scrollvalue
+    if BisTooltipAddon.db.profile.scroll_status and BisTooltipAddon.db.profile.scroll_status.scrollvalue then
+        targetScroll = BisTooltipAddon.db.profile.scroll_status.scrollvalue
     end
 
     wipe(displayed_item_widgets)
+    wipe(displayed_slot_rows)
 
     spec_frame:ReleaseChildren()
+
+    UpdateStatusDisplay("IDLE")
 
     if not (favorites_frame and favorites_frame.frame and favorites_frame.frame:IsShown()) then
         wipe(missing_widgets)
         wipe(fetch_attempts)
+        wipe(fetch_next_request)
         item_fetch_frame:SetScript("OnUpdate", nil)
     else
         for itemID, widgets in pairs(missing_widgets) do
@@ -752,26 +1451,31 @@ local function drawSpecData()
 
     drawTableHeader(spec_frame)
 
-    local list_class = BisTooltip_ItemLists and (BisTooltip_ItemLists[class] or BisTooltip_ItemLists[GetCleanClassName(class)])
-    if not spec or not phase or not list_class or not list_class[spec] then return end
-    local slots = list_class[spec][phase]
-    if not slots then return end
+    spec_frame:PauseLayout()
 
-    if slots[1] then
-        for _, slot in ipairs(slots) do
-            drawItemSlot(slot.slot_name, slot)
-        end
-    else
-        for _, slot_name in ipairs(SLOT_DISPLAY_ORDER) do
-            local item_list = slots[slot_name]
-            if item_list then
-                drawItemSlot(slot_name, item_list)
+    local list_class = BisTooltip_ItemLists and (BisTooltip_ItemLists[class] or BisTooltip_ItemLists[GetCleanClassName(class)])
+    local slots = list_class and spec and phase and list_class[spec] and list_class[spec][phase]
+    if slots then
+        if slots[1] then
+            for _, slot in ipairs(slots) do
+                drawItemSlot(slot.slot_name, slot)
+            end
+        else
+            for _, slot_name in ipairs(SLOT_DISPLAY_ORDER) do
+                local item_list = slots[slot_name]
+                if item_list then
+                    drawItemSlot(slot_name, item_list)
+                end
             end
         end
     end
 
-    if targetScroll > 0 then
-        spec_frame:SetScroll(targetScroll)
+    spec_frame:ResumeLayout()
+    spec_frame:DoLayout()
+    spec_frame:SetScroll(targetScroll or 0)
+
+    if mainSearchQuery ~= "" then
+        ApplyMainSearchInstant()
     end
 end
 
@@ -805,9 +1509,10 @@ local function buildSpecsDict(class_i)
 end
 
 local function loadData()
-    class_index = BisTooltipAddon.db.char.class_index or 1
-    spec_index = BisTooltipAddon.db.char.spec_index or 1
-    phase_index = BisTooltipAddon.db.char.phase_index or 1
+    local dbChar = BisTooltipAddon.db and BisTooltipAddon.db.char
+    class_index = (dbChar and dbChar.class_index) or 1
+    spec_index = (dbChar and dbChar.spec_index) or 1
+    phase_index = (dbChar and dbChar.phase_index) or 1
 
     if not class_options[class_index] then class_index = 1 end
     if class_options[class_index] then
@@ -828,23 +1533,19 @@ end
 local function drawDropdowns()
     local dropDownGroup = AceGUI:Create("SimpleGroup")
     dropDownGroup:SetLayout("Table")
-    dropDownGroup:SetUserData("table", { columns = {42, 110, 180, 70}, space = 4, align = "BOTTOM" })
+    dropDownGroup:SetUserData("table", { columns = {105, 155, 65, 127}, space = 4, align = "BOTTOM" })
     main_frame:AddChild(dropDownGroup)
 
-    local spacerLeft = AceGUI:Create("Label")
-    spacerLeft:SetText(" ")
-    dropDownGroup:AddChild(spacerLeft)
-
     classDropdown = AceGUI:Create("Dropdown")
-    classDropdown:SetWidth(110)
+    classDropdown:SetWidth(105)
     classDropdown:SetPulloutWidth(113)
 
     specDropdown = AceGUI:Create("Dropdown")
-    specDropdown:SetWidth(180)
-    specDropdown:SetPulloutWidth(183)
+    specDropdown:SetWidth(155)
+    specDropdown:SetPulloutWidth(165)
 
     phaseDropDown = AceGUI:Create("Dropdown")
-    phaseDropDown:SetWidth(70)
+    phaseDropDown:SetWidth(65)
     phaseDropDown:SetPulloutWidth(73)
 
     specDropdown:SetDisabled(true)
@@ -852,14 +1553,14 @@ local function drawDropdowns()
     phaseDropDown:SetCallback("OnValueChanged", function(_, _, key)
         phase_index = key
         phase = BisTooltip_PhaseData[key]
-        if BisTooltipAddon.db.char.scroll_status then BisTooltipAddon.db.char.scroll_status.scrollvalue = 0 end
+        if BisTooltipAddon.db.profile.scroll_status then BisTooltipAddon.db.profile.scroll_status.scrollvalue = 0 end
         drawSpecData()
     end)
 
     specDropdown:SetCallback("OnValueChanged", function(_, _, key)
         spec_index = key
         spec = spec_options_to_spec[spec_options[key]]
-        if BisTooltipAddon.db.char.scroll_status then BisTooltipAddon.db.char.scroll_status.scrollvalue = 0 end
+        if BisTooltipAddon.db.profile.scroll_status then BisTooltipAddon.db.profile.scroll_status.scrollvalue = 0 end
         drawSpecData()
     end)
 
@@ -872,16 +1573,83 @@ local function drawDropdowns()
         specDropdown:SetValue(1)
         spec_index = 1
         spec = spec_options_to_spec[spec_options[1]]
-        if BisTooltipAddon.db.char.scroll_status then BisTooltipAddon.db.char.scroll_status.scrollvalue = 0 end
+        if BisTooltipAddon.db.profile.scroll_status then BisTooltipAddon.db.profile.scroll_status.scrollvalue = 0 end
         drawSpecData()
     end)
 
     classDropdown:SetList(class_options)
     phaseDropDown:SetList(GetPhaseDropdownOptions())
 
+    mainSearchBox = AceGUI:Create("EditBox")
+    mainSearchBox:SetWidth(127)
+    mainSearchBox:DisableButton(true)
+    mainSearchBox:SetLabel("")
+    mainSearchBox:SetText(mainSearchQuery)
+    if mainSearchBox.editbox and mainSearchBox.editbox.SetMaxLetters then
+        mainSearchBox.editbox:SetMaxLetters(128)
+    end
+
+    if not mainSearchCount and mainSearchBox.editbox then
+        local mainClearBtn = CreateFrame("Button", nil, mainSearchBox.editbox)
+        mainClearBtn:SetWidth(14)
+        mainClearBtn:SetHeight(14)
+        mainClearBtn:SetPoint("RIGHT", mainSearchBox.editbox, "RIGHT", -4, 0)
+
+        local mainClearText = mainClearBtn:CreateFontString(nil, "OVERLAY")
+        mainClearText:SetFont("Fonts\\FRIZQT__.TTF", 11, "OUTLINE")
+        mainClearText:SetText("X")
+        mainClearText:SetPoint("CENTER", 0, 0)
+        mainClearText:SetTextColor(0.65, 0.65, 0.65, 1)
+        mainClearBtn.text = mainClearText
+
+        mainClearBtn:SetScript("OnEnter", function(self)
+            self.text:SetTextColor(1, 0.25, 0.25, 1)
+        end)
+        mainClearBtn:SetScript("OnLeave", function(self)
+            self.text:SetTextColor(0.65, 0.65, 0.65, 1)
+        end)
+        mainClearBtn:SetScript("OnClick", function()
+            mainSearchBox:SetText("")
+            QueueMainSearch("")
+            mainSearchBox.editbox:ClearFocus()
+        end)
+        mainClearBtn:Hide()
+        mainSearchBox.editbox.clearBtn = mainClearBtn
+
+        mainSearchCount = mainSearchBox.editbox:CreateFontString(nil, "OVERLAY")
+        mainSearchCount:SetFont("Fonts\\FRIZQT__.TTF", 10, "")
+        mainSearchCount:SetShadowOffset(1, -1)
+        mainSearchCount:SetShadowColor(0, 0, 0, 0.8)
+        mainSearchCount:SetJustifyH("RIGHT")
+        mainSearchCount:SetPoint("RIGHT", mainClearBtn, "LEFT", -2, 0)
+        mainSearchCount:Hide()
+    end
+
+    mainSearchBox:SetCallback("OnTextChanged", function(_, _, text)
+        QueueMainSearch(text)
+    end)
+    mainSearchBox:SetCallback("OnEnterPressed", function(widget)
+        widget:ClearFocus()
+    end)
+    if mainSearchBox.editbox then
+        mainSearchBox.editbox:HookScript("OnEscapePressed", function()
+            mainSearchBox.editbox:ClearFocus()
+            mainSearchBox:SetText("")
+            QueueMainSearch("")
+        end)
+    end
+    mainSearchBox:SetCallback("OnEnter", function(widget)
+        GameTooltip:SetOwner(widget.frame, "ANCHOR_TOP")
+        GameTooltip:AddLine("Item search", 1, 1, 1)
+        GameTooltip:AddLine("Start typing to search for items in the current list.", 1, 0.82, 0, 1)
+        GameTooltip:Show()
+    end)
+    mainSearchBox:SetCallback("OnLeave", function() GameTooltip:Hide() end)
+
     dropDownGroup:AddChild(classDropdown)
     dropDownGroup:AddChild(specDropdown)
     dropDownGroup:AddChild(phaseDropDown)
+    dropDownGroup:AddChild(mainSearchBox)
 
     local fillerFrame = AceGUI:Create("Label")
     fillerFrame:SetText(" ")
@@ -911,36 +1679,353 @@ local function createSpecFrame()
     frame:SetHeight(420)
     frame:SetAutoAdjustHeight(false)
 
-    BisTooltipAddon.db.char.scroll_status = BisTooltipAddon.db.char.scroll_status or {}
-    frame:SetStatusTable(BisTooltipAddon.db.char.scroll_status)
+    BisTooltipAddon.db.profile.scroll_status = BisTooltipAddon.db.profile.scroll_status or {}
+    frame:SetStatusTable(BisTooltipAddon.db.profile.scroll_status)
 
     main_frame:AddChild(frame)
     spec_frame = frame
 end
 
-function BisTooltipAddon:RefreshFavoritesWindow()
-    if not favorites_frame or not favorites_frame.frame:IsShown() or not favorites_scroll then return end
+local favSearchBox = nil
+local favSearchCount = nil
 
-    wipe(displayed_fav_widgets)
+local favScrollbarAnimFrame = CreateFrame("Frame")
+favScrollbarAnimFrame:Hide()
+local targetScrollbarAlpha = 1.0
 
-    local targetScroll = 0
-    if BisTooltipAddon.db.char.fav_scroll_status and BisTooltipAddon.db.char.fav_scroll_status.scrollvalue then
-        targetScroll = BisTooltipAddon.db.char.fav_scroll_status.scrollvalue
+local displayed_fav_rows = {}
+local favRowPool = {}
+local preSearchScrollValue = nil
+
+local function RestoreFavRowsAlpha()
+    favSearchQuery = ""
+    if favSearchBox then
+        favSearchBox:SetText("")
+        if favSearchBox.editbox then
+            if favSearchBox.editbox.clearBtn then favSearchBox.editbox.clearBtn:Hide() end
+            favSearchBox.editbox:SetTextInsets(0, 0, 3, 3)
+        end
+    end
+    if favSearchCount then
+        favSearchCount:SetText("")
+        favSearchCount:Hide()
+    end
+    if BisTooltipAddon.RefreshFavoritesWindow then
+        BisTooltipAddon:RefreshFavoritesWindow(true)
+    end
+    if favorites_scroll and preSearchScrollValue then
+        favorites_scroll:SetScroll(preSearchScrollValue)
+        preSearchScrollValue = nil
     end
 
-    favorites_scroll:ReleaseChildren()
+    for i = 1, #displayed_fav_rows do
+        local row = displayed_fav_rows[i]
+        if row and row.frame then
+            row.frame:SetAlpha(1.0)
+        end
+    end
+end
 
-    local favList = {}
-    local favData = self.db and self.db.char and self.db.char.favorites
-    if favData then
-        for itemID, orderVal in pairs(favData) do
-            if orderVal then table.insert(favList, tonumber(itemID)) end
+ApplyFavSearchInstant = function()
+    if BisTooltipAddon.RefreshFavoritesWindow then
+        BisTooltipAddon:RefreshFavoritesWindow(true)
+    end
+end
+
+favScrollbarAnimFrame:SetScript("OnUpdate", function(self, elapsed)
+    if not favorites_scroll or not favorites_scroll.scrollbar then
+        self:Hide()
+        return
+    end
+
+    local sbar = favorites_scroll.scrollbar
+    local current = sbar:GetAlpha() or 1.0
+    local diff = targetScrollbarAlpha - current
+    local step = min(1, elapsed * 10)
+
+    if diff > -0.02 and diff < 0.02 then
+        sbar:SetAlpha(targetScrollbarAlpha)
+        self:Hide()
+    else
+        sbar:SetAlpha(current + diff * step)
+    end
+end)
+
+local function QueueFavSearch(text)
+    local trimmed = strtrim(text or "")
+    if #trimmed > 128 then trimmed = trimmed:sub(1, 128) end
+    local newQuery = trimmed:lower()
+
+    local isStartingSearch = (favSearchQuery == "" and newQuery ~= "")
+    local isClearingSearch = (favSearchQuery ~= "" and newQuery == "")
+
+    if isStartingSearch then
+        if favorites_scroll and favorites_scroll.scrollvalue then
+            preSearchScrollValue = favorites_scroll.scrollvalue
+        elseif BisTooltipAddon.db and BisTooltipAddon.db.profile and BisTooltipAddon.db.profile.fav_scroll_status then
+            preSearchScrollValue = BisTooltipAddon.db.profile.fav_scroll_status.scrollvalue or 0
+        else
+            preSearchScrollValue = 0
         end
     end
 
-    if #favList == 0 then
+    favSearchQuery = newQuery
+
+    if BisTooltipAddon.RefreshFavoritesWindow then
+        BisTooltipAddon:RefreshFavoritesWindow(true)
+    end
+
+    if isStartingSearch then
+        if favorites_scroll then
+            favorites_scroll:SetScroll(0)
+        end
+    elseif isClearingSearch then
+        if favorites_scroll and preSearchScrollValue then
+            favorites_scroll:SetScroll(preSearchScrollValue)
+            preSearchScrollValue = nil
+        end
+    end
+
+    for i = 1, #displayed_fav_rows do
+        local row = displayed_fav_rows[i]
+        if row and row.frame then
+            row.frame:SetAlpha(1.0)
+        end
+    end
+end
+
+local function PopulateFavRow(row, itemID, display_id)
+    row.item_id = display_id
+    row.rawItemID = itemID
+
+    local itemWidget = row.itemWidget
+    itemWidget.item_id = display_id
+
+    local itemName, _, itemRarity, _, _, _, itemSubType, _, equipSlot, itemIcon = GetItemInfo(display_id)
+    local slotText = (equipSlot and equipSlot ~= "" and _G[equipSlot]) or itemSubType
+
+    if itemName then
+        itemWidget:SetImage(itemIcon)
+        ApplyItemStateVisuals(itemWidget, display_id, false)
+        local cachedBoe = boe_cache[display_id]
+        if cachedBoe == true then
+            ApplyBoeMark(itemWidget, true)
+        elseif cachedBoe == nil and display_id > 0 then
+            ApplyBoeMark(itemWidget, false)
+            QueueBoeCheck(display_id)
+        else
+            ApplyBoeMark(itemWidget, false)
+        end
+    else
+        itemWidget:SetImage("Interface\\Icons\\INV_Misc_QuestionMark")
+        ApplyBoeMark(itemWidget, false)
+        ApplyItemStateVisuals(itemWidget, display_id, true)
+
+        if not missing_widgets[display_id] then
+            missing_widgets[display_id] = { itemWidget }
+        else
+            local alreadyQueued = false
+            for idx = 1, #missing_widgets[display_id] do
+                if missing_widgets[display_id][idx] == itemWidget then
+                    alreadyQueued = true
+                    break
+                end
+            end
+            if not alreadyQueued then
+                table.insert(missing_widgets[display_id], itemWidget)
+            end
+        end
+        StartItemFetch()
+    end
+
+    local nameButton = row.nameButton
+    local titleStr = itemName or ("Item #" .. display_id)
+    local r, g, b = 0.75, 0.75, 0.75
+    if itemName then
+        r, g, b = GetItemQualityColor(itemRarity or 1)
+    end
+
+    if nameButton._lastTitle ~= titleStr or nameButton._lastRarity ~= (itemRarity or 0) then
+        nameButton.titleText:SetText(titleStr)
+        nameButton.titleText:SetTextColor(r, g, b, 1)
+        nameButton._lastTitle = titleStr
+        nameButton._lastRarity = itemRarity or 0
+    end
+
+    if nameButton._lastSlot ~= slotText then
+        nameButton._lastSlot = slotText
+        nameButton.titleText:ClearAllPoints()
+        nameButton.subText:ClearAllPoints()
+
+        if slotText and slotText ~= "" then
+            nameButton.titleText:SetPoint("TOPLEFT", nameButton, "TOPLEFT", 8, -5)
+            nameButton.titleText:SetPoint("RIGHT", nameButton, "RIGHT", -6, 0)
+            nameButton.titleText:SetHeight(14)
+            nameButton.titleText:SetJustifyV("TOP")
+
+            nameButton.subText:SetPoint("BOTTOMLEFT", nameButton, "BOTTOMLEFT", 8, 5)
+            nameButton.subText:SetPoint("RIGHT", nameButton, "RIGHT", -6, 0)
+            nameButton.subText:SetHeight(12)
+            nameButton.subText:SetText(slotText)
+            nameButton.subText:Show()
+        else
+            nameButton.titleText:SetPoint("LEFT", nameButton, "LEFT", 8, 0)
+            nameButton.titleText:SetPoint("RIGHT", nameButton, "RIGHT", -6, 0)
+            nameButton.titleText:SetHeight(14)
+            nameButton.titleText:SetJustifyV("MIDDLE")
+
+            nameButton.subText:SetText("")
+            nameButton.subText:Hide()
+        end
+    end
+    nameButton.titleText:Show()
+end
+
+local favUpdateFrame = CreateFrame("Frame")
+favUpdateFrame:Hide()
+favUpdateFrame:SetScript("OnUpdate", function(self)
+    self:Hide()
+    if BisTooltipAddon.RefreshFavoritesWindow then
+        BisTooltipAddon:RefreshFavoritesWindow(true)
+    end
+end)
+
+local function LockFavoritesScrollbar()
+    if not favorites_scroll or not favorites_scroll.frame then return end
+    local sframe = favorites_scroll.scrollframe
+    local sbar = favorites_scroll.scrollbar
+    if not sframe or not sbar then return end
+
+    sframe:ClearAllPoints()
+    sframe:SetPoint("TOPLEFT", favorites_scroll.frame, "TOPLEFT", 0, 0)
+    sframe:SetPoint("BOTTOMRIGHT", favorites_scroll.frame, "BOTTOMRIGHT", -26, 0)
+
+    local content = favorites_scroll.content
+    local height = content and content:GetHeight() or 0
+    local frameHeight = sframe:GetHeight() or 430
+    local currange = height - frameHeight
+
+    sbar:Show()
+
+    if currange <= 0 then
+        targetScrollbarAlpha = 0.25
+        sbar:EnableMouse(false)
+        if favorites_scroll.scrollupbutton then favorites_scroll.scrollupbutton:Disable() end
+        if favorites_scroll.scrolldownbutton then favorites_scroll.scrolldownbutton:Disable() end
+    else
+        targetScrollbarAlpha = 1.0
+        sbar:EnableMouse(true)
+        if favorites_scroll.scrollupbutton then favorites_scroll.scrollupbutton:Enable() end
+        if favorites_scroll.scrolldownbutton then favorites_scroll.scrolldownbutton:Enable() end
+    end
+
+    if sbar:GetAlpha() ~= targetScrollbarAlpha then
+        favScrollbarAnimFrame:Show()
+    end
+end
+
+function BisTooltipAddon:RefreshFavoritesWindow(immediate)
+    if not favorites_frame or not favorites_frame.frame:IsShown() or not favorites_scroll then
+        favs_dirty = true
+        return
+    end
+
+    if not immediate then
+        favs_dirty = true
+        if not favUpdateFrame:IsShown() then
+            favUpdateFrame:Show()
+        end
+        return
+    end
+    favUpdateFrame:Hide()
+    favs_dirty = false
+
+    wipe(memo_state)
+    wipe(memo_fav)
+    wipe(memo_ilvl)
+
+    local targetScroll = 0
+    if favSearchQuery == "" and BisTooltipAddon.db.profile.fav_scroll_status and BisTooltipAddon.db.profile.fav_scroll_status.scrollvalue then
+        targetScroll = BisTooltipAddon.db.profile.fav_scroll_status.scrollvalue
+    end
+
+    local favList = {}
+    local favData = self.db and self.db.profile and self.db.profile.favorites
+    local totalFavCount = 0
+
+    if favData then
+        for itemID, orderVal in pairs(favData) do
+            if orderVal then
+                totalFavCount = totalFavCount + 1
+                local numID = tonumber(itemID)
+                if numID then
+                    if favSearchQuery == "" then
+                        table.insert(favList, numID)
+                    else
+                        local display_id = (BisTooltipAddon.GetFactionItem and BisTooltipAddon:GetFactionItem(numID)) or numID
+                        local lowerName = GetItemNameLower(display_id) or GetItemNameLower(numID)
+                        if lowerName and stringfind(lowerName, favSearchQuery, 1, true) then
+                            table.insert(favList, numID)
+                        end
+                    end
+                end
+            end
+        end
+    end
+
+    local clearBtn = favSearchBox and favSearchBox.editbox and favSearchBox.editbox.clearBtn
+    if favSearchCount then
+        if favSearchQuery == "" then
+            favSearchCount:SetText("")
+            favSearchCount:Hide()
+            if clearBtn then clearBtn:Hide() end
+            if favSearchBox and favSearchBox.editbox then
+                favSearchBox.editbox:SetTextInsets(0, 0, 3, 3)
+            end
+        else
+            local matchCount = #favList
+            if matchCount == 0 then
+                favSearchCount:SetText("|cffff4444(0)|r")
+            else
+                favSearchCount:SetText("|cff888888(" .. matchCount .. ")|r")
+            end
+            favSearchCount:Show()
+            if clearBtn then clearBtn:Show() end
+            if favSearchBox and favSearchBox.editbox then
+                favSearchBox.editbox:SetTextInsets(0, 44, 3, 3)
+            end
+        end
+    end
+
+    local numFavs = #favList
+
+    if totalFavCount == 0 or numFavs == 0 then
+        for i = #displayed_fav_rows, 1, -1 do
+            local row = displayed_fav_rows[i]
+            displayed_fav_rows[i] = nil
+            displayed_fav_widgets[i] = nil
+            if row then
+                row.frame:Hide()
+                if row.nameButton then row.nameButton:Hide() end
+                if row.removeBtn then row.removeBtn:Hide() end
+                for cIdx = #favorites_scroll.children, 1, -1 do
+                    if favorites_scroll.children[cIdx] == row then
+                        table.remove(favorites_scroll.children, cIdx)
+                        break
+                    end
+                end
+                table.insert(favRowPool, row)
+            end
+        end
+
+        favorites_scroll:ReleaseChildren()
+
+        local msgText = (totalFavCount == 0)
+            and "\n\n|cffffd100No favorite items yet.|r\n\nRight-click any item in the BiS list to add it to your Favorites!"
+            or "\n\n|cffffd100No items match your search.|r"
+
         local emptyLabel = AceGUI:Create("Label")
-        emptyLabel:SetText("\n\n|cffffd100No favorite items yet.|r\n\nRight-click any item in the BiS list to add it to your Favorites!")
+        emptyLabel:SetText(msgText)
         emptyLabel:SetFont("Fonts\\FRIZQT__.TTF", 14, "")
         emptyLabel:SetFullWidth(true)
         emptyLabel.label:SetJustifyH("CENTER")
@@ -948,144 +2033,201 @@ function BisTooltipAddon:RefreshFavoritesWindow()
             if self.label then self.label:SetJustifyH("LEFT") end
         end)
         favorites_scroll:AddChild(emptyLabel)
-    else
-        table.sort(favList, CompareFavorites)
+        favorites_scroll:DoLayout()
 
-        for _, itemID in ipairs(favList) do
-            local display_id = (BisTooltipAddon.GetFactionItem and BisTooltipAddon:GetFactionItem(itemID)) or itemID
+        if favorites_frame.clearBtn then
+            favorites_frame.clearBtn:SetDisabled(totalFavCount == 0)
+        end
+        UpdateFavStatusDisplay("COUNT", totalFavCount)
+        return
+    end
 
-            local row = AceGUI:Create("SimpleGroup")
-            row:SetLayout("Table")
-            row:SetFullWidth(true)
-            row:SetUserData("table", FAV_ROW_TABLE_LAYOUT)
+    favorites_scroll:PauseLayout()
 
-            local itemWidget = createItemFrame(display_id, 36)
-            itemWidget:SetWidth(36)
-            itemWidget:SetHeight(42)
-            itemWidget.image:ClearAllPoints()
-            itemWidget.image:SetPoint("CENTER", itemWidget.frame, "CENTER", 0, 2)
-            displayed_fav_widgets[#displayed_fav_widgets + 1] = itemWidget
-            row:AddChild(itemWidget)
+    if #displayed_fav_rows == 0 and #favorites_scroll.children > 0 then
+        favorites_scroll:ReleaseChildren()
+    end
 
-            local card = row.frame.favCard
-            if not card then
-                card = CreateFrame("Frame", nil, row.frame)
-                row.frame.favCard = card
-                card:SetBackdrop(ROW_BACKDROP)
-            end
-            card:SetFrameLevel(math.max(1, row.frame:GetFrameLevel()))
-            card:ClearAllPoints()
-            card:SetPoint("TOP", itemWidget.frame, "TOP", 0, 0)
-            card:SetPoint("BOTTOM", itemWidget.frame, "BOTTOM", 0, 0)
-            card:SetPoint("LEFT", row.frame, "LEFT", 40, 0)
-            card:SetPoint("RIGHT", row.frame, "RIGHT", 0, 0)
-            card:SetBackdropColor(0, 0, 0, 0)
-            card:SetBackdropBorderColor(0.65, 0.65, 0.65, 0.80)
-            card:Show()
+    currentFavSortData = favData
+    table.sort(favList, CompareFavorites)
+    currentFavSortData = nil
 
-            row:SetCallback("OnRelease", function(self)
-                if self.frame.favCard then
-                    self.frame.favCard:Hide()
-                end
-            end)
+    local currentRows = #displayed_fav_rows
 
-            itemWidget.frame:SetFrameLevel(card:GetFrameLevel() + 2)
+    for i = 1, numFavs do
+        local itemID = favList[i]
+        local display_id = (BisTooltipAddon.GetFactionItem and BisTooltipAddon:GetFactionItem(itemID)) or itemID
+        local row = displayed_fav_rows[i]
 
-            local itemName, _, itemRarity, _, _, _, itemSubType, _, equipSlot = GetItemInfo(display_id)
-            local infoGroup = AceGUI:Create("SimpleGroup")
-            infoGroup:SetLayout("List")
-            infoGroup:SetWidth(320)
-
-            local nameLabel = AceGUI:Create("InteractiveLabel")
-            if itemName then
-                local r, g, b = GetItemQualityColor(itemRarity or 1)
-                nameLabel:SetText(itemName)
-                nameLabel:SetColor(r, g, b)
+        if not row then
+            row = table.remove(favRowPool)
+            if row then
+                row.frame:Show()
+                row.frame:SetHeight(42)
+                row.frame:SetAlpha(1.0)
+                if row.nameButton then row.nameButton:Show() end
+                if row.removeBtn then row.removeBtn:Show() end
+                favorites_scroll:AddChild(row)
             else
-                nameLabel:SetText("Item #" .. display_id)
-                nameLabel:SetColor(0.75, 0.75, 0.75)
+                row = AceGUI:Create("SimpleGroup")
+                row:SetLayout("None")
+                row:SetFullWidth(true)
+                row:SetHeight(42)
+
+                local itemWidget = createItemFrame(display_id, 36)
+                itemWidget:SetWidth(36)
+                itemWidget:SetHeight(42)
+                itemWidget.frame:ClearAllPoints()
+                itemWidget.frame:SetPoint("LEFT", row.frame, "LEFT", 4, 0)
+                itemWidget.image:ClearAllPoints()
+                itemWidget.image:SetPoint("CENTER", itemWidget.frame, "CENTER", 0, 0)
+                row:AddChild(itemWidget)
+
+                local removeBtn = CreateFrame("Button", nil, row.frame)
+                removeBtn:SetWidth(26)
+                removeBtn:SetHeight(26)
+                removeBtn:SetPoint("RIGHT", row.frame, "RIGHT", -4, 0)
+
+                local removeBtnText = removeBtn:CreateFontString(nil, "OVERLAY")
+                removeBtnText:SetFont("Fonts\\FRIZQT__.TTF", 18, "OUTLINE")
+                removeBtnText:SetText("X")
+                removeBtnText:SetPoint("CENTER", 0, 0)
+                removeBtnText:SetTextColor(0.65, 0.65, 0.65, 1)
+                removeBtn.text = removeBtnText
+
+                local nameButton = CreateFrame("Button", nil, row.frame)
+                nameButton:SetHeight(40)
+                nameButton:SetPoint("LEFT", itemWidget.frame, "RIGHT", 6, 0)
+                nameButton:SetPoint("RIGHT", removeBtn, "LEFT", -4, 0)
+                nameButton:SetBackdrop(ROW_BACKDROP)
+                nameButton:SetBackdropColor(0, 0, 0, 0.45)
+                nameButton:SetBackdropBorderColor(0.65, 0.65, 0.65, 0.80)
+
+                local titleText = nameButton:CreateFontString(nil, "ARTWORK")
+                titleText:SetFont("Fonts\\FRIZQT__.TTF", 13, "")
+                titleText:SetJustifyH("LEFT")
+
+                local subText = nameButton:CreateFontString(nil, "ARTWORK")
+                subText:SetFont("Fonts\\FRIZQT__.TTF", 10, "")
+                subText:SetTextColor(0.85, 0.85, 0.85, 1)
+                subText:SetJustifyH("LEFT")
+                subText:SetJustifyV("BOTTOM")
+                subText:SetHeight(12)
+
+                nameButton.titleText = titleText
+                nameButton.subText = subText
+
+                nameButton:SetScript("OnEnter", function(self)
+                    self:SetBackdropBorderColor(1, 0.82, 0, 1)
+                    if row.item_id then HandleItemTooltip(row.itemWidget, row.item_id) end
+                end)
+                nameButton:SetScript("OnLeave", function(self)
+                    self:SetBackdropBorderColor(0.65, 0.65, 0.65, 0.80)
+                    GameTooltip:Hide()
+                end)
+                nameButton:SetScript("OnClick", function()
+                    local curID = row.item_id
+                    if not curID then return end
+                    local _, link = GetItemInfo(curID)
+                    local validLink = link or ("item:" .. curID .. ":0:0:0:0:0:0:0")
+                    if IsModifiedClick() then
+                        HandleModifiedItemClick(validLink)
+                    else
+                        SetItemRef(validLink, validLink, "LeftButton")
+                    end
+                end)
+
+                removeBtn:SetScript("OnEnter", function(self)
+                    self.text:SetTextColor(1, 0.25, 0.25, 1)
+                    GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+                    GameTooltip:AddLine("Remove from Favorites", 1, 1, 1)
+                    if row.item_id then
+                        local name, _, rarity = GetItemInfo(row.item_id)
+                        if name then
+                            local r, g, b = GetItemQualityColor(rarity or 1)
+                            GameTooltip:AddLine(name, r, g, b)
+                        end
+                    end
+                    GameTooltip:Show()
+                end)
+                removeBtn:SetScript("OnLeave", function(self)
+                    self.text:SetTextColor(0.65, 0.65, 0.65, 1)
+                    GameTooltip:Hide()
+                end)
+                removeBtn:SetScript("OnClick", function()
+                    favs_dirty = true
+                    if row.rawItemID then
+                        BisTooltipAddon:ToggleFavorite(row.rawItemID)
+                    end
+                    GameTooltip:Hide()
+                end)
+
+                row.itemWidget = itemWidget
+                row.nameButton = nameButton
+                row.removeBtn = removeBtn
+                itemWidget.favNameButton = nameButton
+
+                row:SetCallback("OnRelease", function(self)
+                    if self.nameButton then
+                        self.nameButton:Hide()
+                        self.nameButton:ClearAllPoints()
+                    end
+                    if self.removeBtn then
+                        self.removeBtn:Hide()
+                        self.removeBtn:ClearAllPoints()
+                    end
+                end)
+
+                favorites_scroll:AddChild(row)
             end
-            nameLabel:SetFont("Fonts\\FRIZQT__.TTF", 13, "")
-            nameLabel:SetFullWidth(true)
 
-            local nameHeight = math.max(14, nameLabel.label:GetStringHeight() or 14)
-            nameLabel:SetHeight(nameHeight)
+            displayed_fav_rows[i] = row
+            displayed_fav_widgets[i] = row.itemWidget
+        end
 
-            nameLabel:SetCallback("OnClick", function()
-                local _, link = GetItemInfo(display_id)
-                local validLink = link or ("item:" .. display_id .. ":0:0:0:0:0:0:0")
-                if IsModifiedClick() then
-                    HandleModifiedItemClick(validLink)
-                else
-                    SetItemRef(validLink, validLink, "LeftButton")
+        row.frame:Show()
+        row.frame:SetHeight(42)
+        row.frame:SetAlpha(1.0)
+        if row.nameButton then row.nameButton:Show() end
+        if row.removeBtn then row.removeBtn:Show() end
+
+        PopulateFavRow(row, itemID, display_id)
+    end
+
+    if currentRows > numFavs then
+        for i = currentRows, numFavs + 1, -1 do
+            local excessRow = displayed_fav_rows[i]
+            displayed_fav_rows[i] = nil
+            displayed_fav_widgets[i] = nil
+            if excessRow then
+                excessRow.frame:Hide()
+                if excessRow.nameButton then excessRow.nameButton:Hide() end
+                if excessRow.removeBtn then excessRow.removeBtn:Hide() end
+                for cIdx = #favorites_scroll.children, 1, -1 do
+                    if favorites_scroll.children[cIdx] == excessRow then
+                        table.remove(favorites_scroll.children, cIdx)
+                        break
+                    end
                 end
-            end)
-            nameLabel:SetCallback("OnEnter", function(widget) HandleItemTooltip(widget, display_id) end)
-            nameLabel:SetCallback("OnLeave", function() GameTooltip:Hide() end)
-            infoGroup:AddChild(nameLabel)
-
-            local slotText = (equipSlot and _G[equipSlot]) or itemSubType
-            if slotText and slotText ~= "" then
-                local spacer = AceGUI:Create("Label")
-                spacer:SetText(" ")
-                spacer:SetHeight(4)
-                spacer:SetFullWidth(true)
-                infoGroup:AddChild(spacer)
-
-                local subLabel = AceGUI:Create("Label")
-                subLabel:SetText(slotText)
-                subLabel:SetFont("Fonts\\FRIZQT__.TTF", 10, "")
-                subLabel:SetColor(0.75, 0.75, 0.75)
-                subLabel:SetFullWidth(true)
-                subLabel:SetHeight(12)
-                infoGroup:AddChild(subLabel)
+                table.insert(favRowPool, excessRow)
             end
-
-            row:AddChild(infoGroup)
-            infoGroup.frame:SetFrameLevel(card:GetFrameLevel() + 2)
-
-            local removeBtn = AceGUI:Create("Button")
-            removeBtn:SetText("X")
-            removeBtn:SetWidth(26)
-            if removeBtn.text then
-                removeBtn.text:ClearAllPoints()
-                removeBtn.text:SetPoint("CENTER", 0, 0)
-            end
-            removeBtn:SetCallback("OnRelease", function(self)
-                if self.text then
-                    self.text:ClearAllPoints()
-                    self.text:SetPoint("LEFT", self.frame, "LEFT", 10, 0)
-                    self.text:SetPoint("RIGHT", self.frame, "RIGHT", -10, 0)
-                end
-            end)
-            removeBtn:SetCallback("OnClick", function()
-                BisTooltipAddon:ToggleFavorite(itemID)
-                GameTooltip:Hide()
-            end)
-            removeBtn:SetCallback("OnEnter", function(widget)
-                GameTooltip:SetOwner(widget.frame, "ANCHOR_RIGHT")
-                GameTooltip:AddLine("Remove from Favorites", 1, 1, 1)
-                if itemName then
-                    local r, g, b = GetItemQualityColor(itemRarity or 1)
-                    GameTooltip:AddLine(itemName, r, g, b)
-                end
-                GameTooltip:Show()
-            end)
-            removeBtn:SetCallback("OnLeave", function() GameTooltip:Hide() end)
-            row:AddChild(removeBtn)
-            removeBtn.frame:SetFrameLevel(card:GetFrameLevel() + 2)
-
-            favorites_scroll:AddChild(row)
         end
     end
 
-    if targetScroll > 0 then
-        favorites_scroll:SetScroll(targetScroll)
-    end
+    favorites_scroll:ResumeLayout()
+    favorites_scroll:DoLayout()
+    favorites_scroll:SetScroll(targetScroll or 0)
+    LockFavoritesScrollbar()
 
     if favorites_frame.clearBtn then
-        favorites_frame.clearBtn:SetDisabled(#favList == 0)
+        favorites_frame.clearBtn:SetDisabled(totalFavCount == 0)
     end
+
+    UpdateFavStatusDisplay("COUNT", totalFavCount)
+
+    wipe(memo_state)
+    wipe(memo_fav)
+    wipe(memo_ilvl)
 end
 
 local function ClampPosition(pos, width, height)
@@ -1118,7 +2260,7 @@ function BisTooltipAddon:OpenFavoritesFrame()
         favorites_frame:EnableResize(false)
         favorites_frame:SetTitle("BiS-Tooltip Renewed - Favorites List")
 
-        local pos = BisTooltipAddon.db.char.favorites_pos
+        local pos = BisTooltipAddon.db.profile.favorites_pos
         local posX, posY = ClampPosition(pos, 460, 570)
         if posX and posY then
             favorites_frame.frame:ClearAllPoints()
@@ -1136,6 +2278,20 @@ function BisTooltipAddon:OpenFavoritesFrame()
 
         favorites_frame.frame:HookScript("OnHide", function()
             StaticPopup_Hide("BISTOOLTIP_CONFIRM_CLEAR_FAVORITES")
+            if favScrollbarAnimFrame then favScrollbarAnimFrame:Hide() end
+            favSearchQuery = ""
+            if favSearchBox then
+                favSearchBox:SetText("")
+                if favSearchBox.editbox then favSearchBox.editbox:SetTextInsets(0, 0, 3, 3) end
+            end
+            if favSearchCount then
+                favSearchCount:SetText("")
+                favSearchCount:Hide()
+            end
+            RestoreFavRowsAlpha()
+            favStatusTimer = 0
+            currentFavStatusState = "IDLE"
+            favSwitchedText = false
             if not (main_frame and main_frame.frame and main_frame.frame:IsShown()) then
                 item_fetch_frame:SetScript("OnUpdate", nil)
             end
@@ -1157,7 +2313,7 @@ function BisTooltipAddon:OpenFavoritesFrame()
             if x + w > screenW then x = screenW - w; clamped = true end
             if y - h < 0 then y = h; clamped = true end
 
-            BisTooltipAddon.db.char.favorites_pos = { x = x, y = y }
+            BisTooltipAddon.db.profile.favorites_pos = { x = x, y = y }
 
             if clamped then
                 self:ClearAllPoints()
@@ -1178,14 +2334,93 @@ function BisTooltipAddon:OpenFavoritesFrame()
         end)
         favorites_frame:SetLayout("List")
 
+        local searchGroup = AceGUI:Create("SimpleGroup")
+        searchGroup:SetLayout("Table")
+        searchGroup:SetFullWidth(true)
+        searchGroup:SetUserData("table", { columns = {65, 289, 72}, space = 0, align = "middle" })
+
+        local sSpacerL = AceGUI:Create("Label"); sSpacerL:SetText(" "); searchGroup:AddChild(sSpacerL)
+
+        favSearchBox = AceGUI:Create("EditBox")
+        favSearchBox:SetWidth(289)
+        favSearchBox:DisableButton(true)
+        favSearchBox:SetLabel("")
+        favSearchBox:SetText(favSearchQuery)
+        if favSearchBox.editbox and favSearchBox.editbox.SetMaxLetters then
+            favSearchBox.editbox:SetMaxLetters(128)
+        end
+
+        if not favSearchCount and favSearchBox.editbox then
+            local favClearBtn = CreateFrame("Button", nil, favSearchBox.editbox)
+            favClearBtn:SetWidth(14)
+            favClearBtn:SetHeight(14)
+            favClearBtn:SetPoint("RIGHT", favSearchBox.editbox, "RIGHT", -4, 0)
+
+            local favClearText = favClearBtn:CreateFontString(nil, "OVERLAY")
+            favClearText:SetFont("Fonts\\FRIZQT__.TTF", 11, "OUTLINE")
+            favClearText:SetText("X")
+            favClearText:SetPoint("CENTER", 0, 0)
+            favClearText:SetTextColor(0.65, 0.65, 0.65, 1)
+            favClearBtn.text = favClearText
+
+            favClearBtn:SetScript("OnEnter", function(self)
+                self.text:SetTextColor(1, 0.25, 0.25, 1)
+            end)
+            favClearBtn:SetScript("OnLeave", function(self)
+                self.text:SetTextColor(0.65, 0.65, 0.65, 1)
+            end)
+            favClearBtn:SetScript("OnClick", function()
+                favSearchBox.editbox:ClearFocus()
+                RestoreFavRowsAlpha()
+            end)
+            favClearBtn:Hide()
+            favSearchBox.editbox.clearBtn = favClearBtn
+
+            favSearchCount = favSearchBox.editbox:CreateFontString(nil, "OVERLAY")
+            favSearchCount:SetFont("Fonts\\FRIZQT__.TTF", 10, "")
+            favSearchCount:SetShadowOffset(1, -1)
+            favSearchCount:SetShadowColor(0, 0, 0, 0.8)
+            favSearchCount:SetJustifyH("RIGHT")
+            favSearchCount:SetPoint("RIGHT", favClearBtn, "LEFT", -2, 0)
+            favSearchCount:Hide()
+        end
+
+        favSearchBox:SetCallback("OnTextChanged", function(_, _, text)
+            QueueFavSearch(text)
+        end)
+        favSearchBox:SetCallback("OnEnterPressed", function(widget)
+            widget:ClearFocus()
+        end)
+        if favSearchBox.editbox then
+            favSearchBox.editbox:HookScript("OnEscapePressed", function(self)
+                self:ClearFocus()
+                RestoreFavRowsAlpha()
+            end)
+        end
+        favSearchBox:SetCallback("OnEnter", function(widget)
+            GameTooltip:SetOwner(widget.frame, "ANCHOR_TOP")
+            GameTooltip:AddLine("Item search", 1, 1, 1)
+            GameTooltip:AddLine("Start typing to search for items in your favorites list.", 1, 0.82, 0, 1)
+            GameTooltip:Show()
+        end)
+        favSearchBox:SetCallback("OnLeave", function() GameTooltip:Hide() end)
+        searchGroup:AddChild(favSearchBox)
+
+        local sSpacerR = AceGUI:Create("Label"); sSpacerR:SetText(" "); searchGroup:AddChild(sSpacerR)
+
+        favorites_frame:AddChild(searchGroup)
+
         favorites_scroll = AceGUI:Create("ScrollFrame")
-        favorites_scroll:SetLayout("Flow")
+        favorites_scroll:SetLayout("List")
         favorites_scroll:SetFullWidth(true)
-        favorites_scroll:SetHeight(457)
+        favorites_scroll:SetHeight(430)
         favorites_scroll:SetAutoAdjustHeight(false)
 
-        BisTooltipAddon.db.char.fav_scroll_status = BisTooltipAddon.db.char.fav_scroll_status or {}
-        favorites_scroll:SetStatusTable(BisTooltipAddon.db.char.fav_scroll_status)
+        hooksecurefunc(favorites_scroll, "DoLayout", LockFavoritesScrollbar)
+        hooksecurefunc(favorites_scroll, "SetScroll", LockFavoritesScrollbar)
+
+        BisTooltipAddon.db.profile.fav_scroll_status = BisTooltipAddon.db.profile.fav_scroll_status or {}
+        favorites_scroll:SetStatusTable(BisTooltipAddon.db.profile.fav_scroll_status)
         favorites_frame:AddChild(favorites_scroll)
 
         local sep = AceGUI:Create("Heading")
@@ -1219,20 +2454,57 @@ function BisTooltipAddon:OpenFavoritesFrame()
 
         favorites_frame:AddChild(bottomGroup)
 
-        sep.frame:ClearAllPoints()
-        sep.frame:SetPoint("BOTTOMLEFT", favorites_frame.frame, "BOTTOMLEFT", 17, 50)
-        sep.frame:SetPoint("BOTTOMRIGHT", favorites_frame.frame, "BOTTOMRIGHT", -17, 50)
+        local function LockFavoritesLayout()
+            if sep and sep.frame then
+                sep.frame:ClearAllPoints()
+                sep.frame:SetPoint("BOTTOMLEFT", favorites_frame.frame, "BOTTOMLEFT", 17, 50)
+                sep.frame:SetPoint("BOTTOMRIGHT", favorites_frame.frame, "BOTTOMRIGHT", -17, 50)
+            end
+            if bottomGroup and bottomGroup.frame then
+                bottomGroup.frame:ClearAllPoints()
+                bottomGroup.frame:SetPoint("BOTTOMLEFT", favorites_frame.frame, "BOTTOMLEFT", 17, 14)
+                bottomGroup.frame:SetPoint("BOTTOMRIGHT", favorites_frame.frame, "BOTTOMRIGHT", -17, 14)
+            end
+        end
 
-        bottomGroup.frame:ClearAllPoints()
-        bottomGroup.frame:SetPoint("BOTTOMLEFT", favorites_frame.frame, "BOTTOMLEFT", 17, 14)
-        bottomGroup.frame:SetPoint("BOTTOMRIGHT", favorites_frame.frame, "BOTTOMRIGHT", -17, 14)
+        LockFavoritesLayout()
+        favorites_frame.frame:HookScript("OnShow", LockFavoritesLayout)
+        hooksecurefunc(favorites_frame, "DoLayout", LockFavoritesLayout)
+
+        if not favStatusText then
+            favStatusText = favorites_frame.frame:CreateFontString(nil, "OVERLAY")
+            favStatusText:SetFont("Fonts\\FRIZQT__.TTF", 11, "")
+            favStatusText:SetShadowOffset(1, -1)
+            favStatusText:SetShadowColor(0, 0, 0, 0.8)
+            favStatusText:SetJustifyH("CENTER")
+            favStatusText:SetPoint("CENTER", favorites_frame.frame, "BOTTOM", 0, 48)
+        end
     end
 
     favorites_frame:Show()
-    self:RefreshFavoritesWindow()
+    if favs_dirty or #displayed_fav_rows == 0 then
+        self:RefreshFavoritesWindow(true)
+    else
+        RefreshItemStateVisuals()
+    end
 end
 
 function BisTooltipAddon:CloseFavoritesFrame()
+    if favUpdateFrame then favUpdateFrame:Hide() end
+    if favScrollbarAnimFrame then favScrollbarAnimFrame:Hide() end
+    favSearchQuery = ""
+    if favSearchBox then
+        favSearchBox:SetText("")
+        if favSearchBox.editbox then favSearchBox.editbox:SetTextInsets(0, 0, 3, 3) end
+    end
+    if favSearchCount then
+        favSearchCount:SetText("")
+        favSearchCount:Hide()
+    end
+    RestoreFavRowsAlpha()
+    favStatusTimer = 0
+    currentFavStatusState = "IDLE"
+    favSwitchedText = false
     StaticPopup_Hide("BISTOOLTIP_CONFIRM_CLEAR_FAVORITES")
     if favorites_frame and favorites_frame.frame:IsShown() then
         favorites_frame:Hide()
@@ -1248,9 +2520,12 @@ function BisTooltipAddon:ToggleFavoritesFrame()
 end
 
 function BisTooltipAddon:reloadData()
-    wipe(boe_cache)
     buildClassDict()
     loadData()
+
+    wipe(fetch_attempts)
+    wipe(fetch_next_request)
+    fetch_has_failure = false
 
     if main_frame then
         phaseDropDown:SetList(GetPhaseDropdownOptions())
@@ -1270,6 +2545,9 @@ function BisTooltipAddon:createMainFrame()
             BisTooltipAddon:closeMainFrame()
         else
             main_frame:Show()
+            for item_id in pairs(missing_widgets) do
+                fetch_next_request[item_id] = nil
+            end
             RefreshItemStateVisuals()
             StartItemFetch()
         end
@@ -1284,7 +2562,7 @@ function BisTooltipAddon:createMainFrame()
     main_frame:SetHeight(570)
     main_frame:EnableResize(false)
 
-    local pos = BisTooltipAddon.db.char.frame_pos
+    local pos = BisTooltipAddon.db.profile.frame_pos
     local posX, posY = ClampPosition(pos, 505, 570)
     if posX and posY then
         main_frame.frame:ClearAllPoints()
@@ -1298,6 +2576,18 @@ function BisTooltipAddon:createMainFrame()
     end
 
     main_frame.frame:HookScript("OnHide", function()
+        UpdateStatusDisplay("IDLE")
+        mainSearchFrame:Hide()
+        mainSearchQuery = ""
+        if mainSearchBox then
+            mainSearchBox:SetText("")
+            if mainSearchBox.editbox then mainSearchBox.editbox:SetTextInsets(0, 0, 3, 3) end
+        end
+        if mainSearchCount then
+            mainSearchCount:SetText("")
+            mainSearchCount:Hide()
+        end
+        RestoreMainItemsAlpha()
         if not (favorites_frame and favorites_frame.frame and favorites_frame.frame:IsShown()) then
             item_fetch_frame:SetScript("OnUpdate", nil)
             StaticPopup_Hide("BISTOOLTIP_CONFIRM_CLEAR_FAVORITES")
@@ -1320,7 +2610,7 @@ function BisTooltipAddon:createMainFrame()
         if x + w > screenW then x = screenW - w; clamped = true end
         if y - h < 0 then y = h; clamped = true end
 
-        BisTooltipAddon.db.char.frame_pos = { x = x, y = y }
+        BisTooltipAddon.db.profile.frame_pos = { x = x, y = y }
 
         if clamped then
             self:ClearAllPoints()
@@ -1343,6 +2633,16 @@ function BisTooltipAddon:createMainFrame()
     end)
     main_frame:SetLayout("List")
     main_frame:SetTitle(BisTooltipAddon.AddonNameAndVersion)
+
+    if not statusText then
+        statusText = main_frame.frame:CreateFontString(nil, "OVERLAY")
+        statusText:SetFont("Fonts\\FRIZQT__.TTF", 11, "")
+        statusText:SetShadowOffset(1, -1)
+        statusText:SetShadowColor(0, 0, 0, 0.8)
+        statusText:SetJustifyH("CENTER")
+        statusText:SetPoint("CENTER", main_frame.frame, "BOTTOM", 0, 48)
+        statusText:Hide()
+    end
 
     drawDropdowns()
     createSpecFrame()
@@ -1367,7 +2667,7 @@ function BisTooltipAddon:createMainFrame()
     reloadButton:SetCallback("OnEnter", function(widget)
         GameTooltip:SetOwner(widget.frame, "ANCHOR_TOP")
         GameTooltip:AddLine("Reload Items", 1, 1, 1)
-        GameTooltip:AddLine("If some items are displaying a '?' icon,\nclick this to force the server to fetch them.\nThis may take a couple of attempts.", 1, 0.82, 0, 1)
+        GameTooltip:AddLine("If some items are displaying '?' icon,\nclick this to force the server to try to load them.\n\nThis may take a couple of attempts.", 1, 0.82, 0, 1)
         GameTooltip:Show()
     end)
     reloadButton:SetCallback("OnLeave", function() GameTooltip:Hide() end)
@@ -1396,7 +2696,7 @@ function BisTooltipAddon:createMainFrame()
     configButton:SetCallback("OnEnter", function(widget)
         GameTooltip:SetOwner(widget.frame, "ANCHOR_TOP")
         GameTooltip:AddLine("Configuration", 1, 1, 1)
-        GameTooltip:AddLine("Open addon configuration and filter settings.", 1, 0.82, 0, 1)
+        GameTooltip:AddLine("Open addon configuration menu.", 1, 0.82, 0, 1)
         GameTooltip:Show()
     end)
     configButton:SetCallback("OnLeave", function() GameTooltip:Hide() end)

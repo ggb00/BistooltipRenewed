@@ -1,0 +1,12 @@
+<Bindings>
+    <Binding name="BISTOOLTIP_TOGGLE_MAIN" header="BISTOOLTIP">
+        if BisTooltipAddon and BisTooltipAddon.createMainFrame then
+            BisTooltipAddon:createMainFrame()
+        end
+    </Binding>
+    <Binding name="BISTOOLTIP_TOGGLE_FAV">
+        if BisTooltipAddon and BisTooltipAddon.ToggleFavoritesFrame then
+            BisTooltipAddon:ToggleFavoritesFrame()
+        end
+    </Binding>
+</Bindings>
