@@ -3,8 +3,10 @@
 **Renewed** version of BiS-Tooltip addon for **World of Warcraft: Wrath of the Lich King (3.3.5)**\
 It adds new features, fixes old bugs, adds more customization, has improved optimization and more recent class data.
 
-Last item data update: `2026-10-17`\
-All data is originally gathered from `wowtbc.gg` and is corrected to be compatible with **3.3.5** version, rather than "Classic".
+Current version: `1.9.3`\
+Last item data update: `2026-10-17` <sup>(yyyy-MM-dd)</sup>
+
+All data is originally gathered from `wowtbc.gg` and is fixed to be compatible with **3.3.5** version, rather than "Classic".
 
 > [!NOTE]
 > While some items are objectively BiS, it's worth noting that every BiS list contains some degree of subjectivity.\
@@ -24,4 +26,4 @@ All data is originally gathered from `wowtbc.gg` and is corrected to be compatib
 
 <br>
 
-<img width="55%" alt="Addon preview" src="https://github.com/user-attachments/assets/d5ee2553-30ab-4a51-8b8c-c7016f11ce7b" />
+<img width="55%" alt="Addon preview" src="https://github.com/user-attachments/assets/93de43ac-d6ee-411d-82ea-e0ecf6d11b03" />
