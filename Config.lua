@@ -2,7 +2,7 @@
 local AceConfigDialog = LibStub("AceConfigDialog-3.0")
 local icon_loaded = false
 local icon_name = "BisRenewedIcon"
-local CURRENT_DB_VERSION = 9
+local CURRENT_DB_VERSION = 10
 
 local keyToClassSpec = {}
 
